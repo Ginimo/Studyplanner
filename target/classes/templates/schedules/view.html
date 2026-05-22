@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(
+        title='Study Plan – ' + ${degreeProgram.name},
+        content=~{::main})}"
+      xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<main>
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a th:href="@{/degree-programs}">Degree Programs</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/degree-programs/{id}(id=${degreeProgram.id})}"
+                   th:text="${degreeProgram.name}">Program</a>
+            </li>
+            <li class="breadcrumb-item active">Study Plan</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-calendar-check me-2 text-success"></i>Study Plan
+        </h2>
+        <form th:action="@{/degree-programs/{id}/schedule/calculate(id=${degreeProgram.id})}"
+              method="post">
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-arrow-repeat me-1"></i>Recalculate
+            </button>
+        </form>
+    </div>
+
+    <!-- Not yet calculated -->
+    <div th:if="${schedule == null}" class="text-center py-5 border rounded text-muted">
+        <i class="bi bi-calculator display-4 d-block mb-3"></i>
+        <p>No study plan has been calculated yet.</p>
+        <form th:action="@{/degree-programs/{id}/schedule/calculate(id=${degreeProgram.id})}"
+              method="post">
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-calculator me-1"></i>Calculate Now
+            </button>
+        </form>
+    </div>
+
+    <!-- Schedule exists -->
+    <div th:unless="${schedule == null}">
+        <p class="text-muted small mb-4">
+            <i class="bi bi-clock me-1"></i>Calculated:
+            <span th:text="${#temporals.format(schedule.calculatedAt, 'dd.MM.yyyy HH:mm')}">
+                date
+            </span>
+            &nbsp;|&nbsp;
+            <strong th:text="${schedule.totalSemesters}">0</strong> semester(s) total
+        </p>
+
+        <!-- Semester cards -->
+        <div class="row g-3">
+            <div class="col-md-6 col-lg-4" th:each="sem : ${semesterViews}">
+                <div class="card h-100 border-success">
+                    <div class="card-header bg-success text-white fw-semibold">
+                        <i class="bi bi-calendar3 me-2"></i>Semester
+                        <span th:text="${sem.semesterNumber}">1</span>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                            th:each="studyModule : ${sem.studyModules}">
+                            <span th:text="${studyModule.name}">Study Module Name</span>
+                            <span class="badge bg-primary rounded-pill"
+                                  th:text="${studyModule.ects + ' ECTS'}">3 ECTS</span>
+                        </li>
+                    </ul>
+                    <div class="card-footer text-muted small">
+                        <i class="bi bi-sigma me-1"></i>Total ECTS this semester:
+                        <strong th:text="${sem.totalEcts}">0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary table -->
+        <h5 class="mt-5 mb-3">Summary</h5>
+        <table class="table table-sm table-bordered">
+            <thead class="table-light">
+            <tr>
+                <th>Semester</th>
+                <th>Study Modules</th>
+                <th>Study Module Keys</th>
+                <th>ECTS</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="sem : ${semesterViews}">
+                <td th:text="${sem.semesterNumber}">1</td>
+                <td th:text="${sem.studyModules.size()}">0</td>
+                <td th:text="${sem.studyModuleKeys}">KEY1, KEY2</td>
+                <td th:text="${sem.totalEcts}">0</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <a th:href="@{/degree-programs/{id}(id=${degreeProgram.id})}"
+       class="btn btn-outline-primary btn-sm mt-3">
+        <i class="bi bi-arrow-left me-1"></i>Back to Program
+    </a>
+</main>
+</body>
+</html>

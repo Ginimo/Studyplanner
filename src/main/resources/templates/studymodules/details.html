@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(
+        title=${studyModule.name},
+        content=~{::main})}"
+      xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<main>
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a th:href="@{/degree-programs}">Degree Programs</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/degree-programs/{id}(id=${degreeProgram.id})}"
+                   th:text="${degreeProgram.name}">Program</a>
+            </li>
+            <li class="breadcrumb-item active" th:text="${studyModule.name}">Study Module</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h2 th:text="${studyModule.name}" class="mb-1">Study Module Name</h2>
+            <p class="text-muted mb-1"
+               th:text="${studyModule.description ?: 'No description.'}">Description</p>
+            <span class="badge bg-primary">
+                <th:block th:text="${studyModule.ects}">3</th:block> ECTS
+            </span>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/degree-programs/{pid}/study-modules/{mid}/edit(pid=${degreeProgram.id},mid=${studyModule.studyModuleKey})}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-pencil me-1"></i>Edit
+            </a>
+            <form th:action="@{/degree-programs/{pid}/study-modules/{mid}/delete(pid=${degreeProgram.id},mid=${studyModule.studyModuleKey})}"
+                  method="post"
+                  th:attr="onsubmit='return confirm(\'Delete study module ' + ${studyModule.name} + '?\');'">
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-trash me-1"></i>Delete
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Prerequisites -->
+    <h5 class="mb-3"><i class="bi bi-arrow-return-right me-2"></i>Prerequisites</h5>
+
+    <div th:if="${prerequisites.isEmpty()}" class="text-muted fst-italic mb-4">
+        This study module has no prerequisites — it can be taken in the first semester.
+    </div>
+
+    <ul th:unless="${prerequisites.isEmpty()}" class="list-group mb-4" style="max-width:400px">
+        <li class="list-group-item d-flex justify-content-between align-items-center"
+            th:each="prereq : ${prerequisites}">
+            <span th:text="${prereq.name}">Prerequisite</span>
+            <span class="badge bg-secondary rounded-pill">
+                <th:block th:text="${prereq.ects}">3</th:block> ECTS
+            </span>
+        </li>
+    </ul>
+
+    <a th:href="@{/degree-programs/{id}(id=${degreeProgram.id})}"
+       class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to Program
+    </a>
+</main>
+</body>
+</html>
