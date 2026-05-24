@@ -36,6 +36,10 @@ public class DummyDataGenerator {
             new StudyModuleKey("AD1"), "Algorithms and Data Structures 1",
             "Fundamental algorithms and data structures.", 4, List.of("OO"));
 
+    private static final StudyModuleView MODULE_AD2 = new StudyModuleView(
+            new StudyModuleKey("AD2"), "Algorithms and Data Structures 2",
+            "Advanced algorithms and data structures.", 4, List.of("OO", "AD1"));
+
     private static final StudyModuleView MODULE_CPI = new StudyModuleView(
             new StudyModuleKey("CPI"), "Computer Programming and Interfaces",
             "Advanced programming concepts and interfaces.", 4, List.of("OO", "Math"));
@@ -56,6 +60,10 @@ public class DummyDataGenerator {
             new StudyModuleKey("SE2"), "Software Engineering 2",
             "Advanced software engineering and architecture.", 4, List.of("DB1", "SE1", "UI1"));
 
+    private static final StudyModuleView MODULE_A1 = new StudyModuleView(
+            new StudyModuleKey("SE2"), "Geschichte der Sozialen Arbeit",
+            "Geschichte der Sozialen Arbeit als organisierte Hilfe", 6, List.of());
+
     private static final StudyModuleView MODULE_UI2 = new StudyModuleView(
             new StudyModuleKey("UI2"), "User Interfaces 2",
             "Advanced UI patterns and frameworks.", 4, List.of("UI1"));
@@ -65,7 +73,7 @@ public class DummyDataGenerator {
             "Independent research project and thesis.", 12, List.of("DB2", "SE2", "UI2"));
 
     private static final List<StudyModuleView> STUDY_MODULE_VIEWS = List.of(
-            MODULE_OO, MODULE_MATH, MODULE_DB1, MODULE_AD1, MODULE_CPI,
+            MODULE_OO, MODULE_MATH, MODULE_DB1, MODULE_AD1, MODULE_AD2, MODULE_CPI,
             MODULE_DB2, MODULE_SE1, MODULE_UI1, MODULE_SE2, MODULE_UI2, MODULE_THESIS);
 
     private static final List<StudyModuleListView> STUDY_MODULE_LIST_VIEWS = List.of(
@@ -76,6 +84,8 @@ public class DummyDataGenerator {
             new StudyModuleListView(new StudyModuleKey("DB1"), "Databases 1",
                     4, LocalDate.of(2024, 9, 1), null, true, 1),
             new StudyModuleListView(new StudyModuleKey("AD1"), "Algorithms and Data Structures 1",
+                    4, LocalDate.of(2024, 9, 1), null, true, 1),
+            new StudyModuleListView(new StudyModuleKey("AD2"), "Algorithms and Data Structures 2",
                     4, LocalDate.of(2024, 9, 1), null, true, 1),
             new StudyModuleListView(new StudyModuleKey("CPI"), "Computer Programming and Interfaces",
                     4, LocalDate.of(2024, 9, 1), null, true, 2),
@@ -100,7 +110,7 @@ public class DummyDataGenerator {
             new SemesterView(1, List.of(MODULE_MATH, MODULE_OO), 8, "Math, OO"),
             new SemesterView(2, List.of(MODULE_DB1, MODULE_AD1, MODULE_CPI), 12, "DB1, AD1, CPI"),
             new SemesterView(3, List.of(MODULE_DB2, MODULE_SE1, MODULE_UI1), 12, "DB2, SE1, UI1"),
-            new SemesterView(4, List.of(MODULE_SE2, MODULE_UI2), 8, "SE2, UI2"),
+            new SemesterView(4, List.of(MODULE_SE2, MODULE_UI2, MODULE_AD2), 8, "SE2, UI2, AD2"),
             new SemesterView(5, List.of(MODULE_THESIS), 12, "Thesis")
     );
 
@@ -110,11 +120,16 @@ public class DummyDataGenerator {
                         PROGRAM_ID,
                         "BSc Informatik",
                         "Studiengang Informatik der OST",
+                        12),
+                new DegreeProgramView(
+                        PROGRAM_ID,
+                        "BSc Soziale Arbeit",
+                        "Studiengang Soziale Arbeit der OST",
                         12)
         );
     }
 
-    public Optional<DegreeProgramView> getDegreeProgramById(final String id) {
+    public Optional<DegreeProgramView> getDegreeProgramById(final String id) { // → wird für Details/Edit verwendet, ein spezifisches Programm per id holen
         if (PROGRAM_ID.equals(id)) {
             // TODO: assumtion list always contains at least 1 element, best practise to check if list size() > 0
             return Optional.of(getListOfDegreePrograms().getFirst());

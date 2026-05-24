@@ -1,0 +1,17 @@
+@startuml
+
+object Kunde
+object Shop
+object Lager
+object Zahlungssystem
+object Versand
+
+Kunde -> Shop : 1: bestelleArtikel()
+Shop -> Lager : 1.1: prüfeBestand()
+Lager -> Shop : 1.2: bestandOK()
+Shop -> Zahlungssystem : 1.3: führeZahlungAus()
+Zahlungssystem -> Shop : 1.4: zahlungOK()
+Shop -> Kunde : 1.5: bestellungBestätigt()
+Shop -> Versand : 1.6: versenden()
+
+@enduml

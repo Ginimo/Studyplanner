@@ -10,18 +10,19 @@ import jakarta.validation.constraints.NotBlank;
  * It is intentionally separate from the {@code DegreeProgram} domain object,
  * which is immutable and validated in its constructor.</p>
  */
-public class DegreeProgramForm {
+public class DegreeProgramForm { // Eingabe vom User
+    // Empfängt Daten aus dem HTML-Formular (ID muss nicht seperat gesetzt werden. Wird dynamisch von der URL geschickt)
 
-    @NotBlank(message = "Name is required")
-    private String name;
+    @NotBlank(message = "Name is required") // Annotation (Metadaten)
+    private String name; // mutable
 
     private String description;
 
     @Min(value = 1, message = "Max duration must be at least 1 semester")
     private int maxDurationInSemesters;
 
-    public String getName() { return name; }
-    public void setName(final String name) { this.name = name; }
+    public String getName() { return name; } // POST → SetName --> Validierung schlägt → Getter wird gebraucht → Werte bleiben im Formular
+    public void setName(final String name) { this.name = name; } // immutable innerhalb der Methode : nicht aus Versehen den Input des Users überschreiben
 
     public String getDescription() { return description; }
     public void setDescription(final String description) { this.description = description; }

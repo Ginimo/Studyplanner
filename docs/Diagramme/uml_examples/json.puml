@@ -1,0 +1,7 @@
+@startuml
+json Payload {
+   "fruit":"Apple",
+   "size":"Large",
+   "color": ["Red", "Green", "Blue"]
+}
+@endtuml

@@ -1,0 +1,8 @@
+@startuml
+package Shop
+{
+    class OrderService
+    class PaymentService
+    class LagerService
+}
+@enduml
