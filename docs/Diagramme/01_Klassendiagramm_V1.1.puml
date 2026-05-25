@@ -37,23 +37,24 @@ package "Service" {
     class DegreeProgramServiceImpl{
     - programs: List<DegreeProgram>
     + create(program: DegreeProgram): void
-    + findById(id: String): Optional<DegreeProgram>
+    + findByID(program_id: String): Optional<DegreeProgram>
     + findAll(): List<DegreeProgram>
     + update(program: DegreeProgram): void
-    + delete(id: String): void
+    + delete(program_id: String): void
     }
 
     class StudyModuleServiceImpl{
     - modules: List<StudyModule>
     + create(module: StudyModule): void
-    + findById(key: String): Optional<StudyModule>
-    + findAll(): List<StudyModule>
+    + findByKey(studyModuleKey: String): Optional<StudyModule>
+    + findAll(program_id: int): List<StudyModule>
     + update(module: StudyModule): void
-    + delete(key: String): void
+    + delete(studyModuleKey: String): void
     }
 
     class ScheduleServiceImpl{
     + calculate(program: DegreeProgram): Schedule
+    - sortByPrerequisites(modules: List<StudyModule>): List<StudyModule>
     }
 
     DegreeProgramServiceImpl ..|> DegreeProgramService
