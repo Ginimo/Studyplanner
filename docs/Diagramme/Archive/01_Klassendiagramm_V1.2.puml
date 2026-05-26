@@ -43,6 +43,7 @@ package "Model" {
     ScheduleImpl ..|> Schedule
 }
 
+
 package "Service" {
     interface DegreeProgramService{}
     interface StudyModuleService{}

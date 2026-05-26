@@ -74,4 +74,5 @@ StudyModuleServiceImpl --> StudyModule : macht CRUD für
 ScheduleServiceImpl --> Schedule : berechnet
 ScheduleServiceImpl --> StudyModuleService : nutzt
 
+
 @enduml
