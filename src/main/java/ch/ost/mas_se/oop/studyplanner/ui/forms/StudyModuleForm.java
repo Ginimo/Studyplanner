@@ -28,7 +28,7 @@ public class StudyModuleForm {
     @Min(value = 1, message = "ECTS must be at least 1")
     private int ects;
 
-    private List<String> prerequisiteKeys = new ArrayList<>();
+    private List<String> prerequisiteKeys = new ArrayList<>(); // nur die Keys (z.B. DB1)
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate offeredFrom;

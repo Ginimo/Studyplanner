@@ -1,0 +1,47 @@
+@startuml
+
+package "Frontend" {
+  [Webshop UI]
+  [Login / Registrierung UI]
+  [Warenkorb UI]
+  [Bestellübersicht UI]
+}
+
+package "Backend" {
+  [Authentifizierungs-Service]
+  [Benutzer-Service]
+  [Produkt-Service]
+  [Warenkorb-Service]
+  [Order-Service]
+  [Payment-Service]
+}
+
+package "Externe Systeme" {
+  [Zahlungsanbieter]
+  [E-Mail-Service]
+  [Datenbank]
+}
+
+' Verbindungen Frontend -> Backend
+[Webshop UI] --> [Produkt-Service]
+[Login / Registrierung UI] --> [Authentifizierungs-Service]
+[Warenkorb UI] --> [Warenkorb-Service]
+[Bestellübersicht UI] --> [Order-Service]
+
+' Backend interne Abhängigkeiten
+[Authentifizierungs-Service] --> [Benutzer-Service]
+[Warenkorb-Service] --> [Produkt-Service]
+[Order-Service] --> [Warenkorb-Service]
+[Order-Service] --> [Payment-Service]
+
+' Backend -> Externe Systeme
+[Payment-Service] --> [Zahlungsanbieter]
+[Order-Service] --> [E-Mail-Service]
+
+' Datenbankzugriff
+[Benutzer-Service] --> [Datenbank]
+[Produkt-Service] --> [Datenbank]
+[Warenkorb-Service] --> [Datenbank]
+[Order-Service] --> [Datenbank]
+
+@enduml

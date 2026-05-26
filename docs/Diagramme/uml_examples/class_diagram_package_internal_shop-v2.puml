@@ -1,0 +1,19 @@
+@startuml
+
+package Shop {
+
+  interface PaymentAPI
+  interface InventoryAPI
+
+  class OrderService
+  class StripeAdapter
+  class LagerService
+
+  OrderService --> PaymentAPI
+  OrderService --> InventoryAPI
+
+  StripeAdapter ..|> PaymentAPI
+  LagerService ..|> InventoryAPI
+}
+
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+
+skinparam componentStyle uml2
+skinparam shadowing false
+allowmixing
+
+package Shop {
+
+  package UI {
+     class OrderDialog
+     class OrderOverview
+
+     class CustomerOverview
+  }
+
+  package Services {
+     class OrderService
+     class CustomerService
+  }
+
+  package PaymentAdapter
+  package InventoryAdapter
+}
+
+database "LagerDB" as DB
+component "StripeAPI" as Stripe
+
+Shop::PaymentAdapter --> Stripe
+Shop::InventoryAdapter --> DB
+
+@enduml

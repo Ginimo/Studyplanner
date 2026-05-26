@@ -1,0 +1,17 @@
+@startuml
+
+<style>
+state {
+    LineColor red
+    LineThickness 7
+}
+</style>
+
+state Normal
+'state ThickDashed ##[dashed,thickness=5]red
+'state ThickDashed ##[dashed,bold]red
+state ThickDashed2 #line:red;line.dashed;line.bold
+'state ThickDotted ##[dotted,thickness=8]blue
+state Bold ##[bold]green
+
+@enduml
