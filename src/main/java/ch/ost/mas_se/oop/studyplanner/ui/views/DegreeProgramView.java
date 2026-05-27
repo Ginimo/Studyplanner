@@ -1,9 +1,6 @@
 package ch.ost.mas_se.oop.studyplanner.ui.views;
 
 public class DegreeProgramView {
-    // Liefert Daten ans HTML-Template
-    // Hat nur Getter, keine Setter
-    // Enthält nur das, was die UI braucht
 
     private final String id;
     private final String name;

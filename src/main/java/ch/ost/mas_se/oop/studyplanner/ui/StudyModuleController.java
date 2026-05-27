@@ -26,7 +26,7 @@ public class StudyModuleController {
 
     @GetMapping("/new")
     public String showCreateForm(@PathVariable final String degreeProgramId, final Model model) {
-        StudyModuleForm form = new StudyModuleForm(); // Geht auf Form
+        StudyModuleForm form = new StudyModuleForm();
         model.addAttribute("studyModule", form);
         return showCreateFormView(degreeProgramId, form, model);
     }
@@ -34,9 +34,9 @@ public class StudyModuleController {
     @PostMapping("/new")
     public String createStudyModule(
             @PathVariable final String degreeProgramId,
-            @Valid @ModelAttribute("studyModule") final StudyModuleForm form, // @Valid löst die Validierung aus und @ModelAttribute befüllt das form-Objekt mit den eingegebenen Werten
-            final BindingResult result, // Validierung und Exception Catching (vom Spring MVC Framework)
-            final Model model, // Model= Speicher für ein Request. Sobald Template gerendet ist, ist das Model weg (vom Spring MVC Framework)
+            @Valid @ModelAttribute("studyModule") final StudyModuleForm form,
+            final BindingResult result,
+            final Model model,
             final RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
@@ -44,16 +44,16 @@ public class StudyModuleController {
         }
 
         // TODO: build a StudyModule from the form and save it
-        redirectAttributes.addFlashAttribute("successMessage",  // addFlashAttribute speichert Daten kurz zwischen zwei Requests:
+        redirectAttributes.addFlashAttribute("successMessage",
                 "Study module \"" + form.getName() + "\" created.");
         return "redirect:/degree-programs/" + degreeProgramId;
     }
 
     @GetMapping("/{studyModuleKey}")
-    public String showDetails(@PathVariable final String degreeProgramId, // kommt von URL http://localhost:8080/degree-programs/sample-id-1234/study-modules/OO
+    public String showDetails(@PathVariable final String degreeProgramId,
                               @PathVariable final String studyModuleKey,
                               final Model model) {
-        StudyModuleView studyModule = requireStudyModule(studyModuleKey); // Objekt von View (Über ID) holen
+        StudyModuleView studyModule = requireStudyModule(studyModuleKey);
 
         // TODO to be replaced
         List<StudyModuleView> prerequisites = studyModule.getPrerequisiteKeys().stream()

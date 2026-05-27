@@ -129,7 +129,7 @@ public class DummyDataGenerator {
         );
     }
 
-    public Optional<DegreeProgramView> getDegreeProgramById(final String id) { // → wird für Details/Edit verwendet, ein spezifisches Programm per id holen
+    public Optional<DegreeProgramView> getDegreeProgramById(final String id) {
         if (PROGRAM_ID.equals(id)) {
             // TODO: assumtion list always contains at least 1 element, best practise to check if list size() > 0
             return Optional.of(getListOfDegreePrograms().getFirst());
