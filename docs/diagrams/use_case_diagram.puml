@@ -1,0 +1,23 @@
+@startuml
+left to right direction
+
+actor Student
+
+rectangle StudyPlanner {
+
+  usecase "Create and edit study programs" as UC1
+  usecase "List all study programs" as UC2
+  usecase "Manage modules for study program (CRUD)" as UC3
+  usecase "(Re-)calculate study program" as UC4
+  usecase "View plan (already calculated)" as UC5
+  usecase "Delete whole study program" as UC6
+}
+
+Student --> UC1
+Student --> UC2
+Student --> UC3
+Student --> UC4
+Student --> UC5
+Student --> UC6
+
+@enduml

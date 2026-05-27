@@ -1,3 +1,50 @@
-/docs/Soziale_Arbeit.pdf
-/docs/Diagramme/uml_examples/
+# Maven
+target/
+.m2/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+pom.xml.bak
+release.properties
+dependency-reduced-pom.xml
+.flattened-pom.xml
 
+# IDE
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# IntelliJ IDEA
+*.iml
+*.iws
+*.ipr
+out/
+.gradle/
+
+# VS Code
+.vscode/
+jsconfig.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+*.class
+*.jar
+*.war
+*.nar
+*.zip
+*.tar.gz
+*.rar
+
+# Misc
+HELP.md
+.env
+.env.local
