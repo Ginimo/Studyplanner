@@ -32,8 +32,8 @@ partition "Update Degree Program" {
     "GET /degree-programs/{id}/edit" --> "Load Data"
     "Load Data" --> "Show Edit Form"
     "Show Edit Form" --> "Submit Update (POST)"
-    "Submit Update (POST)" --> "Validate Input "
-    if "Has Errors? " then
+    "Submit Update (POST)" --> "Validate Input"
+    if "Has Errors?" then
         -->[Yes] "Show Edit Form with Errors"
         "Show Edit Form with Errors" --> "Submit Update (POST)"
     else
@@ -47,13 +47,10 @@ partition "Delete Degree Program" {
     (*) --> "POST /degree-programs/{id}/delete"
     "POST /degree-programs/{id}/delete" --> "Require Program"
     "Require Program" --> "Delete Program"
-    "Delete Program" --> "Redirect to List "
-    "Redirect to List " --> (*)
+    "Delete Program" --> "Redirect to List"
 }
 
 partition "Manage Study Modules" {
-    (*) --> "GET /degree-programs/{id}"
-    "GET /degree-programs/{id}" --> "Show Details View"
     "Show Details View" --> "GET /degree-programs/{id}/study-modules/new"
     "GET /degree-programs/{id}/study-modules/new" --> "Show Create Module Form"
     "Show Create Module Form" --> "Submit Module (POST)"
@@ -63,8 +60,7 @@ partition "Manage Study Modules" {
         "Show Create Module Form with Errors" --> "Submit Module (POST)"
     else
         -->[No] "Save Study Module"
-        "Save Study Module" --> "Redirect to Details "
-        "Redirect to Details " --> (*)
+        "Save Study Module" --> "Redirect to Details"
     endif
 
     "Show Details View" --> "GET /degree-programs/{id}/study-modules/{key}/edit"
@@ -76,14 +72,12 @@ partition "Manage Study Modules" {
         "Show Edit Module Form with Errors" --> "Submit Module Update (POST)"
     else
         -->[No] "Save Module Changes"
-        "Save Module Changes" --> "Redirect to Details  "
-        "Redirect to Details  " --> (*)
+        "Save Module Changes" --> "Redirect to Details"
     endif
 
     "Show Details View" --> "POST /degree-programs/{id}/study-modules/{key}/delete"
     "POST /degree-programs/{id}/study-modules/{key}/delete" --> "Delete Study Module"
-    "Delete Study Module" --> "Redirect to Details   "
-    "Redirect to Details   " --> (*)
+    "Delete Study Module" --> "Redirect to Details"
 }
 
 @enduml
