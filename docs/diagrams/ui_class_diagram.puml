@@ -167,7 +167,7 @@ class StudyModuleView{
 + getPrerequisiteKeys(): List<String>
 }
 
-' Beziehungen
+' Relationships
 WelcomeController --> DummyDataGenerator
 
 DegreeProgramController --> DummyDataGenerator

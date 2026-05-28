@@ -1,0 +1,89 @@
+@startuml
+skinparam style strictuml
+title UI Workflow - Degree Program CRUD
+
+partition "Create Degree Program" {
+    (*) --> "GET /degree-programs/new"
+    "GET /degree-programs/new" --> "Show Create Form"
+    "Show Create Form" --> "Submit Form (POST)"
+    "Submit Form (POST)" --> "Validate Input"
+    if "Has Errors?" then
+        -->[Yes] "Show Create Form with Errors"
+        "Show Create Form with Errors" --> "Submit Form (POST)"
+    else
+        -->[No] "Save Degree Program"
+        "Save Degree Program" --> "Redirect to List"
+        "Redirect to List" --> (*)
+    endif
+}
+
+partition "Read Degree Program" {
+    (*) --> "GET /degree-programs"
+    "GET /degree-programs" --> "Show List View"
+    "Show List View" --> (*)
+    
+    (*) --> "GET /degree-programs/{id}"
+    "GET /degree-programs/{id}" --> "Show Details View"
+    "Show Details View" --> (*)
+}
+
+partition "Update Degree Program" {
+    (*) --> "GET /degree-programs/{id}/edit"
+    "GET /degree-programs/{id}/edit" --> "Load Data"
+    "Load Data" --> "Show Edit Form"
+    "Show Edit Form" --> "Submit Update (POST)"
+    "Submit Update (POST)" --> "Validate Input "
+    if "Has Errors? " then
+        -->[Yes] "Show Edit Form with Errors"
+        "Show Edit Form with Errors" --> "Submit Update (POST)"
+    else
+        -->[No] "Save Changes"
+        "Save Changes" --> "Redirect to Details"
+        "Redirect to Details" --> (*)
+    endif
+}
+
+partition "Delete Degree Program" {
+    (*) --> "POST /degree-programs/{id}/delete"
+    "POST /degree-programs/{id}/delete" --> "Require Program"
+    "Require Program" --> "Delete Program"
+    "Delete Program" --> "Redirect to List "
+    "Redirect to List " --> (*)
+}
+
+partition "Manage Study Modules" {
+    (*) --> "GET /degree-programs/{id}"
+    "GET /degree-programs/{id}" --> "Show Details View"
+    "Show Details View" --> "GET /degree-programs/{id}/study-modules/new"
+    "GET /degree-programs/{id}/study-modules/new" --> "Show Create Module Form"
+    "Show Create Module Form" --> "Submit Module (POST)"
+    "Submit Module (POST)" --> "Validate Module Input"
+    if "Module Has Errors?" then
+        -->[Yes] "Show Create Module Form with Errors"
+        "Show Create Module Form with Errors" --> "Submit Module (POST)"
+    else
+        -->[No] "Save Study Module"
+        "Save Study Module" --> "Redirect to Details "
+        "Redirect to Details " --> (*)
+    endif
+
+    "Show Details View" --> "GET /degree-programs/{id}/study-modules/{key}/edit"
+    "GET /degree-programs/{id}/study-modules/{key}/edit" --> "Show Edit Module Form"
+    "Show Edit Module Form" --> "Submit Module Update (POST)"
+    "Submit Module Update (POST)" --> "Validate Module Update Input"
+    if "Module Update Has Errors?" then
+        -->[Yes] "Show Edit Module Form with Errors"
+        "Show Edit Module Form with Errors" --> "Submit Module Update (POST)"
+    else
+        -->[No] "Save Module Changes"
+        "Save Module Changes" --> "Redirect to Details  "
+        "Redirect to Details  " --> (*)
+    endif
+
+    "Show Details View" --> "POST /degree-programs/{id}/study-modules/{key}/delete"
+    "POST /degree-programs/{id}/study-modules/{key}/delete" --> "Delete Study Module"
+    "Delete Study Module" --> "Redirect to Details   "
+    "Redirect to Details   " --> (*)
+}
+
+@enduml
