@@ -1,0 +1,49 @@
+@startuml
+skinparam style strictuml
+title Domain Sequence Diagram - Study Plan Calculation
+
+actor Student
+participant "ScheduleController" as SC
+participant "DegreeProgramService" as DPS
+participant "ScheduleService" as SS
+participant "StudyModuleService" as SMS
+participant "Schedule" as S
+participant "Semester" as Sem
+
+Student -> SC : calculateSchedule(degreeProgramId)
+activate SC
+
+SC -> DPS : findById(degreeProgramId)
+activate DPS
+DPS --> SC : degreeProgram
+deactivate DPS
+
+SC -> SS : calculate(degreeProgram)
+activate SS
+
+SS -> SMS : findAll(degreeProgramId)
+activate SMS
+SMS --> SS : modules
+deactivate SMS
+
+note over SS: sortByPrerequisites(modules)
+
+SS -> S : new Schedule()
+activate S
+S --> SS : schedule
+deactivate S
+
+loop for each calculated semester
+    SS -> Sem : new Semester(number)
+    activate Sem
+    Sem --> SS : semester
+    deactivate Sem
+    SS -> S : addSemester(semester)
+end
+
+SS --> SC : schedule
+deactivate SS
+
+SC -> Student : redirect to schedule view
+deactivate SC
+@enduml

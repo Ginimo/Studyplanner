@@ -1,0 +1,33 @@
+@startuml
+skinparam style strictuml
+title Domain Sequence Diagram - Create Study Module
+
+actor Student
+participant "StudyModuleController" as SMC
+participant "StudyModuleService" as SMS
+participant "StudyModule" as SM
+participant "StudyModuleRepository" as SMR
+
+Student -> SMC : createStudyModule(degreeProgramId, form)
+activate SMC
+
+SMC -> SM : new StudyModule(form.details)
+activate SM
+SM --> SMC : module
+deactivate SM
+
+SMC -> SMS : create(module)
+activate SMS
+
+SMS -> SMR : save(module)
+activate SMR
+SMR --> SMS : success
+deactivate SMR
+
+SMS --> SMC : void
+deactivate SMS
+
+SMC -> Student : redirect to degree program details
+deactivate SMC
+
+@enduml

@@ -1,0 +1,105 @@
+@startuml
+
+package "Model" {
+    class DegreeProgram {
+        - id: String
+        - name: String
+        - description: String
+        - maxDurationInSemesters: int
+    }
+
+    class StudyModule {
+        - studyModuleKey: String
+        - name: String
+        - description: String
+        - ects: int
+        - prerequisiteKeys: List<String>
+        - offeredFrom: LocalDate
+        - offeredTo: LocalDate
+    }
+
+    class Schedule {
+        - calculatedAt: LocalDateTime
+        - totalSemesters: int
+    }
+
+    class Semester {
+        - semesterNumber: int
+        - totalEcts: int
+    }
+}
+
+package "Service" {
+    interface DegreeProgramService {
+        + create(program: DegreeProgram): void
+        + findById(id: String): Optional<DegreeProgram>
+        + findAll(): List<DegreeProgram>
+        + update(program: DegreeProgram): void
+        + delete(id: String): void
+    }
+
+    interface StudyModuleService {
+        + create(module: StudyModule): void
+        + findByKey(studyModuleKey: String): Optional<StudyModule>
+        + findAll(degreeProgramId: String): List<StudyModule>
+        + update(module: StudyModule): void
+        + delete(studyModuleKey: String): void
+    }
+
+    interface ScheduleService {
+        + calculate(program: DegreeProgram): Schedule
+    }
+
+    class DegreeProgramServiceImpl {
+        - repository: DegreeProgramRepository
+    }
+
+    class StudyModuleServiceImpl {
+        - repository: StudyModuleRepository
+    }
+
+    class ScheduleServiceImpl {
+        - moduleService: StudyModuleService
+        + calculate(program: DegreeProgram): Schedule
+        - sortByPrerequisites(modules: List<StudyModule>): List<StudyModule>
+    }
+
+    DegreeProgramServiceImpl ..|> DegreeProgramService
+    StudyModuleServiceImpl ..|> StudyModuleService
+    ScheduleServiceImpl ..|> ScheduleService
+}
+
+package "UI Orchestration" {
+    class DegreeProgramController
+    class ScheduleController
+    class StudyModuleController
+    class WelcomeController
+}
+
+package "Repository" {
+    class StudyModuleRepository {
+         - modules: List<StudyModule>
+    }
+
+    class DegreeProgramRepository {
+        - programs: List<DegreeProgram>
+    }
+}
+
+' Data Associations
+DegreeProgram "1" --> "0..1" Schedule : has
+Schedule "1" --> "*" Semester : contains
+Semester "1" --> "*" StudyModule : consists of
+DegreeProgram "1" --> "*" StudyModule : includes
+StudyModule "*" --> "*" StudyModule : has prerequisites
+
+' Logic Associations (Dependency Injection)
+DegreeProgramController --> DegreeProgramService
+StudyModuleController --> StudyModuleService
+ScheduleController --> ScheduleService
+
+DegreeProgramServiceImpl --> DegreeProgramRepository
+StudyModuleServiceImpl --> StudyModuleRepository
+ScheduleServiceImpl --> StudyModuleService
+
+@enduml
