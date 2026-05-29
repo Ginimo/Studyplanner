@@ -1,7 +1,7 @@
 package ch.ost.mas_se.oop.studyplanner.model;
 
 public class DegreeProgram {
-    private final String id;
+    private String id;
     private String name;
     private String description;
     private int maxDurationInSemesters;
