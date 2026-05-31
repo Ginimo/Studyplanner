@@ -5,18 +5,27 @@ public class Schedule {
     private LocalDateTime calculatedAt;
     private int totalSemesters;
 
-    Schedule (LocalDateTime calculatedAt, int totalSemesters) {
+    public Schedule (LocalDateTime calculatedAt, int totalSemesters) {
         setTotalSemesters(totalSemesters);
         setCalculatedAt(calculatedAt);
     }
 
     // Setter
-    void setTotalSemesters (int totalSemesters) {totalSemesters= this.totalSemesters;}
-    void setCalculatedAt (LocalDateTime calculatedAt) {calculatedAt= this.calculatedAt;}
+    public void setTotalSemesters (int totalSemesters) {this.totalSemesters=totalSemesters;}
+    public void setCalculatedAt (LocalDateTime calculatedAt) {this.calculatedAt=calculatedAt;}
 
     // Getter
-    int getTotalSemesters () {return totalSemesters;}
-    LocalDateTime getCalculatedAt () {return calculatedAt;}
+    public int getTotalSemesters () {return totalSemesters;}
+    public LocalDateTime getCalculatedAt () {return calculatedAt;}
 
+
+    // Printer
+    public void printSchedule(){
+        IO.println("Study Plan configured as: ");
+        IO.println("*******************" );
+        IO.println("calculatedAt: " + calculatedAt);
+        IO.println("totalSemesters: " + totalSemesters);
+        IO.println("*******************");
+    }
 
 }

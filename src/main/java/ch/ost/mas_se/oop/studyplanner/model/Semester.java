@@ -4,18 +4,26 @@ public class Semester {
     private int semesterNumber;
     private int totalEcts;
 
-    Semester(int semesterNumber, int totalEcts){
+    public Semester(int semesterNumber, int totalEcts){
         setSemesterNumber(semesterNumber);
         setTotalEcts(totalEcts);
     }
 
     // Setter
-    void setSemesterNumber (int semesterNumber) {semesterNumber= this.semesterNumber;}
-    void setTotalEcts (int totalEcts) {totalEcts= this.totalEcts;}
+    public void setSemesterNumber (int semesterNumber) {this.semesterNumber=semesterNumber;}
+    public void setTotalEcts (int totalEcts) {this.totalEcts=totalEcts;}
 
     // Getter
-    int getSemesterNumber () {return semesterNumber;}
-    int getTotalEcts () {return totalEcts;}
+    public int getSemesterNumber () {return semesterNumber;}
+    public int getTotalEcts () {return totalEcts;}
 
+    // Printer
+    public void printSemester(){
+        IO.println("Semester configured as: ");
+        IO.println("*******************" );
+        IO.println("semesterNumber: " + semesterNumber);
+        IO.println("totalEcts: " + totalEcts);
+        IO.println("*******************");
+    }
 
 }

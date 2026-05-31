@@ -11,14 +11,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import ch.ost.mas_se.oop.studyplanner.service.ScheduleService;
+
+
 @Controller
 @RequestMapping("/degree-programs/{degreeProgramId}/schedule")
 public class ScheduleController {
 
     private final DummyDataGenerator dummyDataGenerator;
+    private final ScheduleService service;
 
-    public ScheduleController(final DummyDataGenerator dummyDataGenerator) {
+    public ScheduleController(final DummyDataGenerator dummyDataGenerator, final ScheduleService service) {
         this.dummyDataGenerator = dummyDataGenerator;
+        this.service = service;
     }
 
     @GetMapping
@@ -40,7 +45,11 @@ public class ScheduleController {
     public String calculateSchedule(@PathVariable final String degreeProgramId,
                                     final RedirectAttributes redirectAttributes) {
         requireProgram(degreeProgramId);
+        //program =
+        //service.calculate(int degreeProgramId);
+
         // TODO: call component that calculates the schedule
+
 
         // TODO for Kursblock 6: catch exception that is thrown when cyclic study module dependencies are detected
         // You can print errors on the UI as follows: redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());

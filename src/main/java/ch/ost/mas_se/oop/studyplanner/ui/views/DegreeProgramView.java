@@ -1,5 +1,9 @@
 package ch.ost.mas_se.oop.studyplanner.ui.views;
 
+import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
+
+import java.util.Optional;
+
 public class DegreeProgramView {
 
     private final String id;
@@ -19,4 +23,5 @@ public class DegreeProgramView {
     public String getName() { return name; }
     public String getDescription() { return description; }
     public int getMaxDurationInSemesters() { return maxDurationInSemesters; }
+
 }

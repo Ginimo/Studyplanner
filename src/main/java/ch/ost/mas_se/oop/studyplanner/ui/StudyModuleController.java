@@ -1,5 +1,8 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
+import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
+import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
+import ch.ost.mas_se.oop.studyplanner.service.StudyModuleServiceImpl;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.StudyModuleForm;
 import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleView;
@@ -20,8 +23,16 @@ public class StudyModuleController {
 
     private final DummyDataGenerator dummyDataGenerator;
 
-    public StudyModuleController(final DummyDataGenerator dummyDataGenerator) {
+    private final DegreeProgramService degree_program_service;
+    private final StudyModuleService module_service;
+
+
+    public StudyModuleController(final DummyDataGenerator dummyDataGenerator,
+                                 final DegreeProgramService degree_program_service,
+                                 final StudyModuleServiceImpl module_service) {
         this.dummyDataGenerator = dummyDataGenerator;
+        this.degree_program_service = degree_program_service;
+        this.module_service = module_service;
     }
 
     @GetMapping("/new")
@@ -43,7 +54,7 @@ public class StudyModuleController {
             return showCreateFormView(degreeProgramId, form, model);
         }
 
-        // TODO: build a StudyModule from the form and save it
+        module_service.create(form,degreeProgramId);
         redirectAttributes.addFlashAttribute("successMessage",
                 "Study module \"" + form.getName() + "\" created.");
         return "redirect:/degree-programs/" + degreeProgramId;
@@ -55,10 +66,10 @@ public class StudyModuleController {
                               final Model model) {
         StudyModuleView studyModule = requireStudyModule(studyModuleKey);
 
-        // TODO to be replaced
         List<StudyModuleView> prerequisites = studyModule.getPrerequisiteKeys().stream()
-                .flatMap(key -> dummyDataGenerator.getStudyModuleViewByKey(key).stream())
+                .flatMap(key -> module_service.findViewById(key).stream())
                 .toList();
+
 
         model.addAttribute("degreeProgram", requireProgram(degreeProgramId));
         model.addAttribute("studyModule", studyModule);
@@ -148,13 +159,13 @@ public class StudyModuleController {
     }
 
     private DegreeProgramView requireProgram(final String id) {
-        return dummyDataGenerator.getDegreeProgramById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Degree program not found: " + id));
+        return degree_program_service.findViewById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Degree program not found: " + id));
+
     }
 
     private StudyModuleView requireStudyModule(final String studyModuleKey) {
-        return dummyDataGenerator.getStudyModuleViewByKey(studyModuleKey)
+        return module_service.findViewById(studyModuleKey)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Study module not found: " + studyModuleKey));
     }

@@ -1,5 +1,10 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
+import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
+import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
+import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
+import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramServiceImpl;
+import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.DegreeProgramForm;
 import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import jakarta.validation.Valid;
@@ -18,21 +23,27 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/degree-programs")
 public class DegreeProgramController {
 
-    private final DummyDataGenerator dummyDataGenerator;
+    private DegreeProgramService degree_program_service;
+    private StudyModuleService module_service;
 
-    public DegreeProgramController(final DummyDataGenerator dummyDataGenerator) {
-        this.dummyDataGenerator = dummyDataGenerator;
+
+    public DegreeProgramController(final DegreeProgramService degree_program_service,
+                                   final StudyModuleService module_service) {
+        this.degree_program_service = degree_program_service;
+        this.module_service = module_service;
     }
+
 
     @GetMapping
     public String listDegreePrograms(final Model model) {
-        // TODO to be replaced
-        model.addAttribute("degreePrograms", dummyDataGenerator.getListOfDegreePrograms());
+        model.addAttribute("degreePrograms",degree_program_service.findAll());
         return "degreeprograms/list";
     }
 
@@ -53,7 +64,7 @@ public class DegreeProgramController {
             return showCreateFormView(model);
         }
 
-        // TODO: build a DegreeProgram from the form and save it
+        degree_program_service.create(form);
         redirectAttributes.addFlashAttribute("successMessage",
                 "Degree program \"" + form.getName() + "\" created.");
         return "redirect:/degree-programs";
@@ -70,11 +81,13 @@ public class DegreeProgramController {
             final Model model) {
 
         DegreeProgramView program = requireProgram(id);
+        IO.println("Programm ID: " + id);
+
+        List<StudyModule> modules = module_service.findAll(id);
+        IO.println("Modules: " +  modules);
 
         model.addAttribute("degreeProgram", program);
-        // TODO to be replaced
-        model.addAttribute("studyModules",
-                dummyDataGenerator.getStudyModuleListViewEntriesByProgramId(id));
+        model.addAttribute("studyModules",modules);
         model.addAttribute("nameFilter", nameFilter != null ? nameFilter : "");
         model.addAttribute("offeredAt", offeredAt != null ? offeredAt : LocalDate.now());
         model.addAttribute("sortBy", sortBy != null ? sortBy : "NAME");
@@ -135,8 +148,9 @@ public class DegreeProgramController {
     }
 
     private DegreeProgramView requireProgram(final String id) {
-        return dummyDataGenerator.getDegreeProgramById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Degree program not found: " + id));
+        return degree_program_service.findViewById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Degree program not found: " + id));
+
     }
+
 }
