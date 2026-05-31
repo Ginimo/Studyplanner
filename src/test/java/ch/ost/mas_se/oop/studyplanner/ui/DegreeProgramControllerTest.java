@@ -1,5 +1,7 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
+import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
+import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.DegreeProgramForm;
 import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import org.junit.jupiter.api.Test;
@@ -30,8 +32,15 @@ class DegreeProgramControllerTest {
     @Mock
     private BindingResult bindingResult;
 
+    @Mock
+    private DegreeProgramService degree_program_service;
+
+    @Mock
+    private StudyModuleService module_service; //
+
     @InjectMocks
     private DegreeProgramController testee;
+
 
     private static DegreeProgramView testProgramView() {
         return new DegreeProgramView(PROGRAM_ID, "Software Engineering", "A great program.", 6);
@@ -39,7 +48,8 @@ class DegreeProgramControllerTest {
 
     @Test
     void listDegreePrograms_returnsListViewWithPrograms() {
-        when(dummyDataGenerator.getListOfDegreePrograms()).thenReturn(List.of(testProgramView()));
+        //when(dummyDataGenerator.getListOfDegreePrograms()).thenReturn(List.of(testProgramView()));
+        when(degree_program_service.findAll()).thenReturn(List.of(/* DegreeProgram */));
         var model = new ConcurrentModel();
 
         String view = testee.listDegreePrograms(model);
@@ -87,7 +97,8 @@ class DegreeProgramControllerTest {
     @Test
     void showDetails_returnsDetailsViewWithProgramAndStudyModules() {
         DegreeProgramView programView = testProgramView();
-        when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(programView));
+        //when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(programView));
+        when(degree_program_service.findViewById(PROGRAM_ID)).thenReturn(Optional.of(programView));
         when(dummyDataGenerator.getStudyModuleListViewEntriesByProgramId(PROGRAM_ID)).thenReturn(List.of());
         var model = new ConcurrentModel();
 
