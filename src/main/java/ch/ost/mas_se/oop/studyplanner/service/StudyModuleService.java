@@ -14,7 +14,10 @@ public interface StudyModuleService {
     void create(StudyModuleForm form,  String programId);
     Optional<StudyModule> findByKey(String studyModuleKey);
     List<StudyModule> findAll(String program_id);
-    Optional<StudyModuleView> findViewById(String studyModuleKey);
+
+    Optional<StudyModuleView> findViewByKey(String studyModuleKey);
+    List<StudyModuleView> findViewAll(String program_id);
+
     //void update(StudyModule module); // ToDo
     //void delete(String studyModuleKey); // ToDo
 

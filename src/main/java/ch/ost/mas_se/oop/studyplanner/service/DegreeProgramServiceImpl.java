@@ -41,6 +41,7 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
         programs.add(hard_coded_program_2);
     };
 
+    // Methoden für Model
 
     @Override
     public void create(DegreeProgramForm form) {
@@ -79,6 +80,7 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
                 );
     }
 
+    // Methoden für Views
     public Optional<DegreeProgramView> findViewById(final String id) {
         Optional<DegreeProgram> program = findById(id);
         if (program.isEmpty()) {

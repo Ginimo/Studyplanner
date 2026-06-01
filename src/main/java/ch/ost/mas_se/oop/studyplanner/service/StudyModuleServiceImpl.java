@@ -20,7 +20,10 @@ public class StudyModuleServiceImpl implements StudyModuleService {
 
     private DegreeProgramService degreeProgramService;
     private List<StudyModule> modules = new ArrayList<StudyModule>();  //to decide: ArrayList, LinkList, Set oder Map
+
     private StudyModuleView view;
+    private List<StudyModuleView> views = new ArrayList<StudyModuleView>(); ;
+
 
     public StudyModuleServiceImpl(DegreeProgramService degreeProgramService) {
         this.degreeProgramService = degreeProgramService;
@@ -191,6 +194,8 @@ public class StudyModuleServiceImpl implements StudyModuleService {
 
     };
 
+    // Methoden für Modules
+
     @Override
     public void create(StudyModuleForm form, String programId){
         DegreeProgram program = degreeProgramService.findById(programId).orElse(null);
@@ -232,6 +237,8 @@ public class StudyModuleServiceImpl implements StudyModuleService {
             return Optional.empty();
     }
 
+    // Methoden für Views
+
     private StudyModuleView toView(StudyModule module) {
         return new StudyModuleView(
                 new StudyModuleKey(module.getStudyModuleKey()),
@@ -242,12 +249,39 @@ public class StudyModuleServiceImpl implements StudyModuleService {
                 );
     }
 
+    private List<StudyModuleView> toViewList(List<StudyModule> module_list) {
+        List<StudyModuleView> views = new ArrayList<>();
+        for (StudyModule entry : module_list) {
+            views.add(new StudyModuleView(
+                    new StudyModuleKey(entry.getStudyModuleKey()),
+                    entry.getName(),
+                    entry.getDescription(),
+                    entry.getEcts(),
+                    entry.getPrerequisiteKeys()
+            ));
+        }
+        return views;
+    }
 
-    public Optional<StudyModuleView> findViewById(String studyModuleKey) {
+    public Optional<StudyModuleView> findViewByKey(String studyModuleKey) {
         Optional<StudyModule> module = findByKey(studyModuleKey);
         if (module.isEmpty()) {
            return Optional.empty();
         }
         return Optional.of(toView(module.get()));
     }
+
+    @Override
+    public List<StudyModuleView> findViewAll(String programId) {
+        List<StudyModule> result = new ArrayList<>();
+        for (StudyModule entry : modules) {
+            if (programId.equals(entry.getDegreeProgram().getId())) {
+                result.add(entry);
+                //IO.println(entry);
+            }
+        }
+        List<StudyModuleView> views = toViewList(result);
+        return views;
+    }
+
 }

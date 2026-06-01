@@ -21,16 +21,11 @@ import java.util.List;
 @RequestMapping("/degree-programs/{degreeProgramId}/study-modules")
 public class StudyModuleController {
 
-    private final DummyDataGenerator dummyDataGenerator;
-
     private final DegreeProgramService degree_program_service;
     private final StudyModuleService module_service;
 
-
-    public StudyModuleController(final DummyDataGenerator dummyDataGenerator,
-                                 final DegreeProgramService degree_program_service,
+    public StudyModuleController(final DegreeProgramService degree_program_service,
                                  final StudyModuleServiceImpl module_service) {
-        this.dummyDataGenerator = dummyDataGenerator;
         this.degree_program_service = degree_program_service;
         this.module_service = module_service;
     }
@@ -67,7 +62,7 @@ public class StudyModuleController {
         StudyModuleView studyModule = requireStudyModule(studyModuleKey);
 
         List<StudyModuleView> prerequisites = studyModule.getPrerequisiteKeys().stream()
-                .flatMap(key -> module_service.findViewById(key).stream())
+                .flatMap(key -> module_service.findViewByKey(key).stream())
                 .toList();
 
 
@@ -149,9 +144,8 @@ public class StudyModuleController {
     private void addAvailableStudyModules4PrerequisiteSelection(final String degreeProgramId,
                                                                 final String excludeStudyModuleKey,
                                                                 final Model model) {
-        // TODO needs to be replaced by actual module lookup
-        List<StudyModuleView> available = dummyDataGenerator
-                .getStudyModuleViewByProgramId(degreeProgramId)
+        List<StudyModuleView> available = module_service
+                .findViewAll(degreeProgramId)
                 .stream()
                 .filter(sm -> !sm.getStudyModuleKey().key().equals(excludeStudyModuleKey))
                 .toList();
@@ -165,7 +159,7 @@ public class StudyModuleController {
     }
 
     private StudyModuleView requireStudyModule(final String studyModuleKey) {
-        return module_service.findViewById(studyModuleKey)
+        return module_service.findViewByKey(studyModuleKey)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Study module not found: " + studyModuleKey));
     }
