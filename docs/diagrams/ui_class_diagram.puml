@@ -158,7 +158,7 @@ package "Views" {
     }
 }
 
-' Controller → Service dependencies (from domain diagram)
+' Controller -> Service dependencies (from domain diagram)
 WelcomeController --> DegreeProgramService
 DegreeProgramController --> DegreeProgramService
 DegreeProgramController --> StudyModuleService
@@ -167,7 +167,7 @@ StudyModuleController --> StudyModuleService
 ScheduleController --> DegreeProgramService
 ScheduleController --> ScheduleService
 
-' Controller → Form/View usage
+' Controller -> Form/View usage
 DegreeProgramController ..> DegreeProgramForm
 DegreeProgramController ..> DegreeProgramView
 DegreeProgramController ..> StudyModuleListView
