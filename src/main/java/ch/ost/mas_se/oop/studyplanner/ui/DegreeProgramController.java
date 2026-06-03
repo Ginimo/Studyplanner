@@ -1,38 +1,43 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
+import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
+import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
+import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.DegreeProgramForm;
 import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
+import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
+import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleListView;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/degree-programs")
 public class DegreeProgramController {
 
-    private final DummyDataGenerator dummyDataGenerator;
+    private final DegreeProgramService degreeProgramService;
+    private final StudyModuleService studyModuleService;
 
-    public DegreeProgramController(final DummyDataGenerator dummyDataGenerator) {
-        this.dummyDataGenerator = dummyDataGenerator;
+    public DegreeProgramController(final DegreeProgramService degreeProgramService, final StudyModuleService studyModuleService) {
+        this.degreeProgramService = degreeProgramService;
+        this.studyModuleService = studyModuleService;
     }
 
     @GetMapping
     public String listDegreePrograms(final Model model) {
-        // TODO to be replaced
-        model.addAttribute("degreePrograms", dummyDataGenerator.getListOfDegreePrograms());
+        model.addAttribute("degreePrograms", degreeProgramService.findAll().stream()
+                .map(this::toView)
+                .collect(Collectors.toList()));
         return "degreeprograms/list";
     }
 
@@ -53,7 +58,14 @@ public class DegreeProgramController {
             return showCreateFormView(model);
         }
 
-        // TODO: build a DegreeProgram from the form and save it
+        DegreeProgram program = new DegreeProgram(
+                UUID.randomUUID().toString(),
+                form.getName(),
+                form.getDescription(),
+                form.getMaxDurationInSemesters()
+        );
+        degreeProgramService.create(program);
+
         redirectAttributes.addFlashAttribute("successMessage",
                 "Degree program \"" + form.getName() + "\" created.");
         return "redirect:/degree-programs";
@@ -69,12 +81,23 @@ public class DegreeProgramController {
             @RequestParam(value = "sortDir", required = false) final String sortDir,
             final Model model) {
 
-        DegreeProgramView program = requireProgram(id);
+        DegreeProgram program = degreeProgramService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Degree program not found: " + id));
 
-        model.addAttribute("degreeProgram", program);
-        // TODO to be replaced
-        model.addAttribute("studyModules",
-                dummyDataGenerator.getStudyModuleListViewEntriesByProgramId(id));
+        model.addAttribute("degreeProgram", toView(program));
+
+        model.addAttribute("studyModules", studyModuleService.findAllByDegreeProgramId(id).stream()
+                .map(m -> new StudyModuleListView(
+                        new StudyModuleKey(m.getStudyModuleKey()),
+                        m.getName(),
+                        m.getEcts(),
+                        m.getOfferedFrom(),
+                        m.getOfferedTo(),
+                        !m.getPrerequisiteKeys().isEmpty(),
+                        m.getPrerequisiteKeys().size()
+                ))
+                .collect(Collectors.toList()));
+
         model.addAttribute("nameFilter", nameFilter != null ? nameFilter : "");
         model.addAttribute("offeredAt", offeredAt != null ? offeredAt : LocalDate.now());
         model.addAttribute("sortBy", sortBy != null ? sortBy : "NAME");
@@ -84,12 +107,13 @@ public class DegreeProgramController {
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable final String id, final Model model) {
-        // TODO creation of view and form needs to be replaced
-        DegreeProgramView view = requireProgram(id);
+        DegreeProgram program = degreeProgramService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Degree program not found: " + id));
+
         DegreeProgramForm form = new DegreeProgramForm();
-        form.setName(view.getName());
-        form.setDescription(view.getDescription());
-        form.setMaxDurationInSemesters(view.getMaxDurationInSemesters());
+        form.setName(program.getName());
+        form.setDescription(program.getDescription());
+        form.setMaxDurationInSemesters(program.getMaxDurationInSemesters());
 
         model.addAttribute("degreeProgram", form);
         return showEditFormView(id, model);
@@ -107,7 +131,14 @@ public class DegreeProgramController {
             return showEditFormView(id, model);
         }
 
-        // TODO: build a DegreeProgram from the form and save it
+        DegreeProgram program = new DegreeProgram(
+                id,
+                form.getName(),
+                form.getDescription(),
+                form.getMaxDurationInSemesters()
+        );
+        degreeProgramService.update(program);
+
         redirectAttributes.addFlashAttribute("successMessage", "Degree program updated.");
         return "redirect:/degree-programs/" + id;
     }
@@ -115,8 +146,13 @@ public class DegreeProgramController {
     @PostMapping("/{id}/delete")
     public String deleteDegreeProgram(@PathVariable final String id,
                                       final RedirectAttributes redirectAttributes) {
-        DegreeProgramView program = requireProgram(id);
-        // TODO: actually delete the degree program here
+        DegreeProgram program = degreeProgramService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Degree program not found: " + id));
+        
+        studyModuleService.findAllByDegreeProgramId(id)
+                .forEach(m -> studyModuleService.delete(id, m.getStudyModuleKey()));
+        degreeProgramService.delete(id);
+
         redirectAttributes.addFlashAttribute("successMessage",
                 "Degree program \"" + program.getName() + "\" deleted.");
         return "redirect:/degree-programs";
@@ -134,9 +170,7 @@ public class DegreeProgramController {
         return "degreeprograms/form";
     }
 
-    private DegreeProgramView requireProgram(final String id) {
-        return dummyDataGenerator.getDegreeProgramById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Degree program not found: " + id));
+    private DegreeProgramView toView(DegreeProgram program) {
+        return new DegreeProgramView(program.getId(), program.getName(), program.getDescription(), program.getMaxDurationInSemesters());
     }
 }

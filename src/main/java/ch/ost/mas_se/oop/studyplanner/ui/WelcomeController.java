@@ -1,5 +1,6 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
+import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,16 +8,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class WelcomeController {
 
-    private final DummyDataGenerator dummyDataGenerator;
+    private final DegreeProgramService degreeProgramService;
 
-    public WelcomeController(DummyDataGenerator dummyDataGenerator) {
-        this.dummyDataGenerator = dummyDataGenerator;
+    public WelcomeController(DegreeProgramService degreeProgramService) {
+        this.degreeProgramService = degreeProgramService;
     }
 
     @GetMapping("/")
     public String welcome(Model model) {
-        // TODO replace by real lookup
-        model.addAttribute("programCount", dummyDataGenerator.getListOfDegreePrograms().size());
+        model.addAttribute("programCount", degreeProgramService.findAll().size());
         return "welcome";
     }
 }

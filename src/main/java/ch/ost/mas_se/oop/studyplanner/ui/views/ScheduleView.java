@@ -13,5 +13,6 @@ public class ScheduleView {
     }
 
     public LocalDateTime getCalculatedAt() { return calculatedAt; }
+
     public int getTotalSemesters() { return totalSemesters; }
 }

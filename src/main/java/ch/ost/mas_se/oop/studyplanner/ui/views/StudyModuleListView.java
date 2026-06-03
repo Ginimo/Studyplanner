@@ -25,10 +25,16 @@ public class StudyModuleListView {
     }
 
     public StudyModuleKey getStudyModuleKey() { return studyModuleKey; }
+
     public String getName() { return name; }
+
     public int getEcts() { return ects; }
+
     public LocalDate getOfferedFrom() { return offeredFrom; }
+
     public LocalDate getOfferedTo() { return offeredTo; }
+
     public boolean isHasPrerequisites() { return hasPrerequisites; }
+
     public int getPrerequisiteCount() { return prerequisiteCount; }
 }
