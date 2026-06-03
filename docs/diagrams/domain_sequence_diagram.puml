@@ -21,29 +21,45 @@ deactivate DPS
 SC -> SS : calculate(degreeProgram)
 activate SS
 
-SS -> SMS : findAll(degreeProgramId)
+SS -> SMS : findAllByDegreeProgramId(degreeProgramId)
 activate SMS
 SMS --> SS : modules
 deactivate SMS
-
-note over SS: sortByPrerequisites(modules)
 
 SS -> S : new Schedule()
 activate S
 S --> SS : schedule
 deactivate S
 
-loop for each calculated semester
-    SS -> Sem : new Semester(number)
-    activate Sem
-    Sem --> SS : semester
-    deactivate Sem
-    SS -> S : addSemester(semester)
+note over SS
+  Topological sort (Kahn-style):
+  1. Build remainingPrerequisites map (key -> mutable set of unmet prereqs)
+  2. Each iteration: find "ready" modules (prereq set is empty, not yet processed)
+  3. Add ready modules to a new Semester, mark as processed
+  4. Remove processed keys from all remaining prerequisite sets to unblock dependents
+  5. Repeat until all modules are scheduled — or detect a cycle if no ready module found
+end note
+
+alt no cyclic dependency
+    loop for each topological layer (semester)
+        SS -> Sem : new Semester(semesterNumber)
+        activate Sem
+        Sem --> SS : semester
+        deactivate Sem
+        SS -> S : addSemester(semester)
+    end
+    SS --> SC : schedule
+else cyclic dependency detected
+    SS --> SC : throws CyclicDependencyException
 end
 
-SS --> SC : schedule
 deactivate SS
 
-SC -> Student : redirect to schedule view
+alt schedule calculated successfully
+    SC --> Student : redirect to schedule view\n(flash: successMessage + schedule)
+else cyclic dependency
+    SC --> Student : redirect to schedule view\n(flash: errorMessage)
+end
+
 deactivate SC
 @enduml

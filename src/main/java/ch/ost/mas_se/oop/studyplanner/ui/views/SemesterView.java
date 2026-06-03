@@ -18,7 +18,10 @@ public class SemesterView {
     }
 
     public int getSemesterNumber() { return semesterNumber; }
+
     public List<StudyModuleView> getStudyModules() { return studyModules; }
+
     public int getTotalEcts() { return totalEcts; }
+
     public String getStudyModuleKeys() { return studyModuleKeys; }
 }

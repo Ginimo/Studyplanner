@@ -1,67 +1,128 @@
 @startuml
 
-package "Model" {
+skinparam packageStyle Rectangle
+skinparam linetype ortho
+skinparam roundcorner 6
+
+skinparam package {
+    BackgroundColor<<Model>>       #E3F2FD
+    BackgroundColor<<Service>>     #E8F5E9
+    BackgroundColor<<Repository>>  #FFF8E1
+    BackgroundColor<<Exception>>   #FDECEA
+    BackgroundColor<<UI>>          #F3E5F5
+    BorderColor                    #9E9E9E
+    FontStyle                      Bold
+}
+
+skinparam class {
+    BackgroundColor #FAFAFA
+    BorderColor     #9E9E9E
+}
+
+skinparam interface {
+    BackgroundColor #FFFDE7
+    BorderColor     #9E9E9E
+}
+
+skinparam arrow {
+    Color           #555555
+}
+
+package "Model" <<Model>> {
     class DegreeProgram {
         - id: String
         - name: String
         - description: String
         - maxDurationInSemesters: int
+        + getId(): String
+        + getName(): String
+        + getDescription(): String
+        + getMaxDurationInSemesters(): int
     }
 
     class StudyModule {
         - studyModuleKey: String
+        - degreeProgramId: String
         - name: String
         - description: String
         - ects: int
         - prerequisiteKeys: List<String>
         - offeredFrom: LocalDate
         - offeredTo: LocalDate
+        + getStudyModuleKey(): String
+        + getDegreeProgramId(): String
+        + getName(): String
+        + getDescription(): String
+        + getEcts(): int
+        + getPrerequisiteKeys(): List<String>
+        + getOfferedFrom(): LocalDate
+        + getOfferedTo(): LocalDate
     }
 
     class Schedule {
         - calculatedAt: LocalDateTime
-        - totalSemesters: int
+        - semesters: List<Semester>
+        + getCalculatedAt(): LocalDateTime
+        + addSemester(semester: Semester): void
+        + getSemesters(): List<Semester>
+        + getTotalSemesters(): int
     }
 
     class Semester {
         - semesterNumber: int
-        - totalEcts: int
+        - studyModules: List<StudyModule>
+        + getSemesterNumber(): int
+        + addStudyModule(module: StudyModule): void
+        + getStudyModules(): List<StudyModule>
+        + getTotalEcts(): int
     }
 }
 
-package "Service" {
-    interface DegreeProgramService {
-        + create(program: DegreeProgram): void
-        + findById(id: String): Optional<DegreeProgram>
-        + findAll(): List<DegreeProgram>
-        + update(program: DegreeProgram): void
-        + delete(id: String): void
+package "Exception" <<Exception>> {
+    class CyclicDependencyException {
+        + CyclicDependencyException(remainingModuleKeys: List<String>)
+    }
+    CyclicDependencyException --|> RuntimeException
+}
+
+package "Service" <<Service>> {
+    together {
+        interface DegreeProgramService {
+            + create(program: DegreeProgram): void
+            + findById(id: String): Optional<DegreeProgram>
+            + findAll(): List<DegreeProgram>
+            + update(program: DegreeProgram): void
+            + delete(id: String): void
+        }
+
+        class DegreeProgramServiceImpl {
+            - repository: DegreeProgramRepository
+        }
     }
 
-    interface StudyModuleService {
-        + create(module: StudyModule): void
-        + findByKey(studyModuleKey: String): Optional<StudyModule>
-        + findAll(degreeProgramId: String): List<StudyModule>
-        + update(module: StudyModule): void
-        + delete(studyModuleKey: String): void
+    together {
+        interface StudyModuleService {
+            + create(module: StudyModule): void
+            + findByKey(degreeProgramId: String, key: String): Optional<StudyModule>
+            + findAllByDegreeProgramId(degreeProgramId: String): List<StudyModule>
+            + update(module: StudyModule): void
+            + delete(degreeProgramId: String, key: String): void
+        }
+
+        class StudyModuleServiceImpl {
+            - repository: StudyModuleRepository
+        }
     }
 
-    interface ScheduleService {
-        + calculate(program: DegreeProgram): Schedule
-    }
+    together {
+        interface ScheduleService {
+            + calculate(program: DegreeProgram): Schedule
+        }
 
-    class DegreeProgramServiceImpl {
-        - repository: DegreeProgramRepository
-    }
-
-    class StudyModuleServiceImpl {
-        - repository: StudyModuleRepository
-    }
-
-    class ScheduleServiceImpl {
-        - moduleService: StudyModuleService
-        + calculate(program: DegreeProgram): Schedule
-        - sortByPrerequisites(modules: List<StudyModule>): List<StudyModule>
+        class ScheduleServiceImpl {
+            - studyModuleService: StudyModuleService
+            + calculate(program: DegreeProgram): Schedule
+        }
     }
 
     DegreeProgramServiceImpl ..|> DegreeProgramService
@@ -69,37 +130,81 @@ package "Service" {
     ScheduleServiceImpl ..|> ScheduleService
 }
 
-package "UI Orchestration" {
-    class DegreeProgramController
-    class ScheduleController
-    class StudyModuleController
-    class WelcomeController
+package "UI Orchestration" <<UI>> {
+    together {
+        class DegreeProgramController
+        class ScheduleController
+        class StudyModuleController
+        class WelcomeController
+    }
 }
 
-package "Repository" {
-    class StudyModuleRepository {
-         - modules: List<StudyModule>
+package "Repository" <<Repository>> {
+    together {
+        interface DegreeProgramRepository {
+            + save(program: DegreeProgram): void
+            + findById(id: String): Optional<DegreeProgram>
+            + findAll(): List<DegreeProgram>
+            + delete(id: String): void
+        }
+
+        class InMemoryDegreeProgramRepository {
+            - store: Map<String, DegreeProgram>
+        }
     }
 
-    class DegreeProgramRepository {
-        - programs: List<DegreeProgram>
+    together {
+        interface StudyModuleRepository {
+            + save(module: StudyModule): void
+            + findByKey(degreeProgramId: String, key: String): Optional<StudyModule>
+            + findAllByDegreeProgramId(degreeProgramId: String): List<StudyModule>
+            + delete(degreeProgramId: String, key: String): void
+        }
+
+        class InMemoryStudyModuleRepository {
+            - store: Map<String, StudyModule>
+        }
     }
+
+    InMemoryStudyModuleRepository ..|> StudyModuleRepository
+    InMemoryDegreeProgramRepository ..|> DegreeProgramRepository
 }
 
 ' Data Associations
-DegreeProgram "1" --> "0..1" Schedule : has
 Schedule "1" --> "*" Semester : contains
 Semester "1" --> "*" StudyModule : consists of
-DegreeProgram "1" --> "*" StudyModule : includes
+DegreeProgram "1" --> "0..*" StudyModule : includes
 StudyModule "*" --> "*" StudyModule : has prerequisites
 
+' Schedule is computed from a DegreeProgram by ScheduleService; DegreeProgram does not hold a Schedule reference
+ScheduleServiceImpl ..> Schedule : creates
+
 ' Logic Associations (Dependency Injection)
+WelcomeController --> DegreeProgramService
 DegreeProgramController --> DegreeProgramService
+DegreeProgramController --> StudyModuleService
+StudyModuleController --> DegreeProgramService
 StudyModuleController --> StudyModuleService
 ScheduleController --> ScheduleService
+ScheduleController --> DegreeProgramService
 
 DegreeProgramServiceImpl --> DegreeProgramRepository
 StudyModuleServiceImpl --> StudyModuleRepository
 ScheduleServiceImpl --> StudyModuleService
+
+' Exception usage
+ScheduleServiceImpl ..> CyclicDependencyException : throws
+ScheduleController ..> CyclicDependencyException : catches
+
+' Layout hints (invisible — rank enforcement only)
+DegreeProgramService -[hidden]-> DegreeProgramController
+DegreeProgramService -[hidden]-> StudyModuleController
+DegreeProgramService -[hidden]-> ScheduleController
+DegreeProgramService -[hidden]-> WelcomeController
+StudyModuleService -[hidden]-> DegreeProgramController
+StudyModuleService -[hidden]-> StudyModuleController
+StudyModuleService -[hidden]-> ScheduleController
+ScheduleService -[hidden]-> ScheduleController
+ScheduleService -[hidden]-> DegreeProgramController
 
 @enduml

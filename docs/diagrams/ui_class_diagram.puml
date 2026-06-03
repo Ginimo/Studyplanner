@@ -1,195 +1,189 @@
 @startuml
 
+package "Forms" {
+    class DegreeProgramForm {
+        - name: String
+        - description: String
+        - maxDurationInSemesters: int
+        + getName(): String
+        + setName(name: String): void
+        + getDescription(): String
+        + setDescription(description: String): void
+        + getMaxDurationInSemesters(): int
+        + setMaxDurationInSemesters(maxDurationInSemesters: int): void
+    }
 
-class DegreeProgramForm{
-- name: String
-- description: String
-- maxDurationInSemesters: int
-+ getName(): String
-+ setName(name: String): void
-+ getDescription(): String
-+ setDescription(description: String): void
-+ getMaxDurationInSemesters(): int
-+ setMaxDurationInSemesters(maxDurationInSemesters: int): void
+    class StudyModuleForm {
+        - studyModuleKey: String
+        - name: String
+        - description: String
+        - ects: int
+        - prerequisiteKeys: List<String>
+        - offeredFrom: LocalDate
+        - offeredTo: LocalDate
+        - isNew: boolean
+        + getStudyModuleKey(): String
+        + setStudyModuleKey(studyModuleKey: String): void
+        + getName(): String
+        + setName(name: String): void
+        + getDescription(): String
+        + setDescription(description: String): void
+        + getEcts(): int
+        + setEcts(ects: int): void
+        + getPrerequisiteKeys(): List<String>
+        + setPrerequisiteKeys(prerequisiteKeys: List<String>): void
+        + getOfferedFrom(): LocalDate
+        + setOfferedFrom(offeredFrom: LocalDate): void
+        + getOfferedTo(): LocalDate
+        + setOfferedTo(offeredTo: LocalDate): void
+        + getIsNew(): boolean
+        + setIsNew(isNew: boolean): void
+    }
 }
 
-class StudyModuleForm{
-- studyModuleKey: String
-- name: String
-- description: String
-- ects: int
-- prerequisiteKeys: List<String>
-- offeredFrom: LocalDate
-- offeredTo: LocalDate
-- isNew: boolean
-+ getStudyModuleKey(): String
-+ setStudyModuleKey(studyModuleKey: String ): void
-+ getName(): String
-+ setName(name: String ): void
-+ getDescription(): String
-+ setDescription(description: String): void
-+ getEcts(): int
-+ setEcts(ects: int): void
-+ getPrerequisiteKeys(): List<String>
-+ setPrerequisiteKeys(prerequisiteKeys: List<String>): void
-+ getOfferedFrom(): LocalDate
-+ setOfferedFrom(offeredFrom: LocalDate): void
-+ getOfferedTo(): LocalDate
-+ setOfferedTo(offeredTo: LocalDate): void
-+ getIsNew(): boolean
-+ setIsNew(isNew: boolean): void
+package "Controllers" {
+    class WelcomeController {
+        - degreeProgramService: DegreeProgramService
+        + WelcomeController(degreeProgramService: DegreeProgramService)
+        + welcome(model: Model): String
+    }
+
+    class DegreeProgramController {
+        - degreeProgramService: DegreeProgramService
+        - studyModuleService: StudyModuleService
+        + DegreeProgramController(degreeProgramService: DegreeProgramService, studyModuleService: StudyModuleService)
+        + listDegreePrograms(model: Model): String
+        + showCreateForm(model: Model): String
+        + createDegreeProgram(form: DegreeProgramForm, result: BindingResult, model: Model, redirectAttributes: RedirectAttributes): String
+        + showDetails(id: String, nameFilter: String, offeredAt: LocalDate, sortBy: String, sortDir: String, model: Model): String
+        + showEditForm(id: String, model: Model): String
+        + updateDegreeProgram(id: String, form: DegreeProgramForm, result: BindingResult, model: Model, redirectAttributes: RedirectAttributes): String
+        + deleteDegreeProgram(id: String, redirectAttributes: RedirectAttributes): String
+        - showCreateFormView(model: Model): String
+        - showEditFormView(id: String, model: Model): String
+        - toView(program: DegreeProgram): DegreeProgramView
+    }
+
+    class StudyModuleController {
+        - degreeProgramService: DegreeProgramService
+        - studyModuleService: StudyModuleService
+        + StudyModuleController(degreeProgramService: DegreeProgramService, studyModuleService: StudyModuleService)
+        + showCreateForm(degreeProgramId: String, model: Model): String
+        + createStudyModule(degreeProgramId: String, form: StudyModuleForm, result: BindingResult, model: Model, redirectAttributes: RedirectAttributes): String
+        + showDetails(degreeProgramId: String, studyModuleKey: String, model: Model): String
+        + showEditForm(degreeProgramId: String, studyModuleKey: String, model: Model): String
+        + updateStudyModule(degreeProgramId: String, studyModuleKey: String, form: StudyModuleForm, result: BindingResult, model: Model, redirectAttributes: RedirectAttributes): String
+        + deleteStudyModule(degreeProgramId: String, studyModuleKey: String, redirectAttributes: RedirectAttributes): String
+        - showCreateFormView(degreeProgramId: String, form: StudyModuleForm, model: Model): String
+        - showEditFormView(degreeProgramId: String, studyModuleKey: String, form: StudyModuleForm, model: Model): String
+        - addAvailableStudyModulesForPrerequisiteSelection(degreeProgramId: String, excludeStudyModuleKey: String, model: Model): void
+        - requireProgram(id: String): DegreeProgram
+        - toView(module: StudyModule): StudyModuleView
+    }
+
+    class ScheduleController {
+        - degreeProgramService: DegreeProgramService
+        - scheduleService: ScheduleService
+        + ScheduleController(degreeProgramService: DegreeProgramService, scheduleService: ScheduleService)
+        + showSchedule(degreeProgramId: String, model: Model): String
+        + calculateSchedule(degreeProgramId: String, redirectAttributes: RedirectAttributes): String
+        - requireProgram(degreeProgramId: String): DegreeProgram
+        - toView(program: DegreeProgram): DegreeProgramView
+    }
 }
 
+package "Views" {
+    class DegreeProgramView {
+        - id: String
+        - name: String
+        - description: String
+        - maxDurationInSemesters: int
+        + getId(): String
+        + getName(): String
+        + getDescription(): String
+        + getMaxDurationInSemesters(): int
+    }
 
-class DegreeProgramController{
-- dummyDataGenerator: DummyDataGenerator
-+ DegreeProgramController(dummyDataGenerator: DummyDataGenerator)
-+ listDegreePrograms(model: Model): String
-+ showCreateForm(model: Model): String
-+ createDegreeProgram(form: DegreeProgramForm, result: BindingResult, model: Model, redirectAttributes: RedirectAttributes): String
-+ showDetails(id: String, nameFilter: String, offeredAt: LocalDate, sortBy: String, sortDir: String, model: Model): String
-+ showEditForm(id: String, model: Model): String
-+ updateDegreeProgram(id: String, form: DegreeProgramForm, result: BindingResult, model: Model, redirectAttributes: RedirectAttributes): String
-+ deleteDegreeProgram(id: String, redirectAttributes: RedirectAttributes): String
-- showCreateFormView(model: Model): String
-- showEditFormView(id: String, model: Model): String
-- requireProgram(id: String): DegreeProgramView
+    class ScheduleView {
+        - calculatedAt: LocalDateTime
+        - totalSemesters: int
+        + getCalculatedAt(): LocalDateTime
+        + getTotalSemesters(): int
+    }
+
+    class SemesterView {
+        - semesterNumber: int
+        - studyModules: List<StudyModuleView>
+        - totalEcts: int
+        - studyModuleKeys: String
+        + getSemesterNumber(): int
+        + getStudyModules(): List<StudyModuleView>
+        + getTotalEcts(): int
+        + getStudyModuleKeys(): String
+    }
+
+    record StudyModuleKey {
+        + key: String
+        + toString(): String
+    }
+
+    class StudyModuleListView {
+        - studyModuleKey: StudyModuleKey
+        - name: String
+        - ects: int
+        - offeredFrom: LocalDate
+        - offeredTo: LocalDate
+        - hasPrerequisites: boolean
+        - prerequisiteCount: int
+        + getStudyModuleKey(): StudyModuleKey
+        + getName(): String
+        + getEcts(): int
+        + getOfferedFrom(): LocalDate
+        + getOfferedTo(): LocalDate
+        + isHasPrerequisites(): boolean
+        + getPrerequisiteCount(): int
+    }
+
+    class StudyModuleView {
+        - studyModuleKey: StudyModuleKey
+        - name: String
+        - description: String
+        - ects: int
+        - prerequisiteKeys: List<String>
+        + getStudyModuleKey(): StudyModuleKey
+        + getName(): String
+        + getDescription(): String
+        + getEcts(): int
+        + getPrerequisiteKeys(): List<String>
+    }
 }
 
-class DummyDataGenerator{
-- PROGRAM_ID: String
-+ getListOfDegreePrograms(): List<DegreeProgramView>
-+ getDegreeProgramById(id: String): Optional<DegreeProgramView>
-+ getStudyModuleListViewEntriesByProgramId(degreeProgramId: String): List<StudyModuleListView>
-+ getStudyModuleViewByProgramId(degreeProgramId: String): List<StudyModuleView>
-+ getStudyModuleViewByKey(key: String): Optional<StudyModuleView>
-+ getScheduleViewForProgram(id: String): Optional<ScheduleView>
-+ getSemesterViewForProgram(id: String): List<SemesterView>
-}
+' Controller → Service dependencies (from domain diagram)
+WelcomeController --> DegreeProgramService
+DegreeProgramController --> DegreeProgramService
+DegreeProgramController --> StudyModuleService
+StudyModuleController --> DegreeProgramService
+StudyModuleController --> StudyModuleService
+ScheduleController --> DegreeProgramService
+ScheduleController --> ScheduleService
 
-class ScheduleController{
-- dummyDataGenerator: DummyDataGenerator
-+ ScheduleController(dummyDataGenerator: DummyDataGenerator)
-+ showSchedule(degreeProgramId: String, model: Model): String
-+ calculateSchedule(degreeProgramId: String, redirectAttributes: RedirectAttributes): String
-- requireProgram(degreeProgramId: String): DegreeProgramView
-}
+' Controller → Form/View usage
+DegreeProgramController ..> DegreeProgramForm
+DegreeProgramController ..> DegreeProgramView
+DegreeProgramController ..> StudyModuleListView
 
-class StudyModuleController{
-- dummyDataGenerator: DummyDataGenerator
-+ StudyModuleController(dummyDataGenerator: DummyDataGenerator)
-+ showCreateForm(degreeProgramId: String, model: Model): String
-+ createStudyModule(degreeProgramId: String, form: StudyModuleForm, result: BindingResult, model: Model, redirectAttributes: RedirectAttributes): String
-+ showDetails(degreeProgramId: String, studyModuleKey: String, model: Model): String
-+ showEditForm(degreeProgramId: String, studyModuleKey: String, model: Model): String
-+ updateStudyModule(degreeProgramId: String, studyModuleKey: String, form: StudyModuleForm, result: BindingResult, model: Model, redirectAttributes: RedirectAttributes): String
-+ deleteStudyModule(degreeProgramId: String, studyModuleKey: String, redirectAttributes: RedirectAttributes): String
-- showCreateFormView(degreeProgramId: String, form: StudyModuleForm, model: Model): String
-- showEditFormView(degreeProgramId: String, studyModuleKey: String, form: StudyModuleForm, model: Model): String
-- addAvailableStudyModules4PrerequisiteSelection(degreeProgramId: String, excludeStudyModuleKey: String, model: Model): void
-- requireProgram(id: String): DegreeProgramView
-- requireStudyModule(studyModuleKey: String): StudyModuleView
-}
+StudyModuleController ..> StudyModuleForm
+StudyModuleController ..> StudyModuleView
+StudyModuleController ..> DegreeProgramView
 
-class WelcomeController{
-- dummyDataGenerator: DummyDataGenerator
-+ WelcomeController(DummyDataGenerator: dummyDataGenerator)
-+ welcome(model: Model): String
-}
+ScheduleController ..> DegreeProgramView
+ScheduleController ..> ScheduleView
+ScheduleController ..> SemesterView
+ScheduleController ..> StudyModuleView
 
-
-class DegreeProgramView{
-- id: String
-- name: String
-- description: String
-- maxDurationInSemesters: int
-+ DegreeProgramView(id: String, name: String, description: String, maxDurationInSemesters: int)
-+ getId(): String
-+ getName(): String
-+ getDescription(): String
-+ getMaxDurationInSemesters(): int
-}
-
-class ScheduleView{
-- calculatedAt: LocalDateTime
-- totalSemesters: int
-+ ScheduleView(calculatedAt: LocalDateTime, totalSemesters: int)
-+ getCalculatedAt(): LocalDateTime
-+ getTotalSemesters(): int
-}
-
-
-class SemesterView{
-- semesterNumber: int
-- studyModules: List<StudyModuleView>
-- totalEcts: int
-- studyModuleKeys: String
-+ SemesterView(semesterNumber: int, studyModules: List<StudyModuleView>, totalEcts: int, studyModuleKeys: String)
-+ getSemesterNumber(): int
-+ getStudyModules(): List<StudyModuleView>
-+ getTotalEcts(): int
-+ getStudyModuleKeys(): String
-}
-
-class StudyModuleKey{
-+ toString(): String
-}
-
-class StudyModuleListView{
-- studyModuleKey: StudyModuleKey
-- name: String
-- ects: int
-- offeredFrom: LocalDate
-- offeredTo: LocalDate
-- hasPrerequisites: boolean
-- prerequisiteCount: int
-+ StudyModuleListView(studyModuleKey: StudyModuleKey, name: String, ects: int, offeredFrom: LocalDate, offeredTo: LocalDate, hasPrerequisites: boolean, prerequisiteCount: int)
-+ getStudyModuleKey(): StudyModuleKey
-+ getName(): String
-+ getEcts(): int
-+ getOfferedFrom(): LocalDate
-+ getOfferedTo(): LocalDate
-+ isHasPrerequisites(): boolean
-+ getPrerequisiteCount(): int
-}
-
-class StudyModuleView{
-- studyModuleKey: StudyModuleKey
-- name: String
-- description: String
-- ects: int
-- prerequisiteKeys: List<String>
-+ StudyModuleView(studyModuleKey: StudyModuleKey, name: String, description: String, ects: int, prerequisiteKeys: List<String>)
-+ getStudyModuleKey(): StudyModuleKey
-+ getName(): String
-+ getDescription(): String
-+ getEcts(): int
-+ getPrerequisiteKeys(): List<String>
-}
-
-' Relationships
-WelcomeController --> DummyDataGenerator
-
-DegreeProgramController --> DummyDataGenerator
-DegreeProgramController --> DegreeProgramForm
-DegreeProgramController --> DegreeProgramView
-
-ScheduleController --> DummyDataGenerator
-ScheduleController --> DegreeProgramView
-
-StudyModuleController --> DummyDataGenerator
-StudyModuleController --> StudyModuleForm
-StudyModuleController --> StudyModuleView
-StudyModuleController --> DegreeProgramView
-
-DummyDataGenerator --> DegreeProgramView
-DummyDataGenerator --> StudyModuleView
-DummyDataGenerator --> StudyModuleListView
-DummyDataGenerator --> ScheduleView
-DummyDataGenerator --> SemesterView
-
-StudyModuleListView --> StudyModuleKey
+' View composition
 SemesterView --> StudyModuleView
+StudyModuleListView --> StudyModuleKey
 StudyModuleView --> StudyModuleKey
 
 @enduml

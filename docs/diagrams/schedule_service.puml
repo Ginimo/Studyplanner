@@ -1,0 +1,120 @@
+@startuml
+title Schedule Calculation — Topological Sort  |  O(V² + E)
+
+skinparam activity {
+    BackgroundColor #F9F9F9
+    BorderColor     #607D8B
+    DiamondBackgroundColor #FFF9C4
+    DiamondBorderColor     #F57F17
+    StartColor #2E7D32
+    EndColor   #2E7D32
+    ArrowColor #546E7A
+}
+skinparam swimlane {
+    BorderColor         #607D8B
+    TitleBackgroundColor #ECEFF1
+    TitleFontColor      #37474F
+}
+skinparam note {
+    BackgroundColor #FFFDE7
+    BorderColor     #F9A825
+}
+
+|#E8F5E9| Algorithm |
+start
+note right
+  <b>V</b> = number of StudyModules
+      (vertices in the dependency graph)
+  <b>E</b> = total prerequisite relationships
+      (edges in the dependency graph)
+  <b>Overall: O(V² + E)</b>
+end note
+:build moduleMap
+build remainingPrerequisites;
+
+|#FFF8E1| moduleMap (Map<String, StudyModule>) |
+:"Math"   → StudyModule(ects=4)
+"OO"     → StudyModule(ects=4)
+"DB1"    → StudyModule(ects=4)
+"AD1"    → StudyModule(ects=4)
+"CPI"    → StudyModule(ects=4)
+"DB2"    → StudyModule(ects=4)
+"SE1"    → StudyModule(ects=4)
+"UI1"    → StudyModule(ects=4)
+"AD2"    → StudyModule(ects=4)
+"SE2"    → StudyModule(ects=4)
+"UI2"    → StudyModule(ects=4)
+"Thesis" → StudyModule(ects=12);
+
+|#E3F2FD| remainingPrerequisites (Map<String, Set<String>>) |
+:"Math"  → { }
+"OO"    → { }
+"DB1"   → { "OO" }
+"AD1"   → { "OO" }
+"CPI"   → { "OO", "Math" }
+"DB2"   → { "DB1" }
+"SE1"   → { "AD1", "CPI", "DB1" }
+"UI1"   → { "AD1" }
+"AD2"   → { "OO", "AD1" }
+"SE2"   → { "DB1", "SE1", "UI1" }
+"UI2"   → { "UI1" }
+"Thesis"→ { "DB2", "SE2", "UI2" };
+
+|#E8F5E9| Algorithm |
+:processed = {}
+semesterNumber = 1;
+
+while (processed.size() < total) is (true)
+
+  :ready ← keys where
+  prereqSet = {}
+  AND key ∉ processed;
+  note right
+    O(V) per iteration
+    O(V²) across all iterations
+    V = number of StudyModules
+  end note
+
+  if (ready is empty?) then (yes)
+    :throw CyclicDependencyException
+    ──────────────────────────────
+    e.g. "M1"→{"M2"}, "M2"→{"M1"}
+    neither set ever empties; <<#FFCDD2>>
+    stop
+  else (no)
+    :new Semester(semesterNumber++)
+    add moduleMap[key] for each in ready
+    schedule.addSemester(semester)
+    processed.addAll(ready);
+
+    :remove ready keys from
+    every set in the map;
+    note right
+      O(E) total across all iterations
+      each edge is removed exactly once
+      E = total prerequisite edges
+    end note
+  endif
+
+|#E3F2FD| remainingPrerequisites (Map<String, Set<String>>) |
+:——— after iteration 1  (ready = Math, OO) ———
+"Math"  → { }              ✓ processed
+"OO"    → { }              ✓ processed
+"DB1"   → { }              ← unblocked!
+"AD1"   → { }              ← unblocked!
+"CPI"   → { }              ← unblocked!
+"DB2"   → { "DB1" }
+"SE1"   → { "AD1", "CPI", "DB1" }
+"UI1"   → { "AD1" }
+"AD2"   → { "AD1" }        ← partially unblocked
+"SE2"   → { "DB1", "SE1", "UI1" }
+"UI2"   → { "UI1" }
+"Thesis"→ { "DB2", "SE2", "UI2" };
+
+|#E8F5E9| Algorithm |
+endwhile (false)
+
+:return schedule;
+stop
+
+@enduml

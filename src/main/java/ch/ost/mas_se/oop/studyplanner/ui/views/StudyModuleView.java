@@ -17,12 +17,16 @@ public class StudyModuleView {
         this.name = name;
         this.description = description;
         this.ects = ects;
-        this.prerequisiteKeys = prerequisiteKeys != null ? List.copyOf(prerequisiteKeys) : List.of();
+        this.prerequisiteKeys = List.copyOf(prerequisiteKeys);
     }
 
     public StudyModuleKey getStudyModuleKey() { return studyModuleKey; }
+
     public String getName() { return name; }
+
     public String getDescription() { return description; }
+
     public int getEcts() { return ects; }
+
     public List<String> getPrerequisiteKeys() { return prerequisiteKeys; }
 }

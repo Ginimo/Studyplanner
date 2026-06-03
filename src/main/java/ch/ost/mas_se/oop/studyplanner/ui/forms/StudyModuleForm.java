@@ -8,13 +8,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Form-binding object for creating and editing a study module.
- *
- * <p>This is a web-layer DTO used by Spring MVC to bind HTML form fields.
- * It is intentionally separate from the {@code StudyModule} domain object,
- * which is immutable and validated in its constructor.</p>
- */
 public class StudyModuleForm {
 
     @NotBlank(message = "Study module key is required")
@@ -39,28 +32,36 @@ public class StudyModuleForm {
     private boolean isNew;
 
     public String getStudyModuleKey() { return studyModuleKey; }
+
     public void setStudyModuleKey(final String studyModuleKey) { this.studyModuleKey = studyModuleKey; }
 
     public String getName() { return name; }
+
     public void setName(final String name) { this.name = name; }
 
     public String getDescription() { return description; }
+
     public void setDescription(final String description) { this.description = description; }
 
     public int getEcts() { return ects; }
+
     public void setEcts(final int ects) { this.ects = ects; }
 
     public List<String> getPrerequisiteKeys() { return prerequisiteKeys; }
+
     public void setPrerequisiteKeys(final List<String> prerequisiteKeys) {
         this.prerequisiteKeys = prerequisiteKeys != null ? prerequisiteKeys : new ArrayList<>();
     }
 
     public LocalDate getOfferedFrom() { return offeredFrom; }
+
     public void setOfferedFrom(final LocalDate offeredFrom) { this.offeredFrom = offeredFrom; }
 
     public LocalDate getOfferedTo() { return offeredTo; }
+
     public void setOfferedTo(final LocalDate offeredTo) { this.offeredTo = offeredTo; }
 
     public boolean getIsNew() { return isNew; }
+
     public void setIsNew(final boolean isNew) { this.isNew = isNew; }
 }
