@@ -32,50 +32,21 @@ end note
 :build moduleMap
 build inDegree
 build dependents;
-
-|#FFF8E1| moduleMap (Map<String, StudyModule>) |
-:"Math"   → StudyModule(ects=4)
-"OO"     → StudyModule(ects=4)
-"DB1"    → StudyModule(ects=4)
-"AD1"    → StudyModule(ects=4)
-"CPI"    → StudyModule(ects=4)
-"DB2"    → StudyModule(ects=4)
-"SE1"    → StudyModule(ects=4)
-"UI1"    → StudyModule(ects=4)
-"AD2"    → StudyModule(ects=4)
-"SE2"    → StudyModule(ects=4)
-"UI2"    → StudyModule(ects=4)
-"Thesis" → StudyModule(ects=12);
-
-|#E3F2FD| inDegree (Map<String, Integer>) |
-:"Math"   → 0
-"OO"     → 0
-"DB1"    → 1   (OO)
-"AD1"    → 1   (OO)
-"CPI"    → 2   (OO, Math)
-"DB2"    → 1   (DB1)
-"SE1"    → 3   (AD1, CPI, DB1)
-"UI1"    → 1   (AD1)
-"AD2"    → 2   (OO, AD1)
-"SE2"    → 3   (DB1, SE1, UI1)
-"UI2"    → 1   (UI1)
-"Thesis" → 3   (DB2, SE2, UI2);
-
-|#EDE7F6| dependents (Map<String, List<String>>) |
-:"Math"   → ["CPI"]
-"OO"     → ["DB1", "AD1", "AD2", "CPI"]
-"DB1"    → ["DB2", "SE1", "SE2"]
-"AD1"    → ["AD2", "SE1", "UI1"]
-"CPI"    → ["SE1"]
-"DB2"    → ["Thesis"]
-"SE1"    → ["SE2"]
-"UI1"    → ["SE2", "UI2"]
-"AD2"    → []
-"SE2"    → ["Thesis"]
-"UI2"    → ["Thesis"]
-"Thesis" → [];
-
-|#E8F5E9| Algorithm |
+note right
+  | <b>moduleMap</b>           | <b>inDegree</b>              | <b>dependents</b>                     |
+  | "Math"   → StudyModule(4)  | "Math"   → 0                 | "Math"   → ["CPI"]                    |
+  | "OO"     → StudyModule(4)  | "OO"     → 0                 | "OO"     → ["DB1","AD1","AD2","CPI"]  |
+  | "DB1"    → StudyModule(4)  | "DB1"    → 1  (OO)           | "DB1"    → ["DB2","SE1","SE2"]        |
+  | "AD1"    → StudyModule(4)  | "AD1"    → 1  (OO)           | "AD1"    → ["AD2","SE1","UI1"]        |
+  | "CPI"    → StudyModule(4)  | "CPI"    → 2  (OO, Math)     | "CPI"    → ["SE1"]                    |
+  | "DB2"    → StudyModule(4)  | "DB2"    → 1  (DB1)          | "DB2"    → ["Thesis"]                 |
+  | "SE1"    → StudyModule(4)  | "SE1"    → 3  (AD1,CPI,DB1)  | "SE1"    → ["SE2"]                    |
+  | "UI1"    → StudyModule(4)  | "UI1"    → 1  (AD1)          | "UI1"    → ["SE2","UI2"]              |
+  | "AD2"    → StudyModule(4)  | "AD2"    → 2  (OO, AD1)      | "AD2"    → []                         |
+  | "SE2"    → StudyModule(4)  | "SE2"    → 3  (DB1,SE1,UI1)  | "SE2"    → ["Thesis"]                 |
+  | "UI2"    → StudyModule(4)  | "UI2"    → 1  (UI1)          | "UI2"    → ["Thesis"]                 |
+  | "Thesis" → StudyModule(12) | "Thesis" → 3  (DB2,SE2,UI2)  | "Thesis" → []                         |
+end note
 :seed ready ← all keys with inDegree = 0
 ready = ["Math", "OO"]
 placed = 0;
