@@ -1,5 +1,5 @@
 @startuml
-title Schedule Calculation - Topological Sort  |  O(V^2 + E)
+title Schedule Calculation — Topological Sort  |  O(V² + E)
 
 skinparam activity {
     BackgroundColor #F9F9F9
@@ -27,38 +27,38 @@ note right
       (vertices in the dependency graph)
   <b>E</b> = total prerequisite relationships
       (edges in the dependency graph)
-  <b>Overall: O(V^2 + E)</b>
+  <b>Overall: O(V² + E)</b>
 end note
 :build moduleMap
 build remainingPrerequisites;
 
 |#FFF8E1| moduleMap (Map<String, StudyModule>) |
-:"Math"   -> StudyModule(ects=4)
-"OO"     -> StudyModule(ects=4)
-"DB1"    -> StudyModule(ects=4)
-"AD1"    -> StudyModule(ects=4)
-"CPI"    -> StudyModule(ects=4)
-"DB2"    -> StudyModule(ects=4)
-"SE1"    -> StudyModule(ects=4)
-"UI1"    -> StudyModule(ects=4)
-"AD2"    -> StudyModule(ects=4)
-"SE2"    -> StudyModule(ects=4)
-"UI2"    -> StudyModule(ects=4)
-"Thesis" -> StudyModule(ects=12);
+:"Math"   → StudyModule(ects=4)
+"OO"     → StudyModule(ects=4)
+"DB1"    → StudyModule(ects=4)
+"AD1"    → StudyModule(ects=4)
+"CPI"    → StudyModule(ects=4)
+"DB2"    → StudyModule(ects=4)
+"SE1"    → StudyModule(ects=4)
+"UI1"    → StudyModule(ects=4)
+"AD2"    → StudyModule(ects=4)
+"SE2"    → StudyModule(ects=4)
+"UI2"    → StudyModule(ects=4)
+"Thesis" → StudyModule(ects=12);
 
 |#E3F2FD| remainingPrerequisites (Map<String, Set<String>>) |
-:"Math"  -> { }
-"OO"    -> { }
-"DB1"   -> { "OO" }
-"AD1"   -> { "OO" }
-"CPI"   -> { "OO", "Math" }
-"DB2"   -> { "DB1" }
-"SE1"   -> { "AD1", "CPI", "DB1" }
-"UI1"   -> { "AD1" }
-"AD2"   -> { "OO", "AD1" }
-"SE2"   -> { "DB1", "SE1", "UI1" }
-"UI2"   -> { "UI1" }
-"Thesis"-> { "DB2", "SE2", "UI2" };
+:"Math"  → { }
+"OO"    → { }
+"DB1"   → { "OO" }
+"AD1"   → { "OO" }
+"CPI"   → { "OO", "Math" }
+"DB2"   → { "DB1" }
+"SE1"   → { "AD1", "CPI", "DB1" }
+"UI1"   → { "AD1" }
+"AD2"   → { "OO", "AD1" }
+"SE2"   → { "DB1", "SE1", "UI1" }
+"UI2"   → { "UI1" }
+"Thesis"→ { "DB2", "SE2", "UI2" };
 
 |#E8F5E9| Algorithm |
 :processed = {}
@@ -66,19 +66,19 @@ semesterNumber = 1;
 
 while (processed.size() < total) is (true)
 
-  :ready <- keys where
+  :ready ← keys where
   prereqSet = {}
-  AND key not in processed;
+  AND key ∉ processed;
   note right
     O(V) per iteration
-    O(V^2) across all iterations
+    O(V²) across all iterations
     V = number of StudyModules
   end note
 
   if (ready is empty?) then (yes)
     :throw CyclicDependencyException
-    ------------------------------
-    e.g. "M1" -> {"M2"}, "M2" -> {"M1"}
+    ──────────────────────────────
+    e.g. "M1"→{"M2"}, "M2"→{"M1"}
     neither set ever empties; <<#FFCDD2>>
     stop
   else (no)
@@ -97,19 +97,19 @@ while (processed.size() < total) is (true)
   endif
 
 |#E3F2FD| remainingPrerequisites (Map<String, Set<String>>) |
-:--- after iteration 1  (ready = Math, OO) ---
-"Math"  -> { }              (done) processed
-"OO"    -> { }              (done) processed
-"DB1"   -> { }              <- unblocked!
-"AD1"   -> { }              <- unblocked!
-"CPI"   -> { }              <- unblocked!
-"DB2"   -> { "DB1" }
-"SE1"   -> { "AD1", "CPI", "DB1" }
-"UI1"   -> { "AD1" }
-"AD2"   -> { "AD1" }        <- partially unblocked
-"SE2"   -> { "DB1", "SE1", "UI1" }
-"UI2"   -> { "UI1" }
-"Thesis"-> { "DB2", "SE2", "UI2" };
+:——— after iteration 1  (ready = Math, OO) ———
+"Math"  → { }              ✓ processed
+"OO"    → { }              ✓ processed
+"DB1"   → { }              ← unblocked!
+"AD1"   → { }              ← unblocked!
+"CPI"   → { }              ← unblocked!
+"DB2"   → { "DB1" }
+"SE1"   → { "AD1", "CPI", "DB1" }
+"UI1"   → { "AD1" }
+"AD2"   → { "AD1" }        ← partially unblocked
+"SE2"   → { "DB1", "SE1", "UI1" }
+"UI2"   → { "UI1" }
+"Thesis"→ { "DB2", "SE2", "UI2" };
 
 |#E8F5E9| Algorithm |
 endwhile (false)
