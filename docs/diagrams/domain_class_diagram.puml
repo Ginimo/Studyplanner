@@ -173,7 +173,7 @@ package "Repository" <<Repository>> {
 ' Data Associations
 Schedule "1" --> "*" Semester : contains
 Semester "1" --> "*" StudyModule : consists of
-DegreeProgram "1" --> "0..*" StudyModule : includes
+StudyModule "*" --> "1" DegreeProgram : belongs to
 StudyModule "*" --> "*" StudyModule : has prerequisites
 
 ' Schedule is computed from a DegreeProgram by ScheduleService; DegreeProgram does not hold a Schedule reference

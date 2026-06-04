@@ -33,6 +33,7 @@ public class DegreeProgramController {
         this.studyModuleService = studyModuleService;
     }
 
+    /** Renders the list of all degree programs. */
     @GetMapping
     public String listDegreePrograms(final Model model) {
         model.addAttribute("degreePrograms", degreeProgramService.findAll().stream()
@@ -41,12 +42,17 @@ public class DegreeProgramController {
         return "degreeprograms/list";
     }
 
+    /** Renders the blank creation form for a new degree program. */
     @GetMapping("/new")
     public String showCreateForm(final Model model) {
         model.addAttribute("degreeProgram", new DegreeProgramForm());
         return showCreateFormView(model);
     }
 
+    /**
+     * Processes the creation form. On validation errors the form is re-displayed;
+     * on success the program is saved and the user is redirected to the program list.
+     */
     @PostMapping("/new")
     public String createDegreeProgram(
             @Valid @ModelAttribute("degreeProgram") final DegreeProgramForm form,
@@ -71,6 +77,10 @@ public class DegreeProgramController {
         return "redirect:/degree-programs";
     }
 
+    /**
+     * Renders the detail view for a degree program, including its study modules and
+     * the current filter/sort state passed as query parameters.
+     */
     @GetMapping("/{id}")
     public String showDetails(
             @PathVariable final String id,
@@ -105,6 +115,7 @@ public class DegreeProgramController {
         return "degreeprograms/details";
     }
 
+    /** Loads the existing degree program into the edit form. */
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable final String id, final Model model) {
         DegreeProgram program = degreeProgramService.findById(id)
@@ -119,6 +130,10 @@ public class DegreeProgramController {
         return showEditFormView(id, model);
     }
 
+    /**
+     * Processes the edit form. On validation errors the form is re-displayed;
+     * on success the program is updated and the user is redirected to its detail view.
+     */
     @PostMapping("/{id}/edit")
     public String updateDegreeProgram(
             @PathVariable final String id,
@@ -143,6 +158,11 @@ public class DegreeProgramController {
         return "redirect:/degree-programs/" + id;
     }
 
+    /**
+     * Deletes the degree program together with all of its study modules, then redirects to
+     * the program list. Study modules are deleted first so that the service layer can clean
+     * up cross-module prerequisite references before the program itself is removed.
+     */
     @PostMapping("/{id}/delete")
     public String deleteDegreeProgram(@PathVariable final String id,
                                       final RedirectAttributes redirectAttributes) {
@@ -158,18 +178,21 @@ public class DegreeProgramController {
         return "redirect:/degree-programs";
     }
 
+    /** Populates the model with metadata for the create form and returns the form view name. */
     private String showCreateFormView(final Model model) {
         model.addAttribute("formAction", "/degree-programs/new");
         model.addAttribute("pageTitle", "New Degree Program");
         return "degreeprograms/form";
     }
 
+    /** Populates the model with metadata for the edit form and returns the form view name. */
     private String showEditFormView(final String id, final Model model) {
         model.addAttribute("formAction", "/degree-programs/" + id + "/edit");
         model.addAttribute("pageTitle", "Edit Degree Program");
         return "degreeprograms/form";
     }
 
+    /** Converts a {@link DegreeProgram} domain object to its view model. */
     private DegreeProgramView toView(DegreeProgram program) {
         return new DegreeProgramView(program.getId(), program.getName(), program.getDescription(), program.getMaxDurationInSemesters());
     }

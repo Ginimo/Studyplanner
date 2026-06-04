@@ -46,7 +46,8 @@ partition "Update Degree Program" {
 partition "Delete Degree Program" {
     (*) --> "POST /degree-programs/{id}/delete"
     "POST /degree-programs/{id}/delete" --> "Require Program"
-    "Require Program" --> "Delete Program"
+    "Require Program" --> "Delete all Study Modules\n(cleans up prerequisite references)"
+    "Delete all Study Modules\n(cleans up prerequisite references)" --> "Delete Program"
     "Delete Program" --> "Redirect to List"
 }
 

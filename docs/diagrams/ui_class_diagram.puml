@@ -1,6 +1,27 @@
 @startuml
 
-package "Forms" {
+skinparam packageStyle Rectangle
+skinparam linetype ortho
+skinparam roundcorner 6
+
+skinparam package {
+    BackgroundColor<<Forms>>       #FFF3E0
+    BackgroundColor<<Controllers>> #F3E5F5
+    BackgroundColor<<Views>>       #E3F2FD
+    BorderColor                    #9E9E9E
+    FontStyle                      Bold
+}
+
+skinparam class {
+    BackgroundColor #FAFAFA
+    BorderColor     #9E9E9E
+}
+
+skinparam arrow {
+    Color           #555555
+}
+
+package "Forms" <<Forms>> {
     class DegreeProgramForm {
         - name: String
         - description: String
@@ -41,7 +62,7 @@ package "Forms" {
     }
 }
 
-package "Controllers" {
+package "Controllers" <<Controllers>> {
     class WelcomeController {
         - degreeProgramService: DegreeProgramService
         + WelcomeController(degreeProgramService: DegreeProgramService)
@@ -78,6 +99,7 @@ package "Controllers" {
         - showEditFormView(degreeProgramId: String, studyModuleKey: String, form: StudyModuleForm, model: Model): String
         - addAvailableStudyModulesForPrerequisiteSelection(degreeProgramId: String, excludeStudyModuleKey: String, model: Model): void
         - requireProgram(id: String): DegreeProgram
+        - toView(program: DegreeProgram): DegreeProgramView
         - toView(module: StudyModule): StudyModuleView
     }
 
@@ -87,12 +109,15 @@ package "Controllers" {
         + ScheduleController(degreeProgramService: DegreeProgramService, scheduleService: ScheduleService)
         + showSchedule(degreeProgramId: String, model: Model): String
         + calculateSchedule(degreeProgramId: String, redirectAttributes: RedirectAttributes): String
+        - resolveSchedule(program: DegreeProgram, model: Model): Schedule
+        - addScheduleToModel(schedule: Schedule, model: Model): void
         - requireProgram(degreeProgramId: String): DegreeProgram
         - toView(program: DegreeProgram): DegreeProgramView
+        - toView(semester: Semester): SemesterView
     }
 }
 
-package "Views" {
+package "Views" <<Views>> {
     class DegreeProgramView {
         - id: String
         - name: String
@@ -122,8 +147,10 @@ package "Views" {
         + getStudyModuleKeys(): String
     }
 
-    record StudyModuleKey {
-        + key: String
+    class StudyModuleKey {
+        - key: String
+        + StudyModuleKey(key: String)
+        + getKey(): String
         + toString(): String
     }
 

@@ -23,24 +23,25 @@ public class DegreeProgramView {
 
     public int getMaxDurationInSemesters() { return maxDurationInSemesters; }
 
-    // added for testing purposes
+    /**
+     * Two views are equal if and only if they have the same {@code id},
+     * consistent with {@link ch.ost.mas_se.oop.studyplanner.model.DegreeProgram#equals}.
+     */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object other) {
+        if (this == other) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (other == null || getClass() != other.getClass()) {
             return false;
         }
-        DegreeProgramView that = (DegreeProgramView) o;
-        return maxDurationInSemesters == that.maxDurationInSemesters &&
-                java.util.Objects.equals(id, that.id) &&
-                java.util.Objects.equals(name, that.name) &&
-                java.util.Objects.equals(description, that.description);
+        DegreeProgramView that = (DegreeProgramView) other;
+        return java.util.Objects.equals(id, that.id);
     }
 
+    /** Consistent with {@link #equals}: based solely on {@code id}. */
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(id, name, description, maxDurationInSemesters);
+        return java.util.Objects.hash(id);
     }
 }

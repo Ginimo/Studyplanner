@@ -14,6 +14,16 @@ public class StudyModule {
     private final LocalDate offeredFrom;
     private final LocalDate offeredTo;
 
+    /**
+     * @param studyModuleKey   unique key within the degree program; must not be null
+     * @param degreeProgramId  ID of the owning degree program; must not be null
+     * @param name             human-readable module name; must not be null
+     * @param description      optional description; may be null
+     * @param ects             ECTS credit points for this module
+     * @param prerequisiteKeys keys of modules that must be completed first; null is treated as empty
+     * @param offeredFrom      date from which the module is offered; may be null
+     * @param offeredTo        date until which the module is offered; null means open-ended
+     */
     public StudyModule(String studyModuleKey, String degreeProgramId, String name, String description, int ects, List<String> prerequisiteKeys, LocalDate offeredFrom, LocalDate offeredTo) {
         this.studyModuleKey = Objects.requireNonNull(studyModuleKey);
         this.degreeProgramId = Objects.requireNonNull(degreeProgramId);
@@ -57,21 +67,25 @@ public class StudyModule {
         return offeredTo;
     }
 
-    // if a class has a meaningful business identity (an ID field that uniquely identifies it),
-    // override equals/hashCode based on that field
+    /**
+     * Two study modules are equal if and only if they share the same {@code degreeProgramId}
+     * and {@code studyModuleKey} — the composite business key that uniquely identifies a module
+     * within a degree program.
+     */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object other) {
+        if (this == other) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (other == null || getClass() != other.getClass()) {
             return false;
         }
-        StudyModule that = (StudyModule) o;
+        StudyModule that = (StudyModule) other;
         return Objects.equals(studyModuleKey, that.studyModuleKey)
                 && Objects.equals(degreeProgramId, that.degreeProgramId);
     }
 
+    /** Consistent with {@link #equals}: based solely on {@code studyModuleKey} and {@code degreeProgramId}. */
     @Override
     public int hashCode() {
         return Objects.hash(studyModuleKey, degreeProgramId);

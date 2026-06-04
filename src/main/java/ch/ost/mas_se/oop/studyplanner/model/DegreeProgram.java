@@ -8,6 +8,12 @@ public class DegreeProgram {
     private final String description;
     private final int maxDurationInSemesters;
 
+    /**
+     * @param id                     unique identifier; must not be null
+     * @param name                   human-readable program name; must not be null
+     * @param description            optional description; may be null
+     * @param maxDurationInSemesters maximum allowed study duration in semesters
+     */
     public DegreeProgram(String id, String name, String description, int maxDurationInSemesters) {
         this.id = Objects.requireNonNull(id);
         this.name = Objects.requireNonNull(name);
@@ -31,20 +37,24 @@ public class DegreeProgram {
         return maxDurationInSemesters;
     }
 
-    // if a class has a meaningful business identity (an ID field that uniquely identifies it),
-    // override equals/hashCode based on that field
+    /**
+     * Two degree programs are equal if and only if they have the same {@code id}.
+     * Equality is based on the business key rather than all fields, so that a fetched
+     * and an in-memory instance of the same program compare as equal.
+     */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object other) {
+        if (this == other) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (other == null || getClass() != other.getClass()) {
             return false;
         }
-        DegreeProgram that = (DegreeProgram) o;
+        DegreeProgram that = (DegreeProgram) other;
         return Objects.equals(id, that.id);
     }
 
+    /** Consistent with {@link #equals}: based solely on {@code id}. */
     @Override
     public int hashCode() {
         return Objects.hash(id);

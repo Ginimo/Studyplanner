@@ -1,5 +1,5 @@
 @startuml
-title Schedule Calculation — Topological Sort  |  O(V² + E)
+title Schedule Calculation — Kahn's Layered BFS  |  O(V + E)
 
 skinparam activity {
     BackgroundColor #F9F9F9
@@ -27,10 +27,11 @@ note right
       (vertices in the dependency graph)
   <b>E</b> = total prerequisite relationships
       (edges in the dependency graph)
-  <b>Overall: O(V² + E)</b>
+  <b>Overall: O(V + E)</b>
 end note
 :build moduleMap
-build remainingPrerequisites;
+build inDegree
+build dependents;
 
 |#FFF8E1| moduleMap (Map<String, StudyModule>) |
 :"Math"   → StudyModule(ects=4)
@@ -46,75 +47,93 @@ build remainingPrerequisites;
 "UI2"    → StudyModule(ects=4)
 "Thesis" → StudyModule(ects=12);
 
-|#E3F2FD| remainingPrerequisites (Map<String, Set<String>>) |
-:"Math"  → { }
-"OO"    → { }
-"DB1"   → { "OO" }
-"AD1"   → { "OO" }
-"CPI"   → { "OO", "Math" }
-"DB2"   → { "DB1" }
-"SE1"   → { "AD1", "CPI", "DB1" }
-"UI1"   → { "AD1" }
-"AD2"   → { "OO", "AD1" }
-"SE2"   → { "DB1", "SE1", "UI1" }
-"UI2"   → { "UI1" }
-"Thesis"→ { "DB2", "SE2", "UI2" };
+|#E3F2FD| inDegree (Map<String, Integer>) |
+:"Math"   → 0
+"OO"     → 0
+"DB1"    → 1   (OO)
+"AD1"    → 1   (OO)
+"CPI"    → 2   (OO, Math)
+"DB2"    → 1   (DB1)
+"SE1"    → 3   (AD1, CPI, DB1)
+"UI1"    → 1   (AD1)
+"AD2"    → 2   (OO, AD1)
+"SE2"    → 3   (DB1, SE1, UI1)
+"UI2"    → 1   (UI1)
+"Thesis" → 3   (DB2, SE2, UI2);
+
+|#EDE7F6| dependents (Map<String, List<String>>) |
+:"Math"   → ["CPI"]
+"OO"     → ["DB1", "AD1", "AD2", "CPI"]
+"DB1"    → ["DB2", "SE1", "SE2"]
+"AD1"    → ["AD2", "SE1", "UI1"]
+"CPI"    → ["SE1"]
+"DB2"    → ["Thesis"]
+"SE1"    → ["SE2"]
+"UI1"    → ["SE2", "UI2"]
+"AD2"    → []
+"SE2"    → ["Thesis"]
+"UI2"    → ["Thesis"]
+"Thesis" → [];
 
 |#E8F5E9| Algorithm |
-:processed = {}
-semesterNumber = 1;
+:seed ready ← all keys with inDegree = 0
+ready = ["Math", "OO"]
+placed = 0;
 
-while (processed.size() < total) is (true)
+while (!ready.isEmpty()) is (true)
 
-  :ready ← keys where
-  prereqSet = {}
-  AND key ∉ processed;
+  :layer = List.copyOf(ready)
+  ready.clear();
   note right
-    O(V) per iteration
-    O(V²) across all iterations
-    V = number of StudyModules
+    Snapshot the current layer before processing
+    so that newly unblocked modules are queued
+    for the <b>next</b> semester, not the current one.
   end note
 
-  if (ready is empty?) then (yes)
-    :throw CyclicDependencyException
-    ──────────────────────────────
-    e.g. "M1"→{"M2"}, "M2"→{"M1"}
-    neither set ever empties; <<#FFCDD2>>
-    stop
-  else (no)
-    :new Semester(semesterNumber++)
-    add moduleMap[key] for each in ready
-    schedule.addSemester(semester)
-    processed.addAll(ready);
+  :new Semester(semesterNumber)
+  for each key in layer:
+    semester.addStudyModule(moduleMap[key])
+    placed++
+    for each dep in dependents[key]:
+      inDegree[dep]--
+      if inDegree[dep] == 0 → ready.add(dep)
+  schedule.addSemester(semester);
+  note right
+    O(V + E) total across all iterations —
+    each module is dequeued exactly once (V),
+    each edge is traversed exactly once (E).
+  end note
 
-    :remove ready keys from
-    every set in the map;
-    note right
-      O(E) total across all iterations
-      each edge is removed exactly once
-      E = total prerequisite edges
-    end note
-  endif
-
-|#E3F2FD| remainingPrerequisites (Map<String, Set<String>>) |
-:——— after iteration 1  (ready = Math, OO) ———
-"Math"  → { }              ✓ processed
-"OO"    → { }              ✓ processed
-"DB1"   → { }              ← unblocked!
-"AD1"   → { }              ← unblocked!
-"CPI"   → { }              ← unblocked!
-"DB2"   → { "DB1" }
-"SE1"   → { "AD1", "CPI", "DB1" }
-"UI1"   → { "AD1" }
-"AD2"   → { "AD1" }        ← partially unblocked
-"SE2"   → { "DB1", "SE1", "UI1" }
-"UI2"   → { "UI1" }
-"Thesis"→ { "DB2", "SE2", "UI2" };
+|#E3F2FD| inDegree (Map<String, Integer>) |
+:——— after iteration 1  (layer = [Math, OO]) ———
+"Math"   → 0   ✓ placed in Semester 1
+"OO"     → 0   ✓ placed in Semester 1
+"DB1"    → 0   ← unblocked! (OO done)
+"AD1"    → 0   ← unblocked! (OO done)
+"CPI"    → 0   ← unblocked! (OO + Math done)
+"DB2"    → 1   (DB1)
+"SE1"    → 3   (AD1, CPI, DB1)
+"UI1"    → 1   (AD1)
+"AD2"    → 1   (AD1)
+"SE2"    → 3   (DB1, SE1, UI1)
+"UI2"    → 1   (UI1)
+"Thesis" → 3   (DB2, SE2, UI2)
+ready = ["DB1", "AD1", "CPI"];
 
 |#E8F5E9| Algorithm |
 endwhile (false)
 
-:return schedule;
-stop
+if (placed < total?) then (yes)
+  :throw CyclicDependencyException
+  ──────────────────────────────
+  modules still with inDegree > 0
+  are in or blocked by a cycle
+  e.g. "M1"→inDegree=1, "M2"→inDegree=1
+       "M1" needs "M2", "M2" needs "M1"; <<#FFCDD2>>
+  stop
+else (no)
+  :return schedule;
+  stop
+endif
 
 @enduml

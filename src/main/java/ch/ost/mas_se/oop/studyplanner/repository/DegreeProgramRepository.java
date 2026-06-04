@@ -7,11 +7,24 @@ import java.util.Optional;
 
 public interface DegreeProgramRepository {
 
+    /**
+     * Persists the given degree program, creating it if new or replacing the existing one
+     * with the same ID.
+     */
     void save(DegreeProgram program);
 
+    /**
+     * Returns the degree program with the given ID, or {@link java.util.Optional#empty()} if none exists.
+     */
     Optional<DegreeProgram> findById(String id);
 
+    /**
+     * Returns all stored degree programs in insertion order.
+     */
     List<DegreeProgram> findAll();
 
+    /**
+     * Removes the degree program with the given ID. No-op if it does not exist.
+     */
     void delete(String id);
 }
