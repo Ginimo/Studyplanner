@@ -12,8 +12,6 @@ import java.util.Optional;
 @Repository
 public class InMemoryDegreeProgramRepository implements DegreeProgramRepository {
 
-    // LinkedHashMap: O(1) get/put/remove with insertion-order iteration,
-    // so findAll() returns programs in the order they were created.
     private final Map<String, DegreeProgram> store = new LinkedHashMap<>();
 
     @Override

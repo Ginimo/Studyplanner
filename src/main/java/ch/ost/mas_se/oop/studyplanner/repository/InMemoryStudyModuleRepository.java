@@ -13,9 +13,6 @@ import java.util.stream.Collectors;
 @Repository
 public class InMemoryStudyModuleRepository implements StudyModuleRepository {
 
-    // LinkedHashMap: O(1) get/put/remove; insertion order preserved for stable list display.
-    // Composite key "degreeProgramId#moduleKey" lets one flat map serve all degree programs
-    // without nested maps, while still guaranteeing uniqueness per (program, module) pair.
     private final Map<String, StudyModule> store = new LinkedHashMap<>();
 
     private String storeKey(String degreeProgramId, String moduleKey) {
@@ -32,7 +29,6 @@ public class InMemoryStudyModuleRepository implements StudyModuleRepository {
         return Optional.ofNullable(store.get(storeKey(degreeProgramId, key)));
     }
 
-    // O(n): n = total modules across all degree programs
     @Override
     public List<StudyModule> findAllByDegreeProgramId(String degreeProgramId) {
         return store.values().stream()
