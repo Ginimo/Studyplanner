@@ -4,10 +4,16 @@ import java.time.LocalDateTime;
 public class Schedule {
     private LocalDateTime calculatedAt;
     private int totalSemesters;
+    DegreeProgram degreeProgram;
+    //Semester semester;
 
-    public Schedule (LocalDateTime calculatedAt, int totalSemesters) {
+    public Schedule (
+                LocalDateTime calculatedAt,
+                int totalSemesters,
+                DegreeProgram degreeProgram) {
         setTotalSemesters(totalSemesters);
         setCalculatedAt(calculatedAt);
+        this.degreeProgram = degreeProgram;
     }
 
     // Setter
@@ -21,10 +27,11 @@ public class Schedule {
 
     // Printer
     public void printSchedule(){
-        IO.println("Study Plan configured as: ");
+        IO.println("Study Plan / Schedule configured as: ");
         IO.println("*******************" );
         IO.println("calculatedAt: " + calculatedAt);
         IO.println("totalSemesters: " + totalSemesters);
+        IO.println("Degree Program: " + degreeProgram.getId());
         IO.println("*******************");
     }
 
