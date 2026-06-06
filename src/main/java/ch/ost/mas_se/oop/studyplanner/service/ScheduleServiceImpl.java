@@ -8,7 +8,6 @@ import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
@@ -29,24 +28,29 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public Schedule calculate(DegreeProgram program) {
         List<StudyModule> allModules = studyModuleService.findAllByDegreeProgramId(program.getId());
+
+        // create 3 auxiliary data structures
         Map<String, StudyModule> moduleMap = buildModuleMap(allModules);
         Map<String, Integer> inDegree = buildInDegree(allModules, moduleMap.keySet());
         Map<String, List<String>> dependents = buildDependents(allModules, moduleMap.keySet());
 
         Queue<String> ready = seedReady(inDegree);
         Schedule schedule = new Schedule();
-        int placed = 0;
+        int placed = 0; // tracks how many modules were placed; less than total at the end means a cycle exists
 
         for (int semesterNumber = 1; !ready.isEmpty(); semesterNumber++) {
             // snapshot the layer so modules unblocked during this iteration land in the next semester
+            // 1 layer = 1 semester
             List<String> layer = List.copyOf(ready);
             ready.clear();
             Semester semester = new Semester(semesterNumber);
             for (String key : layer) {
                 semester.addStudyModule(moduleMap.get(key));
                 placed++;
-                for (String dep : dependents.getOrDefault(key, List.of())) {
-                    int remaining = inDegree.merge(dep, -1, Integer::sum); // decrement in-degree and return new value
+                for (String dep : dependents.get(key)) {
+                    // one more prerequisite of dep is now satisfied; if none remain, dep is ready
+                    int remaining = inDegree.get(dep) - 1;
+                    inDegree.put(dep, remaining);
                     if (remaining == 0) {
                         ready.add(dep);
                     }
@@ -79,8 +83,13 @@ public class ScheduleServiceImpl implements ScheduleService {
     private Map<String, Integer> buildInDegree(List<StudyModule> modules, Set<String> allKeys) {
         Map<String, Integer> inDegree = new LinkedHashMap<>();
         for (StudyModule m : modules) {
-            long count = m.getPrerequisiteKeys().stream().filter(allKeys::contains).count();
-            inDegree.put(m.getStudyModuleKey(), (int) count);
+            int count = 0;
+            for (String prereq : m.getPrerequisiteKeys()) {
+                if (allKeys.contains(prereq)) {
+                    count++;
+                }
+            }
+            inDegree.put(m.getStudyModuleKey(), count);
         }
         return inDegree;
     }
@@ -91,11 +100,13 @@ public class ScheduleServiceImpl implements ScheduleService {
      */
     private Map<String, List<String>> buildDependents(List<StudyModule> modules, Set<String> allKeys) {
         Map<String, List<String>> dependents = new HashMap<>();
+        for (String key : allKeys) {
+            dependents.put(key, new ArrayList<>()); // pre-populate so every key has a non-null list
+        }
         for (StudyModule m : modules) {
             for (String prereq : m.getPrerequisiteKeys()) {
                 if (allKeys.contains(prereq)) {
-                    dependents.computeIfAbsent(prereq, k -> new ArrayList<>())
-                              .add(m.getStudyModuleKey());
+                    dependents.get(prereq).add(m.getStudyModuleKey());
                 }
             }
         }
@@ -115,10 +126,13 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     /** Returns the sorted keys of all modules still blocked after the BFS drains (cycle members). */
     private List<String> collectCycleKeys(Map<String, Integer> inDegree) {
-        return inDegree.entrySet().stream()
-                .filter(e -> e.getValue() > 0)
-                .map(Map.Entry::getKey)
-                .sorted()
-                .collect(Collectors.toList());
+        List<String> cycleKeys = new ArrayList<>();
+        for (Map.Entry<String, Integer> e : inDegree.entrySet()) {
+            if (e.getValue() > 0) {
+                cycleKeys.add(e.getKey());
+            }
+        }
+        Collections.sort(cycleKeys);
+        return cycleKeys;
     }
 }
