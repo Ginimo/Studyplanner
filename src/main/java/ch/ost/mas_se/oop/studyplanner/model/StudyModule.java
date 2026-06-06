@@ -63,4 +63,20 @@ public class StudyModule {
         IO.println("Degree Program: " + degreeProgram.getId());
         IO.println("*******************");
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        // Ein Study Module ist gleich, wenn es dasselbe Objekt ist.
+        if (this == obj) return true;                    // selbes Objekt
+        if (obj == null) return false;                   // null check
+        if (getClass() != obj.getClass()) return false;  // selber Typ
+
+        StudyModule other = (StudyModule) obj;
+        return studyModuleKey.equals(other.studyModuleKey);
+    }
+
+    @Override
+    public int hashCode() {
+        return studyModuleKey.hashCode();
+    }
 }

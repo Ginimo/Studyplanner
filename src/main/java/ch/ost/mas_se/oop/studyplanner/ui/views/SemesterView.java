@@ -1,16 +1,18 @@
 package ch.ost.mas_se.oop.studyplanner.ui.views;
 
+import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
+
 import java.util.List;
 
 public class SemesterView {
 
     private final int semesterNumber;
-    private final List<StudyModuleView> studyModules;
+    private final List<StudyModule> studyModules;
     private final int totalEcts;
-    private final String studyModuleKeys;
+    private final List<String> studyModuleKeys;
 
-    public SemesterView(final int semesterNumber, final List<StudyModuleView> studyModules,
-                        final int totalEcts, final String studyModuleKeys) {
+    public SemesterView(final int semesterNumber, final List<StudyModule> studyModules,
+                        final int totalEcts, final List<String> studyModuleKeys) {
         this.semesterNumber = semesterNumber;
         this.studyModules = studyModules;
         this.totalEcts = totalEcts;
@@ -18,7 +20,7 @@ public class SemesterView {
     }
 
     public int getSemesterNumber() { return semesterNumber; }
-    public List<StudyModuleView> getStudyModules() { return studyModules; }
+    public List<StudyModule> getStudyModules() { return studyModules; }
     public int getTotalEcts() { return totalEcts; }
-    public String getStudyModuleKeys() { return studyModuleKeys; }
+    public List<String> getStudyModuleKeys() { return studyModuleKeys; }
 }

@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class DegreeProgramServiceImpl implements DegreeProgramService {
@@ -46,7 +47,7 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
     @Override
     public void create(DegreeProgramForm form) {
                 var program = new DegreeProgram(
-                "sample-id-1236", //ToDo random generator
+                UUID.randomUUID().toString(), // ← zufällige eindeutige ID
                 form.getName(),
                 form.getDescription(),
                 form.getMaxDurationInSemesters()
@@ -88,6 +89,9 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
         }
         return Optional.of(toView(program.get()));
     }
+
+
+
 }
 
 

@@ -19,6 +19,8 @@ public class StudyplannerApplication {
                 String url = "http://localhost:8080";
                 String osName = System.getProperty("os.name").toLowerCase();
 
+
+
                 if (osName.contains("win")) {
                     new ProcessBuilder("cmd", "/c", "start", url).start();
                 } else if (osName.contains("mac")) {

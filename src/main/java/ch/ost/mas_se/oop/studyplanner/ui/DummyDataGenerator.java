@@ -106,13 +106,6 @@ public class DummyDataGenerator {
     private static final ScheduleView SCHEDULE_VIEW = new ScheduleView(
             LocalDateTime.of(2024, 10, 1, 10, 0), 5);
 
-    private static final List<SemesterView> SEMESTER_VIEWS = List.of(
-            new SemesterView(1, List.of(MODULE_MATH, MODULE_OO), 8, "Math, OO"),
-            new SemesterView(2, List.of(MODULE_DB1, MODULE_AD1, MODULE_CPI), 12, "DB1, AD1, CPI"),
-            new SemesterView(3, List.of(MODULE_DB2, MODULE_SE1, MODULE_UI1), 12, "DB2, SE1, UI1"),
-            new SemesterView(4, List.of(MODULE_SE2, MODULE_UI2, MODULE_AD2), 8, "SE2, UI2, AD2"),
-            new SemesterView(5, List.of(MODULE_THESIS), 12, "Thesis")
-    );
 
     public List<DegreeProgramView> getListOfDegreePrograms() {
         return List.of(
@@ -164,10 +157,4 @@ public class DummyDataGenerator {
         return Optional.empty();
     }
 
-    public List<SemesterView> getSemesterViewForProgram(final String id) {
-        if (PROGRAM_ID.equals(id)) {
-            return SEMESTER_VIEWS;
-        }
-        return List.of();
-    }
 }

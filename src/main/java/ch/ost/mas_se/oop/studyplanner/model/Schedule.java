@@ -1,18 +1,18 @@
 package ch.ost.mas_se.oop.studyplanner.model;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Schedule {
     private LocalDateTime calculatedAt;
     private int totalSemesters;
     DegreeProgram degreeProgram;
-    //Semester semester;
+    List<Semester> semesters = new ArrayList<>();;
 
     public Schedule (
-                LocalDateTime calculatedAt,
                 int totalSemesters,
                 DegreeProgram degreeProgram) {
         setTotalSemesters(totalSemesters);
-        setCalculatedAt(calculatedAt);
         this.degreeProgram = degreeProgram;
     }
 
@@ -23,7 +23,12 @@ public class Schedule {
     // Getter
     public int getTotalSemesters () {return totalSemesters;}
     public LocalDateTime getCalculatedAt () {return calculatedAt;}
+    public String getDegreeProgramID(){return degreeProgram.getId();}
+    public List<Semester> getSemesters() { return semesters; }
 
+    // Methoden
+    public void addSemester(Semester semester) {
+        semesters.add(semester); }
 
     // Printer
     public void printSchedule(){
@@ -32,6 +37,11 @@ public class Schedule {
         IO.println("calculatedAt: " + calculatedAt);
         IO.println("totalSemesters: " + totalSemesters);
         IO.println("Degree Program: " + degreeProgram.getId());
+        IO.println("Planned Semesters in this Study Plan: ");
+        IO.println("*******************");
+        for (Semester semester : semesters){
+            semester.printSemester();;
+        }
         IO.println("*******************");
     }
 

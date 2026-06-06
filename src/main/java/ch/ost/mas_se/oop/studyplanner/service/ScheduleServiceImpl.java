@@ -3,16 +3,16 @@ package ch.ost.mas_se.oop.studyplanner.service;
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.model.Schedule;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
-import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 
 import ch.ost.mas_se.oop.studyplanner.model.Semester;
-import ch.ost.mas_se.oop.studyplanner.ui.forms.StudyModuleForm;
+import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
+import ch.ost.mas_se.oop.studyplanner.ui.views.ScheduleView;
+import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
+import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleView;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 
 @Service
@@ -26,47 +26,103 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     private DegreeProgramService degreeProgramService;
     private StudyModuleService studyModuleService;
+    private List<Schedule> schedules = new ArrayList<>();
 
-    private List<StudyModule> sortByPrerequisitesSemester1(List<StudyModule> modules){
-
-        List<StudyModule> modules_sorted = new ArrayList<>();
-
-        for (StudyModule entry : modules) {
-            if (entry.hasPrerequisites()== false) {
-                modules_sorted.add(entry);
-            }
+    private int sumEcts(List<StudyModule> modules_this_semester) {
+        int total_ects = 0;
+        for (StudyModule module : modules_this_semester){
+            total_ects += module.getEcts();
         }
-        return modules_sorted;
+        return total_ects;
     }
-
 
     public Schedule calculate(String degreeProgramId){
 
-        // 0. Create a Schedule with the associated Degree Program
+        // 1. Schedule mit Degree Program kombinieren
         DegreeProgram associated_program = degreeProgramService.findById(degreeProgramId)
                 .orElseThrow(() -> new RuntimeException("DegreeProgram not found: " + degreeProgramId));
-        var schedule = new Schedule(LocalDate.of(2026, 6, 1).atStartOfDay(), 6, associated_program);
+        associated_program.printDegreeProgram();
 
-        // 1. Find all Modules from the Program
-        List<StudyModule> assigned_modules = studyModuleService.findAll(degreeProgramId);
+        // 2.Schedule Gerüst erstellen
+        var schedule = new Schedule(6, associated_program); // per Default 6 Semester
+        int total_semesters = schedule.getTotalSemesters();
 
-        //2. Find all Modules without Prerequisites
-        List<StudyModule>  modules_semester_1 =  sortByPrerequisitesSemester1(assigned_modules);
-        for (StudyModule module: modules_semester_1){
-            module.printStudyModule();
+        // 3. Alle Modules from Degree Program holen
+        List<StudyModule> all_modules = studyModuleService.findAll(degreeProgramId);
+
+        // 4. Iteriere durch alle Module: Solange es noch Module hat und wir noch nicht am Ende aller Semester sind
+        int semester_counter = 1;
+        List<StudyModule> scheduledModules = new ArrayList<>();
+
+        while (semester_counter <= total_semesters && !all_modules.isEmpty()) {
+            List<StudyModule> modules_this_semester = new ArrayList<>();
+            List<String> modules_this_semester_keys = new ArrayList<>();
+
+            for (StudyModule module : all_modules){ // durch alle vorhanden Module gehen
+                List<String> PrereqsOfModule = new ArrayList<String>(module.getPrerequisiteKeys()); // Prerequisites für das Modul holen
+
+                for (StudyModule scheduledModule : scheduledModules) { //  durch alle geplanten Module gehen
+                    String scheduledKey = scheduledModule.getStudyModuleKey();
+                    if (PrereqsOfModule.contains(scheduledKey)) {
+                        PrereqsOfModule.remove(scheduledKey); // Lösche jeden Prereq aus der Liste des jeweilgen Moduls, der bereits eingeplant ist
+                    }
+                }
+
+                if (PrereqsOfModule.isEmpty()) {
+                    modules_this_semester.add(module); //Wenn jetzt nur noch Module übrig sind, wo es keine mehr Prerequesites hat, können wir sie in diesem Semester hinzufügen
+                    modules_this_semester_keys.add(module.getStudyModuleKey());
+                }
+            }
+
+            // 5. Semester erstellen und Semester zum Scheduler hinzufügen
+            int totalEcts = sumEcts(modules_this_semester);
+            var semester = new Semester(semester_counter, totalEcts, modules_this_semester, modules_this_semester_keys, schedule);
+            schedule.addSemester(semester);
+
+            // 6. Liste: Module des Semesters (modules_this_semester) zu Scheduled Modules hinzufügen
+            scheduledModules.addAll(modules_this_semester);
+
+            // 7. Liste: Aller vorhanden Module kürzen, mit denen die eingeplant wurden
+            all_modules.removeAll(modules_this_semester);
+
+            semester_counter++;
+        }
+        // 8. Schedule Timestamp setzen nachdem alles berechnet
+        schedule.setCalculatedAt(LocalDateTime.now());
+        schedule.printSchedule();
+
+        // 9. Alten Schedule für dieses Programm entfernen falls vorhanden
+        schedules.removeIf(s -> degreeProgramId.equals(s.getDegreeProgramID()));
+        schedules.add(schedule); // neuen Schedule hinzufügen
+        return schedule;
         }
 
-        //3. Save them to the Semester 1
+    public Optional<Schedule> findById(String degreeProgramId){
+        for (Schedule entry : schedules) {
+            if (degreeProgramId.equals(entry.getDegreeProgramID())) {
+                return Optional.of(entry);
+            }
+        }
+        return Optional.empty();
 
-        //4. Delete modules from Semester 1
-
-        //5. Go further with the rest semesters
-
-
-
-       return schedule;
     }
-    //List<StudyModule> sortByPrerequisites(List<StudyModule> modules);
 
+    // Methoden für Views
+    private ScheduleView toView(Schedule schedule) {
+        return new ScheduleView(
+            schedule.getCalculatedAt(),
+            schedule.getTotalSemesters()
+        );
+    }
 
-}
+    @Override
+    public Optional<ScheduleView> findViewByID(String degreeProgramId) {
+        Optional<Schedule> schedule = findById(degreeProgramId);
+        if (schedule.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(toView(schedule.get()));
+    }
+
+    }
+
