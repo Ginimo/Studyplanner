@@ -56,16 +56,7 @@ public class StudyModuleController {
             return showCreateFormView(degreeProgramId, form, model);
         }
 
-        StudyModule module = new StudyModule(
-                form.getStudyModuleKey(),
-                degreeProgramId,
-                form.getName(),
-                form.getDescription(),
-                form.getEcts(),
-                form.getPrerequisiteKeys(),
-                form.getOfferedFrom(),
-                form.getOfferedTo()
-        );
+        StudyModule module = toModule(form.getStudyModuleKey(), degreeProgramId, form);
         studyModuleService.create(module);
 
         redirectAttributes.addFlashAttribute("successMessage",
@@ -81,8 +72,7 @@ public class StudyModuleController {
     public String showDetails(@PathVariable final String degreeProgramId,
                               @PathVariable final String studyModuleKey,
                               final Model model) {
-        StudyModule module = studyModuleService.findByKey(degreeProgramId, studyModuleKey)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Study module not found: " + studyModuleKey));
+        StudyModule module = requireStudyModule(degreeProgramId, studyModuleKey);
 
         List<StudyModuleView> prerequisites = module.getPrerequisiteKeys().stream()
                 .flatMap(key -> studyModuleService.findByKey(degreeProgramId, key).stream())
@@ -101,8 +91,7 @@ public class StudyModuleController {
                                @PathVariable final String studyModuleKey,
                                final Model model) {
 
-        StudyModule module = studyModuleService.findByKey(degreeProgramId, studyModuleKey)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Study module not found: " + studyModuleKey));
+        StudyModule module = requireStudyModule(degreeProgramId, studyModuleKey);
 
         StudyModuleForm form = new StudyModuleForm();
         form.setStudyModuleKey(module.getStudyModuleKey());
@@ -134,16 +123,7 @@ public class StudyModuleController {
             return showEditFormView(degreeProgramId, studyModuleKey, form, model);
         }
 
-        StudyModule module = new StudyModule(
-                studyModuleKey,
-                degreeProgramId,
-                form.getName(),
-                form.getDescription(),
-                form.getEcts(),
-                form.getPrerequisiteKeys(),
-                form.getOfferedFrom(),
-                form.getOfferedTo()
-        );
+        StudyModule module = toModule(studyModuleKey, degreeProgramId, form);
         studyModuleService.update(module);
 
         redirectAttributes.addFlashAttribute("successMessage",
@@ -159,8 +139,7 @@ public class StudyModuleController {
     public String deleteStudyModule(@PathVariable final String degreeProgramId,
                                     @PathVariable final String studyModuleKey,
                                     final RedirectAttributes redirectAttributes) {
-        StudyModule module = studyModuleService.findByKey(degreeProgramId, studyModuleKey)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Study module not found: " + studyModuleKey));
+        StudyModule module = requireStudyModule(degreeProgramId, studyModuleKey);
 
         studyModuleService.delete(degreeProgramId, studyModuleKey);
         
@@ -208,6 +187,18 @@ public class StudyModuleController {
                 .map(this::toView)
                 .collect(Collectors.toList());
         model.addAttribute("availableStudyModules", available);
+    }
+
+    /** Looks up a study module by key, throwing a 404 {@link ResponseStatusException} if it does not exist. */
+    private StudyModule requireStudyModule(final String degreeProgramId, final String studyModuleKey) {
+        return studyModuleService.findByKey(degreeProgramId, studyModuleKey)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Study module not found: " + studyModuleKey));
+    }
+
+    /** Builds a {@link StudyModule} domain object from a form, using the given key (create vs. update supply different keys). */
+    private StudyModule toModule(final String key, final String degreeProgramId, final StudyModuleForm form) {
+        return new StudyModule(key, degreeProgramId, form.getName(), form.getDescription(),
+                form.getEcts(), form.getPrerequisiteKeys(), form.getOfferedFrom(), form.getOfferedTo());
     }
 
     /** Looks up a degree program by ID, throwing a 404 {@link org.springframework.web.server.ResponseStatusException} if it does not exist. */

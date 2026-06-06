@@ -91,8 +91,7 @@ public class DegreeProgramController {
             @RequestParam(value = "sortDir", required = false) final String sortDir,
             final Model model) {
 
-        DegreeProgram program = degreeProgramService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Degree program not found: " + id));
+        DegreeProgram program = requireProgram(id);
 
         model.addAttribute("degreeProgram", toView(program));
 
@@ -118,8 +117,7 @@ public class DegreeProgramController {
     /** Loads the existing degree program into the edit form. */
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable final String id, final Model model) {
-        DegreeProgram program = degreeProgramService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Degree program not found: " + id));
+        DegreeProgram program = requireProgram(id);
 
         DegreeProgramForm form = new DegreeProgramForm();
         form.setName(program.getName());
@@ -166,9 +164,8 @@ public class DegreeProgramController {
     @PostMapping("/{id}/delete")
     public String deleteDegreeProgram(@PathVariable final String id,
                                       final RedirectAttributes redirectAttributes) {
-        DegreeProgram program = degreeProgramService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Degree program not found: " + id));
-        
+        DegreeProgram program = requireProgram(id);
+
         studyModuleService.findAllByDegreeProgramId(id)
                 .forEach(m -> studyModuleService.delete(id, m.getStudyModuleKey()));
         degreeProgramService.delete(id);
@@ -190,6 +187,12 @@ public class DegreeProgramController {
         model.addAttribute("formAction", "/degree-programs/" + id + "/edit");
         model.addAttribute("pageTitle", "Edit Degree Program");
         return "degreeprograms/form";
+    }
+
+    /** Looks up a degree program by ID, throwing a 404 {@link ResponseStatusException} if it does not exist. */
+    private DegreeProgram requireProgram(final String id) {
+        return degreeProgramService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Degree program not found: " + id));
     }
 
     /** Converts a {@link DegreeProgram} domain object to its view model. */
