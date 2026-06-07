@@ -40,7 +40,7 @@ public class ScheduleController {
         DegreeProgramView degreeProgram = requireProgram(degreeProgramId);
         model.addAttribute("degreeProgram", degreeProgram);
 
-        schedule_service.findById(degreeProgramId).ifPresent(scheduleView -> {
+        schedule_service.findViewByID(degreeProgramId).ifPresent(scheduleView -> {
             model.addAttribute("schedule", scheduleView);
             model.addAttribute("semesterViews",
                     semester_service.findViewAll(degreeProgramId));

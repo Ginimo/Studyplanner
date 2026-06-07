@@ -1,5 +1,7 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
+import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
+import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.StudyModuleForm;
 import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
@@ -29,7 +31,11 @@ class StudyModuleControllerTest {
     private static final String STUDY_MODULE_KEY = "OOP1";
 
     @Mock
-    private DummyDataGenerator dummyDataGenerator;
+    private StudyModuleService module_service; // Vorsicht: muss exakt dem Namen im Controller entsprechen
+
+    @Mock
+    private DegreeProgramService degree_program_service;
+
     @Mock
     private BindingResult bindingResult;
 
@@ -46,8 +52,8 @@ class StudyModuleControllerTest {
 
     @Test
     void showCreateForm_returnsFormViewWithEmptyForm() {
-        when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
-        when(dummyDataGenerator.getStudyModuleViewByProgramId(PROGRAM_ID)).thenReturn(List.of());
+        when(degree_program_service.findViewById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
+        when(module_service.findViewAll(PROGRAM_ID)).thenReturn(List.of());
         var model = new ConcurrentModel();
 
         String view = testee.showCreateForm(PROGRAM_ID, model);
@@ -75,8 +81,8 @@ class StudyModuleControllerTest {
     @Test
     void createStudyModule_withInvalidForm_returnsFormView() {
         when(bindingResult.hasErrors()).thenReturn(true);
-        when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
-        when(dummyDataGenerator.getStudyModuleViewByProgramId(PROGRAM_ID)).thenReturn(List.of());
+        when(degree_program_service.findViewById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
+        when(module_service.findViewAll(PROGRAM_ID)).thenReturn(List.of());
 
         String view = testee.createStudyModule(PROGRAM_ID, new StudyModuleForm(), bindingResult,
                 new ConcurrentModel(), new RedirectAttributesModelMap());
@@ -87,8 +93,8 @@ class StudyModuleControllerTest {
     @Test
     void showDetails_returnsDetailsViewWithStudyModuleAndPrerequisites() {
         StudyModuleView studyModuleView = testStudyModuleView();
-        when(dummyDataGenerator.getStudyModuleViewByKey(STUDY_MODULE_KEY)).thenReturn(Optional.of(studyModuleView));
-        when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
+        when(module_service.findViewByKey(STUDY_MODULE_KEY)).thenReturn(Optional.of(studyModuleView));
+        when(degree_program_service.findViewById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
         var model = new ConcurrentModel();
 
         String view = testee.showDetails(PROGRAM_ID, STUDY_MODULE_KEY, model);
@@ -100,7 +106,7 @@ class StudyModuleControllerTest {
 
     @Test
     void showDetails_withUnknownStudyModuleKey_throwsNotFoundException() {
-        when(dummyDataGenerator.getStudyModuleViewByKey(any())).thenReturn(Optional.empty());
+        when(module_service.findViewByKey(any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> testee.showDetails(PROGRAM_ID, STUDY_MODULE_KEY, new ConcurrentModel()))
                 .isInstanceOf(ResponseStatusException.class);
@@ -109,9 +115,9 @@ class StudyModuleControllerTest {
     @Test
     void showEditForm_returnsFormViewWithValuesFromView() {
         StudyModuleView view = testStudyModuleView();
-        when(dummyDataGenerator.getStudyModuleViewByKey(STUDY_MODULE_KEY)).thenReturn(Optional.of(view));
-        when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
-        when(dummyDataGenerator.getStudyModuleViewByProgramId(PROGRAM_ID)).thenReturn(List.of());
+        when(module_service.findViewByKey(STUDY_MODULE_KEY)).thenReturn(Optional.of(view));
+        when(degree_program_service.findViewById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
+        when(module_service.findViewAll(PROGRAM_ID)).thenReturn(List.of());
         var model = new ConcurrentModel();
 
         String result = testee.showEditForm(PROGRAM_ID, STUDY_MODULE_KEY, model);
@@ -140,8 +146,8 @@ class StudyModuleControllerTest {
     @Test
     void updateStudyModule_withInvalidForm_returnsFormView() {
         when(bindingResult.hasErrors()).thenReturn(true);
-        when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
-        when(dummyDataGenerator.getStudyModuleViewByProgramId(PROGRAM_ID)).thenReturn(List.of());
+        when(degree_program_service.findViewById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
+        when(module_service.findViewAll(PROGRAM_ID)).thenReturn(List.of());
 
         String view = testee.updateStudyModule(PROGRAM_ID, STUDY_MODULE_KEY, new StudyModuleForm(), bindingResult,
                 new ConcurrentModel(), new RedirectAttributesModelMap());
@@ -151,7 +157,7 @@ class StudyModuleControllerTest {
 
     @Test
     void deleteStudyModule_redirectsToProgram() {
-        when(dummyDataGenerator.getStudyModuleViewByKey(STUDY_MODULE_KEY)).thenReturn(Optional.of(testStudyModuleView()));
+        when(module_service.findViewByKey(STUDY_MODULE_KEY)).thenReturn(Optional.of(testStudyModuleView()));
         var redirectAttributes = new RedirectAttributesModelMap();
 
         String view = testee.deleteStudyModule(PROGRAM_ID, STUDY_MODULE_KEY, redirectAttributes);

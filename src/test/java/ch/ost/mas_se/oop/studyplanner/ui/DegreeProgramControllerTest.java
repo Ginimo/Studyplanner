@@ -1,9 +1,11 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
-import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
+
+import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.DegreeProgramForm;
 import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,8 +29,6 @@ class DegreeProgramControllerTest {
 
     private static final String PROGRAM_ID = "prog-1";
 
-    @Mock
-    private DummyDataGenerator dummyDataGenerator;
     @Mock
     private BindingResult bindingResult;
 
@@ -97,9 +97,8 @@ class DegreeProgramControllerTest {
     @Test
     void showDetails_returnsDetailsViewWithProgramAndStudyModules() {
         DegreeProgramView programView = testProgramView();
-        //when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(programView));
         when(degree_program_service.findViewById(PROGRAM_ID)).thenReturn(Optional.of(programView));
-        when(dummyDataGenerator.getStudyModuleListViewEntriesByProgramId(PROGRAM_ID)).thenReturn(List.of());
+        when(module_service.findAll(PROGRAM_ID)).thenReturn(List.of());
         var model = new ConcurrentModel();
 
         String view = testee.showDetails(PROGRAM_ID, null, null, null, null, model);
@@ -111,7 +110,7 @@ class DegreeProgramControllerTest {
 
     @Test
     void showDetails_withUnknownId_throwsNotFoundException() {
-        when(dummyDataGenerator.getDegreeProgramById(any())).thenReturn(Optional.empty());
+        when(degree_program_service.findViewById(any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> testee.showDetails("unknown-id", null, null, null, null, new ConcurrentModel()))
                 .isInstanceOf(ResponseStatusException.class);
@@ -119,7 +118,7 @@ class DegreeProgramControllerTest {
 
     @Test
     void showEditForm_returnsFormViewWithValuesFromView() {
-        when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
+        when(degree_program_service.findViewById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
         var model = new ConcurrentModel();
 
         String view = testee.showEditForm(PROGRAM_ID, model);
@@ -156,7 +155,7 @@ class DegreeProgramControllerTest {
 
     @Test
     void deleteDegreeProgram_redirectsToDegreePrograms() {
-        when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
+        when(degree_program_service.findViewById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
         var redirectAttributes = new RedirectAttributesModelMap();
 
         String view = testee.deleteDegreeProgram(PROGRAM_ID, redirectAttributes);

@@ -25,7 +25,7 @@ public class StudyModuleController {
     private final StudyModuleService module_service;
 
     public StudyModuleController(final DegreeProgramService degree_program_service,
-                                 final StudyModuleServiceImpl module_service) {
+                                 final StudyModuleService module_service) {
         this.degree_program_service = degree_program_service;
         this.module_service = module_service;
     }

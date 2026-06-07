@@ -1,8 +1,15 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
+import ch.ost.mas_se.oop.studyplanner.model.Semester;
+import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
-import ch.ost.mas_se.oop.studyplanner.ui.views.ScheduleView;
+
+import ch.ost.mas_se.oop.studyplanner.service.SemesterService;
 import ch.ost.mas_se.oop.studyplanner.ui.views.SemesterView;
+
+import ch.ost.mas_se.oop.studyplanner.service.ScheduleService;
+import ch.ost.mas_se.oop.studyplanner.ui.views.ScheduleView;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,7 +31,13 @@ class ScheduleControllerTest {
     private static final String PROGRAM_ID = "prog-1";
 
     @Mock
-    private DummyDataGenerator dummyDataGenerator;
+    private DegreeProgramService degree_program_service;
+
+    @Mock
+    private ScheduleService scheduleService;
+
+    @Mock
+    private SemesterService semesterService;
 
     @InjectMocks
     private ScheduleController testee;
@@ -36,8 +49,8 @@ class ScheduleControllerTest {
     @Test
     void showSchedule_withoutExistingSchedule_returnsViewWithProgramOnly() {
         DegreeProgramView programView = testProgramView();
-        when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(programView));
-        when(dummyDataGenerator.getScheduleViewForProgram(PROGRAM_ID)).thenReturn(Optional.empty());
+        when(degree_program_service.findViewById(PROGRAM_ID)).thenReturn(Optional.of(programView));
+        when(scheduleService.findViewByID(PROGRAM_ID)).thenReturn(Optional.empty());
         var model = new ConcurrentModel();
 
         String view = testee.showSchedule(PROGRAM_ID, model);
@@ -53,9 +66,9 @@ class ScheduleControllerTest {
         DegreeProgramView programView = testProgramView();
         ScheduleView scheduleView = new ScheduleView(LocalDateTime.now(), 3);
         List<SemesterView> semesterViews = List.of();
-        when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(programView));
-        when(dummyDataGenerator.getScheduleViewForProgram(PROGRAM_ID)).thenReturn(Optional.of(scheduleView));
-        when(dummyDataGenerator.getSemesterViewForProgram(PROGRAM_ID)).thenReturn(semesterViews);
+        when(degree_program_service.findViewById(PROGRAM_ID)).thenReturn(Optional.of(programView));
+        when(scheduleService.findViewByID(PROGRAM_ID)).thenReturn(Optional.of(scheduleView));
+        when(semesterService.findViewAll(PROGRAM_ID)).thenReturn(semesterViews);
         var model = new ConcurrentModel();
 
         String view = testee.showSchedule(PROGRAM_ID, model);
@@ -67,7 +80,7 @@ class ScheduleControllerTest {
 
     @Test
     void calculateSchedule_redirectsWithSuccessMessage() {
-        when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
+        when(degree_program_service.findViewById(PROGRAM_ID)).thenReturn(Optional.of(testProgramView()));
         var redirectAttributes = new RedirectAttributesModelMap();
 
         String view = testee.calculateSchedule(PROGRAM_ID, redirectAttributes);
