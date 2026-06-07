@@ -30,8 +30,8 @@ import java.util.Optional;
 @RequestMapping("/degree-programs")
 public class DegreeProgramController {
 
-    private DegreeProgramService degree_program_service;
-    private StudyModuleService module_service;
+    private final DegreeProgramService degree_program_service;
+    private final StudyModuleService module_service;
 
 
     public DegreeProgramController(final DegreeProgramService degree_program_service,
@@ -97,8 +97,8 @@ public class DegreeProgramController {
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable final String id, final Model model) {
-        // TODO creation of view and form needs to be replaced
         DegreeProgramView view = requireProgram(id);
+
         DegreeProgramForm form = new DegreeProgramForm();
         form.setName(view.getName());
         form.setDescription(view.getDescription());
@@ -120,7 +120,7 @@ public class DegreeProgramController {
             return showEditFormView(id, model);
         }
 
-        // TODO: build a DegreeProgram from the form and save it
+        degree_program_service.update(form, id);
         redirectAttributes.addFlashAttribute("successMessage", "Degree program updated.");
         return "redirect:/degree-programs/" + id;
     }
@@ -129,7 +129,7 @@ public class DegreeProgramController {
     public String deleteDegreeProgram(@PathVariable final String id,
                                       final RedirectAttributes redirectAttributes) {
         DegreeProgramView program = requireProgram(id);
-        // TODO: actually delete the degree program here
+        degree_program_service.delete(id);
         redirectAttributes.addFlashAttribute("successMessage",
                 "Degree program \"" + program.getName() + "\" deleted.");
         return "redirect:/degree-programs";

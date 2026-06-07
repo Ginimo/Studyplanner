@@ -2,8 +2,6 @@ package ch.ost.mas_se.oop.studyplanner.service;
 
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.StudyModuleForm;
-import ch.ost.mas_se.oop.studyplanner.repository.StudyModuleRepository;
-import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleView;
 
 import java.util.List;
@@ -18,7 +16,7 @@ public interface StudyModuleService {
     Optional<StudyModuleView> findViewByKey(String studyModuleKey);
     List<StudyModuleView> findViewAll(String program_id);
 
-    //void update(StudyModule module); // ToDo
-    //void delete(String studyModuleKey); // ToDo
+    void update(StudyModuleForm form, String studyModuleKey);
+    void delete(String studyModuleKey);
 
 }

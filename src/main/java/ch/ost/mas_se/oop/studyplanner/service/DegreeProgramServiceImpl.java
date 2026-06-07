@@ -1,18 +1,13 @@
 package ch.ost.mas_se.oop.studyplanner.service;
 
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
-import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.DegreeProgramForm;
 import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
-import ch.ost.mas_se.oop.studyplanner.repository.DegreeProgramRepository;
+
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class DegreeProgramServiceImpl implements DegreeProgramService {
@@ -37,13 +32,12 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
                 "sample-id-1235",
                 "BSc Soziale Arbeit",
                 "Studiengang Soziale Arbeit der OST",
-                12
+                6
         );
         programs.add(hard_coded_program_2);
     };
 
     // Methoden für Model
-
     @Override
     public void create(DegreeProgramForm form) {
                 var program = new DegreeProgram(
@@ -72,6 +66,38 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
         return Optional.empty();
     }
 
+    @Override
+    public void update(DegreeProgramForm form, final String degree_program_id){
+        String updated_name = form.getName();
+        String updated_description = form.getDescription();
+        int updated_maxDurationInSemesters = form.getMaxDurationInSemesters();
+
+        for (DegreeProgram degreeProgram : programs) { // Search for real object and update it
+            if(degreeProgram.getId().equals(degree_program_id)) {
+                degreeProgram.setName(updated_name);
+                degreeProgram.setDescription(updated_description);
+                degreeProgram.setMaxDurationInSemesters(updated_maxDurationInSemesters);
+                IO.println("I updated it");
+            }
+        }
+
+    }
+
+
+    @Override
+    public void delete(String id) {
+        Iterator<DegreeProgram> iterator = programs.iterator();
+        while (iterator.hasNext()) {
+            DegreeProgram program = iterator.next();
+            if (id.equals(program.getId())) {
+                iterator.remove(); // aus der Liste entfernen (geht nur mit Iterator!)
+                IO.println("Deleted the program: " + id);
+                break;
+            }
+        }
+    }
+
+    // Methoden für Views
     private DegreeProgramView toView(DegreeProgram program) {
         return new DegreeProgramView(
                 program.getId(),
@@ -81,7 +107,7 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
                 );
     }
 
-    // Methoden für Views
+    @Override
     public Optional<DegreeProgramView> findViewById(final String id) {
         Optional<DegreeProgram> program = findById(id);
         if (program.isEmpty()) {

@@ -103,7 +103,7 @@ public class StudyModuleController {
             return showEditFormView(degreeProgramId, studyModuleKey, form, model);
         }
 
-        // TODO: build a StudyModule from the form and save it
+        module_service.update(form, studyModuleKey);
         redirectAttributes.addFlashAttribute("successMessage",
                 "Study module \"" + form.getName() + "\" updated.");
         return "redirect:/degree-programs/" + degreeProgramId;
@@ -114,7 +114,7 @@ public class StudyModuleController {
                                     @PathVariable final String studyModuleKey,
                                     final RedirectAttributes redirectAttributes) {
         StudyModuleView studyModule = requireStudyModule(studyModuleKey);
-        // TODO: delete the study module
+        module_service.delete(studyModuleKey);
         redirectAttributes.addFlashAttribute("successMessage",
                 "Study module \"" + studyModule.getName() + "\" deleted.");
         return "redirect:/degree-programs/" + degreeProgramId;

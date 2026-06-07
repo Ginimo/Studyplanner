@@ -33,10 +33,7 @@ public class Semester {
 
     public List<StudyModule> getStudyModulesSemester(){return studyModulesSemester;}
     public List<String> getStudyModuleKeys(){return studyModuleKeys;}
-
-
     public Schedule getSchedule(){return schedule;}
-
 
     // Printer
     public void printSemester(){

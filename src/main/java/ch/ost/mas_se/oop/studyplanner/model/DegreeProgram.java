@@ -1,21 +1,20 @@
 package ch.ost.mas_se.oop.studyplanner.model;
 
 public class DegreeProgram {
-    private String id;
+    private final String id;
     private String name;
     private String description;
     private int maxDurationInSemesters;
     private Schedule schedule;
 
     public DegreeProgram(String id, String name, String description, int maxDurationInSemesters){
-        setID(id);
+        this.id=id;
         setName(name);
         setDescription(description);
         setMaxDurationInSemesters(maxDurationInSemesters);
     }
 
     // Setter
-    public void setID (String id) {this.id=id;}
     public void setName (String name) {this.name= name;}
     public void setDescription (String description) {this.description=description;}
     public void setMaxDurationInSemesters (int maxDurationInSemesters) {this.maxDurationInSemesters=maxDurationInSemesters;}
@@ -37,4 +36,17 @@ public class DegreeProgram {
         IO.println("*******************");
     }
 
+    // Equals
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;                         // 1. gleiches Objekt im Speicher?
+        if (!(o instanceof DegreeProgram)) return false;    // 2. überhaupt ein DegreeProgram?
+        DegreeProgram other = (DegreeProgram) o;            // 3. casten
+        return this.id.equals(other.id);                    // 4. gleiche ID?
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }

@@ -1,5 +1,6 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
+import ch.ost.mas_se.oop.studyplanner.exception.CyclicDependencyException;
 import ch.ost.mas_se.oop.studyplanner.model.Schedule;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.service.SemesterService;
@@ -21,16 +22,16 @@ import ch.ost.mas_se.oop.studyplanner.service.ScheduleService;
 @RequestMapping("/degree-programs/{degreeProgramId}/schedule")
 public class ScheduleController {
 
+    private final DegreeProgramService degree_program_service;
     private final ScheduleService schedule_service;
     private final SemesterService semester_service;
-    private DegreeProgramService degree_program_service;
 
 
     public ScheduleController(DegreeProgramService degree_program_service,
                               ScheduleService scheduleService,
                               SemesterService semester_service) {
         this.degree_program_service = degree_program_service;
-        schedule_service = scheduleService;
+        this.schedule_service = scheduleService;
         this.semester_service = semester_service;
     }
 
@@ -52,14 +53,16 @@ public class ScheduleController {
     public String calculateSchedule(@PathVariable final String degreeProgramId,
                                     final RedirectAttributes redirectAttributes) {
         requireProgram(degreeProgramId);
-        Schedule schedule = this.schedule_service.calculate(degreeProgramId);
 
-        // TODO for Kursblock 6: catch exception that is thrown when cyclic study module dependencies are detected
-        // You can print errors on the UI as follows: redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        // (e is a reference to your exception)
+        try {
+            Schedule schedule = schedule_service.calculate(degreeProgramId);
+            redirectAttributes.addFlashAttribute("flashSchedule", schedule);
+            redirectAttributes.addFlashAttribute("successMessage", "Study plan calculated successfully.");
+        }
+        catch (CyclicDependencyException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
 
-        redirectAttributes.addFlashAttribute("successMessage",
-                "Study plan calculated successfully.");
         return "redirect:/degree-programs/" + degreeProgramId + "/schedule";
     }
 

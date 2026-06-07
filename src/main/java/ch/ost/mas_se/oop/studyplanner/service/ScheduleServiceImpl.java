@@ -1,19 +1,16 @@
 package ch.ost.mas_se.oop.studyplanner.service;
 
+import ch.ost.mas_se.oop.studyplanner.exception.CyclicDependencyException;
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.model.Schedule;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
-
 import ch.ost.mas_se.oop.studyplanner.model.Semester;
-import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import ch.ost.mas_se.oop.studyplanner.ui.views.ScheduleView;
-import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
-import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleView;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
-
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
@@ -44,8 +41,8 @@ public class ScheduleServiceImpl implements ScheduleService {
         associated_program.printDegreeProgram();
 
         // 2.Schedule Gerüst erstellen
-        var schedule = new Schedule(6, associated_program); // per Default 6 Semester
-        int total_semesters = schedule.getTotalSemesters();
+        int total_semesters = associated_program.getMaxDurationInSemesters();
+        var schedule = new Schedule(total_semesters, associated_program);
 
         // 3. Alle Modules from Degree Program holen
         List<StudyModule> all_modules = studyModuleService.findAll(degreeProgramId);
@@ -60,7 +57,6 @@ public class ScheduleServiceImpl implements ScheduleService {
 
             for (StudyModule module : all_modules){ // durch alle vorhanden Module gehen
                 List<String> PrereqsOfModule = new ArrayList<String>(module.getPrerequisiteKeys()); // Prerequisites für das Modul holen
-
                 for (StudyModule scheduledModule : scheduledModules) { //  durch alle geplanten Module gehen
                     String scheduledKey = scheduledModule.getStudyModuleKey();
                     if (PrereqsOfModule.contains(scheduledKey)) {
@@ -74,24 +70,33 @@ public class ScheduleServiceImpl implements ScheduleService {
                 }
             }
 
-            // 5. Semester erstellen und Semester zum Scheduler hinzufügen
+            // 5. Zyklische Abhängigkeit prüfen
+            if (modules_this_semester.isEmpty()) {
+                List<String> remainingKeys = new ArrayList<>();
+                for (StudyModule module : all_modules) { //Prüfen, welche noch übrig sind, aber nicht verplant werden konnten
+                    remainingKeys.add(module.getStudyModuleKey());
+                }
+                throw new CyclicDependencyException(remainingKeys);
+            }
+
+            // 6. Semester erstellen und Semester zum Scheduler hinzufügen
             int totalEcts = sumEcts(modules_this_semester);
             var semester = new Semester(semester_counter, totalEcts, modules_this_semester, modules_this_semester_keys, schedule);
             schedule.addSemester(semester);
 
-            // 6. Liste: Module des Semesters (modules_this_semester) zu Scheduled Modules hinzufügen
+            // 7. Liste: Module des Semesters (modules_this_semester) zu Scheduled Modules hinzufügen
             scheduledModules.addAll(modules_this_semester);
 
-            // 7. Liste: Aller vorhanden Module kürzen, mit denen die eingeplant wurden
+            // 8. Liste: Aller vorhanden Module kürzen, mit denen die eingeplant wurden
             all_modules.removeAll(modules_this_semester);
 
             semester_counter++;
         }
-        // 8. Schedule Timestamp setzen nachdem alles berechnet
+        // 9. Schedule Timestamp setzen nachdem alles berechnet
         schedule.setCalculatedAt(LocalDateTime.now());
         schedule.printSchedule();
 
-        // 9. Alten Schedule für dieses Programm entfernen falls vorhanden
+        // 10. Alten Schedule für dieses Programm entfernen falls vorhanden
         schedules.removeIf(s -> degreeProgramId.equals(s.getDegreeProgramID()));
         schedules.add(schedule); // neuen Schedule hinzufügen
         return schedule;

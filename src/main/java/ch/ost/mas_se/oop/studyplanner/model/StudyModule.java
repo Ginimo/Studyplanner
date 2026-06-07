@@ -64,6 +64,7 @@ public class StudyModule {
         IO.println("*******************");
     }
 
+    // Equals
     @Override
     public boolean equals(Object obj) {
         // Ein Study Module ist gleich, wenn es dasselbe Objekt ist.

@@ -10,12 +10,14 @@ import java.util.Optional;
 public interface DegreeProgramService {
 
     void create(DegreeProgramForm form);
+
     Optional<DegreeProgram> findById(String id);
     List<DegreeProgram> findAll();
+
     Optional<DegreeProgramView> findViewById(String id);
 
-    //void update(DegreeProgram program); // ToDo
-    //void delete(String id); // ToDo
+    void update(DegreeProgramForm form, String id);
+    void delete(String id);
 
 
 }

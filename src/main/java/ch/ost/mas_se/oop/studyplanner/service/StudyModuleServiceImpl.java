@@ -1,17 +1,18 @@
 package ch.ost.mas_se.oop.studyplanner.service;
 
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
+
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.StudyModuleForm;
-import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
-
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleView;
+
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -215,7 +216,7 @@ public class StudyModuleServiceImpl implements StudyModuleService {
     }
 
     @Override
-    public List<StudyModule> findAll(String programId) {
+    public List<StudyModule> findAll(final String programId) {
         List<StudyModule> result = new ArrayList<>();
         for (StudyModule entry : modules) {
             if (programId.equals(entry.getDegreeProgram().getId())) {
@@ -228,7 +229,7 @@ public class StudyModuleServiceImpl implements StudyModuleService {
     }
 
     @Override
-    public Optional<StudyModule> findByKey(String studyModuleKey){
+    public Optional<StudyModule> findByKey(final String studyModuleKey){
             for (StudyModule entry : modules) {
                 if (studyModuleKey.equals(entry.getStudyModuleKey())) {
                     return Optional.of(entry);
@@ -237,8 +238,43 @@ public class StudyModuleServiceImpl implements StudyModuleService {
             return Optional.empty();
     }
 
-    // Methoden für Views
+    @Override
+    public void update(StudyModuleForm form, final String studyModuleKey){
+        String updated_name = form.getName();
+        String updated_description = form.getDescription();
+        int updated_ects = form.getEcts();
+        List<String> prerequisiteKeys = form.getPrerequisiteKeys();
+        LocalDate updatedOfferedFrom = form.getOfferedFrom();
+        LocalDate updatedOfferedTo = form.getOfferedTo();
 
+        for (StudyModule module : modules) { // Search for real object and update it
+            if(module.getStudyModuleKey().equals(studyModuleKey)) {
+                module.setName(updated_name);
+                module.setDescription(updated_description);
+                module.setEcts(updated_ects);
+                module.setPrerequisiteKeys(prerequisiteKeys);
+                module.setOfferedFrom(updatedOfferedFrom);
+                module.setOfferedTo(updatedOfferedTo);
+                IO.println("I updated it");
+            }
+        }
+    }
+
+
+    @Override
+    public void delete(final String studyModuleKey){
+        Iterator<StudyModule> iterator = modules.iterator();
+        while (iterator.hasNext()) {
+        StudyModule module = iterator.next();
+        if (studyModuleKey.equals(module.getStudyModuleKey())) {
+            iterator.remove(); // aus der Liste entfernen (get nur mit Iterator)
+            IO.println("Deleted the program: " + studyModuleKey);
+            break;
+        }
+    }
+}
+
+    // Methoden für Views
     private StudyModuleView toView(StudyModule module) {
         return new StudyModuleView(
                 new StudyModuleKey(module.getStudyModuleKey()),
@@ -263,6 +299,7 @@ public class StudyModuleServiceImpl implements StudyModuleService {
         return views;
     }
 
+    @Override
     public Optional<StudyModuleView> findViewByKey(String studyModuleKey) {
         Optional<StudyModule> module = findByKey(studyModuleKey);
         if (module.isEmpty()) {

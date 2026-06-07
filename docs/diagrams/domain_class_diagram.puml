@@ -6,7 +6,14 @@ package "Model" {
         - name: String
         - description: String
         - maxDurationInSemesters: int
-    }
+        + setName(name: String): void
+        + setDescription(description: String): void
+        + setMaxDurationInSemesters(MaxDurationInSemesters: int): void
+        + getId(): String
+        + getName(): String
+        + getDescription(): String
+        + getMaxDurationInSemesters(): int
+         }
 
     class StudyModule {
         - studyModuleKey: String
@@ -16,52 +23,92 @@ package "Model" {
         - prerequisiteKeys: List<String>
         - offeredFrom: LocalDate
         - offeredTo: LocalDate
+        + setName (name: String): void
+        + setDescription (description: String): void
+        + setEcts (ects: int): void
+        + setPrerequisiteKeys(prerequisiteKeys: List<String> ): void
+        + setOfferedFrom(offeredFrom: LocalDate): void
+        + setOfferedTo(offeredTo: LocalDate)
+        + getStudyModuleKey(): String
+        + getName(): String
+        + getDescription(): String
+        + getEcts(): int
+        + getPrerequisiteKeys(): List<String>
+        + getDegreeProgram(): DegreeProgram
     }
 
     class Schedule {
         - calculatedAt: LocalDateTime
         - totalSemesters: int
+        + setTotalSemesters (totalSemesters: int): void
+        + setCalculatedAt (calculatedAt: LocalDateTime): void
+        + getTotalSemesters (): int
+        + getCalculatedAt (): LocalDateTime
+        + getDegreeProgramID(): String
+        + getSemesters(): List<Semester>
+        + addSemester(semester: Semester)
     }
 
     class Semester {
         - semesterNumber: int
         - totalEcts: int
+        + setSemesterNumber (semesterNumber: int): void
+        + setTotalEcts (totalEcts: int): void
+        + getSemesterNumber(): int
+        + getTotalEcts(): int
+        + getStudyModulesSemester(): List<StudyModule>
+        + getStudyModuleKeys(): List<String>
+        + getSchedule(): Schedule
     }
 }
 
 package "Service" {
     interface DegreeProgramService {
-        + create(program: DegreeProgram): void
+        + create(program_form: DegreeProgramForm): void
         + findById(id: String): Optional<DegreeProgram>
+        + findViewById (id: String): Optional<DegreeProgramView>
         + findAll(): List<DegreeProgram>
-        + update(program: DegreeProgram): void
+        + update(program_form: DegreeProgramForm): void
         + delete(id: String): void
     }
 
     interface StudyModuleService {
-        + create(module: StudyModule): void
+        + create(module_form: StudyModuleForm): void
         + findByKey(studyModuleKey: String): Optional<StudyModule>
+        + findViewByKey(studyModuleKey: String): Optional<StudyModuleView>;
         + findAll(degreeProgramId: String): List<StudyModule>
-        + update(module: StudyModule): void
+        + findViewAll(program_id: String): List<StudyModuleView>;
+        + update(module_form: StudyModuleForm, studyModuleKey: String): void
         + delete(studyModuleKey: String): void
     }
 
     interface ScheduleService {
         + calculate(program: DegreeProgram): Schedule
+        + findById(String degreeProgramId): Optional<Schedule>
+    }
+
+    interface SemesterService {
+         + findAll(degreeProgramId: String): List<Semester>
+         + findViewAll(degreeProgramId : String): List<SemesterView>
     }
 
     class DegreeProgramServiceImpl {
         - repository: DegreeProgramRepository
+        - toView(DegreeProgram program): DegreeProgramView
     }
 
     class StudyModuleServiceImpl {
         - repository: StudyModuleRepository
+        - toView(module: StudyModule): StudyModuleView
+        - toViewList(module_list: List<StudyModule> ): List<StudyModuleView>
     }
 
     class ScheduleServiceImpl {
-        - moduleService: StudyModuleService
+        - sumEcts(modules_this_semester: List<StudyModule>): int
         + calculate(program: DegreeProgram): Schedule
-        - sortByPrerequisites(modules: List<StudyModule>): List<StudyModule>
+    }
+
+    class SemesterServiceImpl {
     }
 
     DegreeProgramServiceImpl ..|> DegreeProgramService

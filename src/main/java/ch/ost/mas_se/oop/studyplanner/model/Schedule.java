@@ -6,8 +6,8 @@ import java.util.List;
 public class Schedule {
     private LocalDateTime calculatedAt;
     private int totalSemesters;
-    DegreeProgram degreeProgram;
-    List<Semester> semesters = new ArrayList<>();;
+    private final DegreeProgram degreeProgram;
+    private final List<Semester> semesters = new ArrayList<>();;
 
     public Schedule (
                 int totalSemesters,

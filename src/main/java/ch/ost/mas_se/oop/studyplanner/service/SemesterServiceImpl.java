@@ -1,11 +1,10 @@
 package ch.ost.mas_se.oop.studyplanner.service;
 
 import ch.ost.mas_se.oop.studyplanner.model.Schedule;
+
 import ch.ost.mas_se.oop.studyplanner.model.Semester;
-import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.ui.views.SemesterView;
-import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
-import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleView;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
