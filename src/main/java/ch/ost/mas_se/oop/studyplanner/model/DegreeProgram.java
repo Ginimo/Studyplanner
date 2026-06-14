@@ -1,6 +1,14 @@
 package ch.ost.mas_se.oop.studyplanner.model;
 
+import ch.ost.mas_se.oop.studyplanner.serializer.DegreeProgramJsonDeserializer;
+import ch.ost.mas_se.oop.studyplanner.serializer.DegreeProgramJsonSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.util.Objects;
+
+@JsonDeserialize(using = DegreeProgramJsonDeserializer.class)
+@JsonSerialize(using = DegreeProgramJsonSerializer.class)
 
 public class DegreeProgram {
   private final String id;
