@@ -11,7 +11,10 @@ dependency-reduced-pom.xml
 .flattened-pom.xml
 
 # IDE
-.idea/
+.idea/*
+!.idea/codeStyles/
+!.idea/codeStyles/**
+!.idea/google-java-format.xml
 .project
 .classpath
 .c9/
