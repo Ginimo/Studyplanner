@@ -1,5 +1,5 @@
 #!/bin/sh
-mvn spotless:check -q || {
+./mvnw spotless:check -q || {
   echo ""
   echo "Formatting issues found. Run 'mvn spotless:apply' then re-commit."
   exit 1
