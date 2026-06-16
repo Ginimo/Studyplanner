@@ -37,38 +37,25 @@ public class ScheduleController {
   }
 
   /**
-   * Renders the schedule view. If a pre-calculated {@link Schedule} was passed as a flash attribute
-   * by {@link #calculateSchedule} (via POST/Redirect/GET), it is used directly; otherwise the
-   * schedule is (re-)calculated on the fly so the page is always populated on a plain GET.
+   * Renders the schedule view. Uses a flash-attribute schedule from a preceding POST/Redirect if
+   * available; otherwise loads the last persisted schedule from the repository. If no schedule has
+   * been calculated yet, the view is rendered without one.
    */
   @GetMapping
   public String showSchedule(@PathVariable final String degreeProgramId, final Model model) {
     DegreeProgram program = requireProgram(degreeProgramId);
     model.addAttribute("degreeProgram", toView(program));
 
-    Schedule schedule = resolveSchedule(program, model);
-    if (schedule != null) {
-      addScheduleToModel(schedule, model);
+    Schedule flashSchedule = (Schedule) model.getAttribute("flashSchedule");
+    if (flashSchedule != null) {
+      addScheduleToModel(flashSchedule, model);
+    } else {
+      scheduleService
+          .findByDegreeProgramId(degreeProgramId)
+          .ifPresent(schedule -> addScheduleToModel(schedule, model));
     }
 
     return "schedules/view";
-  }
-
-  /**
-   * Returns the schedule to display: the flash-attribute schedule from a preceding POST if one was
-   * passed, a freshly calculated schedule otherwise. Returns {@code null} and adds {@code
-   * errorMessage} to the model when a cycle is detected.
-   */
-  private Schedule resolveSchedule(final DegreeProgram program, final Model model) {
-    Schedule schedule = (Schedule) model.getAttribute("flashSchedule");
-    if (schedule == null && !model.containsAttribute("errorMessage")) {
-      try {
-        schedule = scheduleService.calculate(program);
-      } catch (CyclicDependencyException e) {
-        model.addAttribute("errorMessage", e.getMessage());
-      }
-    }
-    return schedule;
   }
 
   /** Adds the {@link ScheduleView} and the list of {@link SemesterView}s to the model. */
@@ -101,9 +88,8 @@ public class ScheduleController {
   }
 
   /**
-   * Calculates the schedule and stores the result as a flash attribute before redirecting to {@link
-   * #showSchedule}, so the computed schedule survives the redirect without being recalculated a
-   * second time.
+   * Calculates the schedule, persists it, and stores the result as a flash attribute before
+   * redirecting to {@link #showSchedule} so the computed schedule survives the redirect.
    */
   @PostMapping("/calculate")
   public String calculateSchedule(
@@ -111,6 +97,7 @@ public class ScheduleController {
     DegreeProgram program = requireProgram(degreeProgramId);
     try {
       Schedule schedule = scheduleService.calculate(program);
+      scheduleService.save(degreeProgramId, schedule);
       redirectAttributes.addFlashAttribute("flashSchedule", schedule);
       redirectAttributes.addFlashAttribute("successMessage", "Study plan calculated successfully.");
     } catch (CyclicDependencyException e) {
