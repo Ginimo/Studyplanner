@@ -5,25 +5,35 @@ import jakarta.validation.constraints.NotBlank;
 
 public class DegreeProgramForm {
 
-    @NotBlank(message = "Name is required")
-    private String name;
+  @NotBlank(message = "Name is required")
+  private String name;
 
-    private String description;
+  private String description;
 
-    @Min(value = 1, message = "Max duration must be at least 1 semester")
-    private int maxDurationInSemesters;
+  @Min(value = 1, message = "Max duration must be at least 1 semester")
+  private int maxDurationInSemesters;
 
-    public String getName() { return name; }
+  public String getName() {
+    return name;
+  }
 
-    public void setName(final String name) { this.name = name; }
+  public void setName(final String name) {
+    this.name = name;
+  }
 
-    public String getDescription() { return description; }
+  public String getDescription() {
+    return description;
+  }
 
-    public void setDescription(final String description) { this.description = description; }
+  public void setDescription(final String description) {
+    this.description = description;
+  }
 
-    public int getMaxDurationInSemesters() { return maxDurationInSemesters; }
+  public int getMaxDurationInSemesters() {
+    return maxDurationInSemesters;
+  }
 
-    public void setMaxDurationInSemesters(final int maxDurationInSemesters) {
-        this.maxDurationInSemesters = maxDurationInSemesters;
-    }
+  public void setMaxDurationInSemesters(final int maxDurationInSemesters) {
+    this.maxDurationInSemesters = maxDurationInSemesters;
+  }
 }

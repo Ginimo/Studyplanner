@@ -1,5 +1,4 @@
 ## Tech Stack
-
 | Category | Technology | Description |
 |---|---|---|
 | **Core Framework** | Spring Boot 3.4.4 | Full-stack Java framework |
@@ -19,13 +18,11 @@
 | **Build** | Maven 3.x | Build automation and dependency management |
 
 ## Domain-Specific Diagrams (Backend)
-
 - **Model: Core data structures**
 - **Service: Location of the business logic**
 - **Repository: Abstraction of data access**
 - **Controller: Link between UI and services**
 
 ## UI Diagrams (Frontend)
-
 - **Forms: DTOs for data binding of HTML forms**
 - **Views: Data objects for display in templates**

@@ -8,16 +8,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class WelcomeController {
 
-    private final DegreeProgramService degreeProgramService;
+  private final DegreeProgramService degreeProgramService;
 
-    public WelcomeController(DegreeProgramService degreeProgramService) {
-        this.degreeProgramService = degreeProgramService;
-    }
+  public WelcomeController(DegreeProgramService degreeProgramService) {
+    this.degreeProgramService = degreeProgramService;
+  }
 
-    /** Renders the welcome page with the total number of registered degree programs. */
-    @GetMapping("/")
-    public String welcome(Model model) {
-        model.addAttribute("programCount", degreeProgramService.findAll().size());
-        return "welcome";
-    }
+  /** Renders the welcome page with the total number of registered degree programs. */
+  @GetMapping("/")
+  public String welcome(Model model) {
+    model.addAttribute("programCount", degreeProgramService.findAll().size());
+    return "welcome";
+  }
 }
