@@ -2,6 +2,7 @@ package ch.ost.mas_se.oop.studyplanner.ui;
 
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
+import ch.ost.mas_se.oop.studyplanner.service.ScheduleService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.DegreeProgramForm;
 import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
@@ -26,12 +27,15 @@ public class DegreeProgramController {
 
   private final DegreeProgramService degreeProgramService;
   private final StudyModuleService studyModuleService;
+  private final ScheduleService scheduleService;
 
   public DegreeProgramController(
       final DegreeProgramService degreeProgramService,
-      final StudyModuleService studyModuleService) {
+      final StudyModuleService studyModuleService,
+      final ScheduleService scheduleService) {
     this.degreeProgramService = degreeProgramService;
     this.studyModuleService = studyModuleService;
+    this.scheduleService = scheduleService;
   }
 
   /** Renders the list of all degree programs. */
@@ -171,6 +175,7 @@ public class DegreeProgramController {
     studyModuleService
         .findAllByDegreeProgramId(id)
         .forEach(m -> studyModuleService.delete(id, m.getStudyModuleKey()));
+    scheduleService.deleteByDegreeProgramId(id);
     degreeProgramService.delete(id);
 
     redirectAttributes.addFlashAttribute(
