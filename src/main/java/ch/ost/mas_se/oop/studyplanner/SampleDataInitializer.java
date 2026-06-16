@@ -24,6 +24,10 @@ public class SampleDataInitializer implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
+    if (!degreeProgramService.findAll().isEmpty()) {
+      return;
+    }
+
     String progId = "sample-id-1234";
     LocalDate since = LocalDate.of(2026, 6, 1);
 

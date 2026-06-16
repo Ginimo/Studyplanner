@@ -1,5 +1,7 @@
 package ch.ost.mas_se.oop.studyplanner.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +16,14 @@ public class Semester {
   public Semester(int semesterNumber) {
     this.semesterNumber = semesterNumber;
     this.studyModules = new ArrayList<>();
+  }
+
+  @JsonCreator
+  public Semester(
+      @JsonProperty("semesterNumber") int semesterNumber,
+      @JsonProperty("studyModules") List<StudyModule> studyModules) {
+    this.semesterNumber = semesterNumber;
+    this.studyModules = studyModules != null ? new ArrayList<>(studyModules) : new ArrayList<>();
   }
 
   public int getSemesterNumber() {
