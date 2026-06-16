@@ -1,11 +1,9 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
-import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.StudyModuleForm;
-import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleView;
 import jakarta.validation.Valid;
@@ -21,15 +19,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/degree-programs/{degreeProgramId}/study-modules")
-public class StudyModuleController {
+public class StudyModuleController extends AbstractController {
 
-  private final DegreeProgramService degreeProgramService;
   private final StudyModuleService studyModuleService;
 
   public StudyModuleController(
       final DegreeProgramService degreeProgramService,
       final StudyModuleService studyModuleService) {
-    this.degreeProgramService = degreeProgramService;
+    super(degreeProgramService);
     this.studyModuleService = studyModuleService;
   }
 
@@ -225,28 +222,6 @@ public class StudyModuleController {
         form.getPrerequisiteKeys(),
         form.getOfferedFrom(),
         form.getOfferedTo());
-  }
-
-  /**
-   * Looks up a degree program by ID, throwing a 404 {@link
-   * org.springframework.web.server.ResponseStatusException} if it does not exist.
-   */
-  private DegreeProgram requireProgram(final String id) {
-    return degreeProgramService
-        .findById(id)
-        .orElseThrow(
-            () ->
-                new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Degree program not found: " + id));
-  }
-
-  /** Converts a {@link DegreeProgram} domain object to its view model. */
-  private DegreeProgramView toView(DegreeProgram program) {
-    return new DegreeProgramView(
-        program.getId(),
-        program.getName(),
-        program.getDescription(),
-        program.getMaxDurationInSemesters());
   }
 
   /** Converts a {@link StudyModule} domain object to its view model. */

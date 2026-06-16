@@ -2,40 +2,31 @@ package ch.ost.mas_se.oop.studyplanner.ui;
 
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
-import ch.ost.mas_se.oop.studyplanner.service.ScheduleService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.DegreeProgramForm;
-import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleListView;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/degree-programs")
-public class DegreeProgramController {
+public class DegreeProgramController extends AbstractController {
 
-  private final DegreeProgramService degreeProgramService;
   private final StudyModuleService studyModuleService;
-  private final ScheduleService scheduleService;
 
   public DegreeProgramController(
       final DegreeProgramService degreeProgramService,
-      final StudyModuleService studyModuleService,
-      final ScheduleService scheduleService) {
-    this.degreeProgramService = degreeProgramService;
+      final StudyModuleService studyModuleService) {
+    super(degreeProgramService);
     this.studyModuleService = studyModuleService;
-    this.scheduleService = scheduleService;
   }
 
   /** Renders the list of all degree programs. */
@@ -69,13 +60,8 @@ public class DegreeProgramController {
       return showCreateFormView(model);
     }
 
-    DegreeProgram program =
-        new DegreeProgram(
-            UUID.randomUUID().toString(),
-            form.getName(),
-            form.getDescription(),
-            form.getMaxDurationInSemesters());
-    degreeProgramService.create(program);
+    degreeProgramService.create(
+        form.getName(), form.getDescription(), form.getMaxDurationInSemesters());
 
     redirectAttributes.addFlashAttribute(
         "successMessage", "Degree program \"" + form.getName() + "\" created.");
@@ -83,8 +69,8 @@ public class DegreeProgramController {
   }
 
   /**
-   * Renders the detail view for a degree program, including its study modules and the current
-   * filter/sort state passed as query parameters.
+   * Renders the detail view for a degree program, including its study modules filtered and sorted
+   * according to the query parameters.
    */
   @GetMapping("/{id}")
   public String showDetails(
@@ -162,22 +148,12 @@ public class DegreeProgramController {
     return "redirect:/degree-programs/" + id;
   }
 
-  /**
-   * Deletes the degree program together with all of its study modules, then redirects to the
-   * program list. Study modules are deleted first so that the service layer can clean up
-   * cross-module prerequisite references before the program itself is removed.
-   */
+  /** Deletes the degree program together with all of its study modules and schedule. */
   @PostMapping("/{id}/delete")
   public String deleteDegreeProgram(
       @PathVariable final String id, final RedirectAttributes redirectAttributes) {
     DegreeProgram program = requireProgram(id);
-
-    studyModuleService
-        .findAllByDegreeProgramId(id)
-        .forEach(m -> studyModuleService.delete(id, m.getStudyModuleKey()));
-    scheduleService.deleteByDegreeProgramId(id);
     degreeProgramService.delete(id);
-
     redirectAttributes.addFlashAttribute(
         "successMessage", "Degree program \"" + program.getName() + "\" deleted.");
     return "redirect:/degree-programs";
@@ -195,27 +171,5 @@ public class DegreeProgramController {
     model.addAttribute("formAction", "/degree-programs/" + id + "/edit");
     model.addAttribute("pageTitle", "Edit Degree Program");
     return "degreeprograms/form";
-  }
-
-  /**
-   * Looks up a degree program by ID, throwing a 404 {@link ResponseStatusException} if it does not
-   * exist.
-   */
-  private DegreeProgram requireProgram(final String id) {
-    return degreeProgramService
-        .findById(id)
-        .orElseThrow(
-            () ->
-                new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Degree program not found: " + id));
-  }
-
-  /** Converts a {@link DegreeProgram} domain object to its view model. */
-  private DegreeProgramView toView(DegreeProgram program) {
-    return new DegreeProgramView(
-        program.getId(),
-        program.getName(),
-        program.getDescription(),
-        program.getMaxDurationInSemesters());
   }
 }

@@ -144,8 +144,9 @@ public class ScheduleServiceImpl implements ScheduleService {
   }
 
   @Override
-  public void save(String degreeProgramId, Schedule schedule) {
-    scheduleRepository.save(degreeProgramId, schedule);
+  public void calculateAndSave(DegreeProgram program) {
+    Schedule schedule = calculate(program);
+    scheduleRepository.save(program.getId(), schedule);
   }
 
   @Override
