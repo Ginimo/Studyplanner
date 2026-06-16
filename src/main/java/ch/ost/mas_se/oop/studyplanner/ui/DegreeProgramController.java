@@ -8,6 +8,9 @@ import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleListView;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -17,186 +20,197 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 @Controller
 @RequestMapping("/degree-programs")
 public class DegreeProgramController {
 
-    private final DegreeProgramService degreeProgramService;
-    private final StudyModuleService studyModuleService;
+  private final DegreeProgramService degreeProgramService;
+  private final StudyModuleService studyModuleService;
 
-    public DegreeProgramController(final DegreeProgramService degreeProgramService, final StudyModuleService studyModuleService) {
-        this.degreeProgramService = degreeProgramService;
-        this.studyModuleService = studyModuleService;
+  public DegreeProgramController(
+      final DegreeProgramService degreeProgramService,
+      final StudyModuleService studyModuleService) {
+    this.degreeProgramService = degreeProgramService;
+    this.studyModuleService = studyModuleService;
+  }
+
+  /** Renders the list of all degree programs. */
+  @GetMapping
+  public String listDegreePrograms(final Model model) {
+    model.addAttribute(
+        "degreePrograms",
+        degreeProgramService.findAll().stream().map(this::toView).collect(Collectors.toList()));
+    return "degreeprograms/list";
+  }
+
+  /** Renders the blank creation form for a new degree program. */
+  @GetMapping("/new")
+  public String showCreateForm(final Model model) {
+    model.addAttribute("degreeProgram", new DegreeProgramForm());
+    return showCreateFormView(model);
+  }
+
+  /**
+   * Processes the creation form. On validation errors the form is re-displayed; on success the
+   * program is saved and the user is redirected to the program list.
+   */
+  @PostMapping("/new")
+  public String createDegreeProgram(
+      @Valid @ModelAttribute("degreeProgram") final DegreeProgramForm form,
+      final BindingResult result,
+      final Model model,
+      final RedirectAttributes redirectAttributes) {
+
+    if (result.hasErrors()) {
+      return showCreateFormView(model);
     }
 
-    /** Renders the list of all degree programs. */
-    @GetMapping
-    public String listDegreePrograms(final Model model) {
-        model.addAttribute("degreePrograms", degreeProgramService.findAll().stream()
-                .map(this::toView)
-                .collect(Collectors.toList()));
-        return "degreeprograms/list";
-    }
+    DegreeProgram program =
+        new DegreeProgram(
+            UUID.randomUUID().toString(),
+            form.getName(),
+            form.getDescription(),
+            form.getMaxDurationInSemesters());
+    degreeProgramService.create(program);
 
-    /** Renders the blank creation form for a new degree program. */
-    @GetMapping("/new")
-    public String showCreateForm(final Model model) {
-        model.addAttribute("degreeProgram", new DegreeProgramForm());
-        return showCreateFormView(model);
-    }
+    redirectAttributes.addFlashAttribute(
+        "successMessage", "Degree program \"" + form.getName() + "\" created.");
+    return "redirect:/degree-programs";
+  }
 
-    /**
-     * Processes the creation form. On validation errors the form is re-displayed;
-     * on success the program is saved and the user is redirected to the program list.
-     */
-    @PostMapping("/new")
-    public String createDegreeProgram(
-            @Valid @ModelAttribute("degreeProgram") final DegreeProgramForm form,
-            final BindingResult result,
-            final Model model,
-            final RedirectAttributes redirectAttributes) {
+  /**
+   * Renders the detail view for a degree program, including its study modules and the current
+   * filter/sort state passed as query parameters.
+   */
+  @GetMapping("/{id}")
+  public String showDetails(
+      @PathVariable final String id,
+      @RequestParam(value = "nameFilter", required = false) final String nameFilter,
+      @RequestParam(value = "offeredAt", required = false)
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+          final LocalDate offeredAt,
+      @RequestParam(value = "sortBy", required = false) final String sortBy,
+      @RequestParam(value = "sortDir", required = false) final String sortDir,
+      final Model model) {
 
-        if (result.hasErrors()) {
-            return showCreateFormView(model);
-        }
+    DegreeProgram program = requireProgram(id);
 
-        DegreeProgram program = new DegreeProgram(
-                UUID.randomUUID().toString(),
-                form.getName(),
-                form.getDescription(),
-                form.getMaxDurationInSemesters()
-        );
-        degreeProgramService.create(program);
+    model.addAttribute("degreeProgram", toView(program));
 
-        redirectAttributes.addFlashAttribute("successMessage",
-                "Degree program \"" + form.getName() + "\" created.");
-        return "redirect:/degree-programs";
-    }
-
-    /**
-     * Renders the detail view for a degree program, including its study modules and
-     * the current filter/sort state passed as query parameters.
-     */
-    @GetMapping("/{id}")
-    public String showDetails(
-            @PathVariable final String id,
-            @RequestParam(value = "nameFilter", required = false) final String nameFilter,
-            @RequestParam(value = "offeredAt", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate offeredAt,
-            @RequestParam(value = "sortBy", required = false) final String sortBy,
-            @RequestParam(value = "sortDir", required = false) final String sortDir,
-            final Model model) {
-
-        DegreeProgram program = requireProgram(id);
-
-        model.addAttribute("degreeProgram", toView(program));
-
-        model.addAttribute("studyModules", studyModuleService.findAllByDegreeProgramId(id).stream()
-                .map(m -> new StudyModuleListView(
+    model.addAttribute(
+        "studyModules",
+        studyModuleService.findAllByDegreeProgramId(id).stream()
+            .map(
+                m ->
+                    new StudyModuleListView(
                         new StudyModuleKey(m.getStudyModuleKey()),
                         m.getName(),
                         m.getEcts(),
                         m.getOfferedFrom(),
                         m.getOfferedTo(),
                         !m.getPrerequisiteKeys().isEmpty(),
-                        m.getPrerequisiteKeys().size()
-                ))
-                .collect(Collectors.toList()));
+                        m.getPrerequisiteKeys().size()))
+            .collect(Collectors.toList()));
 
-        model.addAttribute("nameFilter", nameFilter != null ? nameFilter : "");
-        model.addAttribute("offeredAt", offeredAt != null ? offeredAt : LocalDate.now());
-        model.addAttribute("sortBy", sortBy != null ? sortBy : "NAME");
-        model.addAttribute("sortDir", sortDir != null ? sortDir : "ASC");
-        return "degreeprograms/details";
+    model.addAttribute("nameFilter", nameFilter != null ? nameFilter : "");
+    model.addAttribute("offeredAt", offeredAt != null ? offeredAt : LocalDate.now());
+    model.addAttribute("sortBy", sortBy != null ? sortBy : "NAME");
+    model.addAttribute("sortDir", sortDir != null ? sortDir : "ASC");
+    return "degreeprograms/details";
+  }
+
+  /** Loads the existing degree program into the edit form. */
+  @GetMapping("/{id}/edit")
+  public String showEditForm(@PathVariable final String id, final Model model) {
+    DegreeProgram program = requireProgram(id);
+
+    DegreeProgramForm form = new DegreeProgramForm();
+    form.setName(program.getName());
+    form.setDescription(program.getDescription());
+    form.setMaxDurationInSemesters(program.getMaxDurationInSemesters());
+
+    model.addAttribute("degreeProgram", form);
+    return showEditFormView(id, model);
+  }
+
+  /**
+   * Processes the edit form. On validation errors the form is re-displayed; on success the program
+   * is updated and the user is redirected to its detail view.
+   */
+  @PostMapping("/{id}/edit")
+  public String updateDegreeProgram(
+      @PathVariable final String id,
+      @Valid @ModelAttribute("degreeProgram") final DegreeProgramForm form,
+      final BindingResult result,
+      final Model model,
+      final RedirectAttributes redirectAttributes) {
+
+    if (result.hasErrors()) {
+      return showEditFormView(id, model);
     }
 
-    /** Loads the existing degree program into the edit form. */
-    @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable final String id, final Model model) {
-        DegreeProgram program = requireProgram(id);
+    DegreeProgram program =
+        new DegreeProgram(
+            id, form.getName(), form.getDescription(), form.getMaxDurationInSemesters());
+    degreeProgramService.update(program);
 
-        DegreeProgramForm form = new DegreeProgramForm();
-        form.setName(program.getName());
-        form.setDescription(program.getDescription());
-        form.setMaxDurationInSemesters(program.getMaxDurationInSemesters());
+    redirectAttributes.addFlashAttribute("successMessage", "Degree program updated.");
+    return "redirect:/degree-programs/" + id;
+  }
 
-        model.addAttribute("degreeProgram", form);
-        return showEditFormView(id, model);
-    }
+  /**
+   * Deletes the degree program together with all of its study modules, then redirects to the
+   * program list. Study modules are deleted first so that the service layer can clean up
+   * cross-module prerequisite references before the program itself is removed.
+   */
+  @PostMapping("/{id}/delete")
+  public String deleteDegreeProgram(
+      @PathVariable final String id, final RedirectAttributes redirectAttributes) {
+    DegreeProgram program = requireProgram(id);
 
-    /**
-     * Processes the edit form. On validation errors the form is re-displayed;
-     * on success the program is updated and the user is redirected to its detail view.
-     */
-    @PostMapping("/{id}/edit")
-    public String updateDegreeProgram(
-            @PathVariable final String id,
-            @Valid @ModelAttribute("degreeProgram") final DegreeProgramForm form,
-            final BindingResult result,
-            final Model model,
-            final RedirectAttributes redirectAttributes) {
+    studyModuleService
+        .findAllByDegreeProgramId(id)
+        .forEach(m -> studyModuleService.delete(id, m.getStudyModuleKey()));
+    degreeProgramService.delete(id);
 
-        if (result.hasErrors()) {
-            return showEditFormView(id, model);
-        }
+    redirectAttributes.addFlashAttribute(
+        "successMessage", "Degree program \"" + program.getName() + "\" deleted.");
+    return "redirect:/degree-programs";
+  }
 
-        DegreeProgram program = new DegreeProgram(
-                id,
-                form.getName(),
-                form.getDescription(),
-                form.getMaxDurationInSemesters()
-        );
-        degreeProgramService.update(program);
+  /** Populates the model with metadata for the create form and returns the form view name. */
+  private String showCreateFormView(final Model model) {
+    model.addAttribute("formAction", "/degree-programs/new");
+    model.addAttribute("pageTitle", "New Degree Program");
+    return "degreeprograms/form";
+  }
 
-        redirectAttributes.addFlashAttribute("successMessage", "Degree program updated.");
-        return "redirect:/degree-programs/" + id;
-    }
+  /** Populates the model with metadata for the edit form and returns the form view name. */
+  private String showEditFormView(final String id, final Model model) {
+    model.addAttribute("formAction", "/degree-programs/" + id + "/edit");
+    model.addAttribute("pageTitle", "Edit Degree Program");
+    return "degreeprograms/form";
+  }
 
-    /**
-     * Deletes the degree program together with all of its study modules, then redirects to
-     * the program list. Study modules are deleted first so that the service layer can clean
-     * up cross-module prerequisite references before the program itself is removed.
-     */
-    @PostMapping("/{id}/delete")
-    public String deleteDegreeProgram(@PathVariable final String id,
-                                      final RedirectAttributes redirectAttributes) {
-        DegreeProgram program = requireProgram(id);
+  /**
+   * Looks up a degree program by ID, throwing a 404 {@link ResponseStatusException} if it does not
+   * exist.
+   */
+  private DegreeProgram requireProgram(final String id) {
+    return degreeProgramService
+        .findById(id)
+        .orElseThrow(
+            () ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Degree program not found: " + id));
+  }
 
-        studyModuleService.findAllByDegreeProgramId(id)
-                .forEach(m -> studyModuleService.delete(id, m.getStudyModuleKey()));
-        degreeProgramService.delete(id);
-
-        redirectAttributes.addFlashAttribute("successMessage",
-                "Degree program \"" + program.getName() + "\" deleted.");
-        return "redirect:/degree-programs";
-    }
-
-    /** Populates the model with metadata for the create form and returns the form view name. */
-    private String showCreateFormView(final Model model) {
-        model.addAttribute("formAction", "/degree-programs/new");
-        model.addAttribute("pageTitle", "New Degree Program");
-        return "degreeprograms/form";
-    }
-
-    /** Populates the model with metadata for the edit form and returns the form view name. */
-    private String showEditFormView(final String id, final Model model) {
-        model.addAttribute("formAction", "/degree-programs/" + id + "/edit");
-        model.addAttribute("pageTitle", "Edit Degree Program");
-        return "degreeprograms/form";
-    }
-
-    /** Looks up a degree program by ID, throwing a 404 {@link ResponseStatusException} if it does not exist. */
-    private DegreeProgram requireProgram(final String id) {
-        return degreeProgramService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Degree program not found: " + id));
-    }
-
-    /** Converts a {@link DegreeProgram} domain object to its view model. */
-    private DegreeProgramView toView(DegreeProgram program) {
-        return new DegreeProgramView(program.getId(), program.getName(), program.getDescription(), program.getMaxDurationInSemesters());
-    }
+  /** Converts a {@link DegreeProgram} domain object to its view model. */
+  private DegreeProgramView toView(DegreeProgram program) {
+    return new DegreeProgramView(
+        program.getId(),
+        program.getName(),
+        program.getDescription(),
+        program.getMaxDurationInSemesters());
+  }
 }
