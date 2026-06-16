@@ -1,18 +1,15 @@
 package ch.ost.mas_se.oop.studyplanner.model;
 
-
 import ch.ost.mas_se.oop.studyplanner.serializer.StudyModuleJsonDeserializer;
 import ch.ost.mas_se.oop.studyplanner.serializer.StudyModuleJsonSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
 @JsonDeserialize(using = StudyModuleJsonDeserializer.class)
 @JsonSerialize(using = StudyModuleJsonSerializer.class)
-
 public class StudyModule {
   private final String studyModuleKey;
   private final String degreeProgramId;
