@@ -1,5 +1,4 @@
 ## Tech Stack
-
 | Category | Technology | Description |
 |---|---|---|
 | **Core Framework** | Spring Boot 3.4.4 | Full-stack Java framework |
