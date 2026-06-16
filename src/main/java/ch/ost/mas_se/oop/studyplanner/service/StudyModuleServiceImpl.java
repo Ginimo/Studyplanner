@@ -39,21 +39,22 @@ public class StudyModuleServiceImpl implements StudyModuleService {
   public void delete(String degreeProgramId, String key) {
     repository.findAllByDegreeProgramId(degreeProgramId).stream()
         .filter(m -> m.getPrerequisiteKeys().contains(key))
-        .forEach(
-            m -> {
-              List<String> updatedPrereqs = new ArrayList<>(m.getPrerequisiteKeys());
-              updatedPrereqs.remove(key);
-              repository.save(
-                  new StudyModule(
-                      m.getStudyModuleKey(),
-                      m.getDegreeProgramId(),
-                      m.getName(),
-                      m.getDescription(),
-                      m.getEcts(),
-                      updatedPrereqs,
-                      m.getOfferedFrom(),
-                      m.getOfferedTo()));
-            });
+        .forEach(m -> removePrerequisiteAndSave(m, key));
     repository.delete(degreeProgramId, key);
+  }
+
+  private void removePrerequisiteAndSave(StudyModule module, String prerequisiteKey) {
+    List<String> updatedPrereqs = new ArrayList<>(module.getPrerequisiteKeys());
+    updatedPrereqs.remove(prerequisiteKey);
+    repository.save(
+        new StudyModule(
+            module.getStudyModuleKey(),
+            module.getDegreeProgramId(),
+            module.getName(),
+            module.getDescription(),
+            module.getEcts(),
+            updatedPrereqs,
+            module.getOfferedFrom(),
+            module.getOfferedTo()));
   }
 }

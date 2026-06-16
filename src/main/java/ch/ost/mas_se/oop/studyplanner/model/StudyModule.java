@@ -1,7 +1,5 @@
 package ch.ost.mas_se.oop.studyplanner.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -26,16 +24,15 @@ public class StudyModule {
    * @param offeredFrom date from which the module is offered; may be null
    * @param offeredTo date until which the module is offered; null means open-ended
    */
-  @JsonCreator
   public StudyModule(
-      @JsonProperty("studyModuleKey") String studyModuleKey,
-      @JsonProperty("degreeProgramId") String degreeProgramId,
-      @JsonProperty("name") String name,
-      @JsonProperty("description") String description,
-      @JsonProperty("ects") int ects,
-      @JsonProperty("prerequisiteKeys") List<String> prerequisiteKeys,
-      @JsonProperty("offeredFrom") LocalDate offeredFrom,
-      @JsonProperty("offeredTo") LocalDate offeredTo) {
+      String studyModuleKey,
+      String degreeProgramId,
+      String name,
+      String description,
+      int ects,
+      List<String> prerequisiteKeys,
+      LocalDate offeredFrom,
+      LocalDate offeredTo) {
     this.studyModuleKey = Objects.requireNonNull(studyModuleKey);
     this.degreeProgramId = Objects.requireNonNull(degreeProgramId);
     this.name = Objects.requireNonNull(name);

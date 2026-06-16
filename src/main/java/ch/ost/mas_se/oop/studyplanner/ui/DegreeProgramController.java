@@ -4,12 +4,10 @@ import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.DegreeProgramForm;
-import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
+import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleListView;
 import jakarta.validation.Valid;
-import java.time.LocalDate;
 import java.util.stream.Collectors;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -34,7 +32,9 @@ public class DegreeProgramController extends AbstractController {
   public String listDegreePrograms(final Model model) {
     model.addAttribute(
         "degreePrograms",
-        degreeProgramService.findAll().stream().map(this::toView).collect(Collectors.toList()));
+        degreeProgramService.findAll().stream()
+            .map(DegreeProgramView::toView)
+            .collect(Collectors.toList()));
     return "degreeprograms/list";
   }
 
@@ -73,39 +73,17 @@ public class DegreeProgramController extends AbstractController {
    * according to the query parameters.
    */
   @GetMapping("/{id}")
-  public String showDetails(
-      @PathVariable final String id,
-      @RequestParam(value = "nameFilter", required = false) final String nameFilter,
-      @RequestParam(value = "offeredAt", required = false)
-          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-          final LocalDate offeredAt,
-      @RequestParam(value = "sortBy", required = false) final String sortBy,
-      @RequestParam(value = "sortDir", required = false) final String sortDir,
-      final Model model) {
-
+  public String showDetails(@PathVariable final String id, final Model model) {
     DegreeProgram program = requireProgram(id);
 
-    model.addAttribute("degreeProgram", toView(program));
+    model.addAttribute("degreeProgram", DegreeProgramView.toView(program));
 
     model.addAttribute(
         "studyModules",
         studyModuleService.findAllByDegreeProgramId(id).stream()
-            .map(
-                m ->
-                    new StudyModuleListView(
-                        new StudyModuleKey(m.getStudyModuleKey()),
-                        m.getName(),
-                        m.getEcts(),
-                        m.getOfferedFrom(),
-                        m.getOfferedTo(),
-                        !m.getPrerequisiteKeys().isEmpty(),
-                        m.getPrerequisiteKeys().size()))
+            .map(StudyModuleListView::toView)
             .collect(Collectors.toList()));
 
-    model.addAttribute("nameFilter", nameFilter != null ? nameFilter : "");
-    model.addAttribute("offeredAt", offeredAt != null ? offeredAt : LocalDate.now());
-    model.addAttribute("sortBy", sortBy != null ? sortBy : "NAME");
-    model.addAttribute("sortDir", sortDir != null ? sortDir : "ASC");
     return "degreeprograms/details";
   }
 

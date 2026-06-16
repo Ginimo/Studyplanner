@@ -1,7 +1,5 @@
 package ch.ost.mas_se.oop.studyplanner.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 public class DegreeProgram {
@@ -10,12 +8,7 @@ public class DegreeProgram {
   private final String description;
   private final int maxDurationInSemesters;
 
-  @JsonCreator
-  public DegreeProgram(
-      @JsonProperty("id") String id,
-      @JsonProperty("name") String name,
-      @JsonProperty("description") String description,
-      @JsonProperty("maxDurationInSemesters") int maxDurationInSemesters) {
+  public DegreeProgram(String id, String name, String description, int maxDurationInSemesters) {
     this.id = Objects.requireNonNull(id);
     this.name = Objects.requireNonNull(name);
     this.description = description;

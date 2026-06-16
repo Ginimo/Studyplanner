@@ -1,5 +1,7 @@
 package ch.ost.mas_se.oop.studyplanner.ui.views;
 
+import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
+
 public class DegreeProgramView {
 
   private final String id;
@@ -16,6 +18,14 @@ public class DegreeProgramView {
     this.name = name;
     this.description = description;
     this.maxDurationInSemesters = maxDurationInSemesters;
+  }
+
+  public static DegreeProgramView toView(DegreeProgram program) {
+    return new DegreeProgramView(
+        program.getId(),
+        program.getName(),
+        program.getDescription(),
+        program.getMaxDurationInSemesters());
   }
 
   public String getId() {

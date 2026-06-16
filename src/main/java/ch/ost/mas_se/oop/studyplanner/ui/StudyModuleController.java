@@ -4,7 +4,7 @@ import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.StudyModuleForm;
-import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
+import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleView;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -76,11 +76,11 @@ public class StudyModuleController extends AbstractController {
     List<StudyModuleView> prerequisites =
         module.getPrerequisiteKeys().stream()
             .flatMap(key -> studyModuleService.findByKey(degreeProgramId, key).stream())
-            .map(this::toView)
+            .map(StudyModuleView::toView)
             .collect(Collectors.toList());
 
-    model.addAttribute("degreeProgram", toView(requireProgram(degreeProgramId)));
-    model.addAttribute("studyModule", toView(module));
+    model.addAttribute("degreeProgram", DegreeProgramView.toView(requireProgram(degreeProgramId)));
+    model.addAttribute("studyModule", StudyModuleView.toView(module));
     model.addAttribute("prerequisites", prerequisites);
     return "studymodules/details";
   }
@@ -154,7 +154,7 @@ public class StudyModuleController extends AbstractController {
   private String showCreateFormView(
       final String degreeProgramId, final StudyModuleForm form, final Model model) {
     form.setIsNew(true);
-    model.addAttribute("degreeProgram", toView(requireProgram(degreeProgramId)));
+    model.addAttribute("degreeProgram", DegreeProgramView.toView(requireProgram(degreeProgramId)));
     model.addAttribute("formAction", "/degree-programs/" + degreeProgramId + "/study-modules/new");
     model.addAttribute("pageTitle", "New Study Module");
     addAvailableStudyModulesForPrerequisiteSelection(degreeProgramId, null, model);
@@ -168,7 +168,7 @@ public class StudyModuleController extends AbstractController {
       final StudyModuleForm form,
       final Model model) {
     form.setIsNew(false);
-    model.addAttribute("degreeProgram", toView(requireProgram(degreeProgramId)));
+    model.addAttribute("degreeProgram", DegreeProgramView.toView(requireProgram(degreeProgramId)));
     model.addAttribute(
         "formAction",
         "/degree-programs/" + degreeProgramId + "/study-modules/" + studyModuleKey + "/edit");
@@ -188,7 +188,7 @@ public class StudyModuleController extends AbstractController {
     List<StudyModuleView> available =
         studyModuleService.findAllByDegreeProgramId(degreeProgramId).stream()
             .filter(sm -> !sm.getStudyModuleKey().equals(excludeStudyModuleKey))
-            .map(this::toView)
+            .map(StudyModuleView::toView)
             .collect(Collectors.toList());
     model.addAttribute("availableStudyModules", available);
   }
@@ -222,15 +222,5 @@ public class StudyModuleController extends AbstractController {
         form.getPrerequisiteKeys(),
         form.getOfferedFrom(),
         form.getOfferedTo());
-  }
-
-  /** Converts a {@link StudyModule} domain object to its view model. */
-  private StudyModuleView toView(StudyModule module) {
-    return new StudyModuleView(
-        new StudyModuleKey(module.getStudyModuleKey()),
-        module.getName(),
-        module.getDescription(),
-        module.getEcts(),
-        module.getPrerequisiteKeys());
   }
 }

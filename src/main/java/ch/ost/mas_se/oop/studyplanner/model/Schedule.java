@@ -1,7 +1,5 @@
 package ch.ost.mas_se.oop.studyplanner.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,10 +15,7 @@ public class Schedule {
     this.semesters = new ArrayList<>();
   }
 
-  @JsonCreator
-  public Schedule(
-      @JsonProperty("calculatedAt") LocalDateTime calculatedAt,
-      @JsonProperty("semesters") List<Semester> semesters) {
+  public Schedule(LocalDateTime calculatedAt, List<Semester> semesters) {
     this.calculatedAt = calculatedAt;
     this.semesters = semesters != null ? new ArrayList<>(semesters) : new ArrayList<>();
   }

@@ -30,8 +30,7 @@ public class ScheduleServiceImpl implements ScheduleService {
    * @throws CyclicDependencyException if the prerequisite graph contains a cycle
    */
   @Override
-  public Schedule calculate(DegreeProgram program) {
-    List<StudyModule> allModules = studyModuleService.findAllByDegreeProgramId(program.getId());
+  public Schedule calculate(List<StudyModule> allModules) {
 
     // create 3 auxiliary data structures
     Map<String, StudyModule> moduleMap = buildModuleMap(allModules);
@@ -145,7 +144,8 @@ public class ScheduleServiceImpl implements ScheduleService {
 
   @Override
   public void calculateAndSave(DegreeProgram program) {
-    Schedule schedule = calculate(program);
+    List<StudyModule> modules = studyModuleService.findAllByDegreeProgramId(program.getId());
+    Schedule schedule = calculate(modules);
     scheduleRepository.save(program.getId(), schedule);
   }
 
