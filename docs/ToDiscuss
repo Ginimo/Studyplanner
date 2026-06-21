@@ -1,7 +1,0 @@
-
-1. Cyclic Dependency Exception im Save prüfen?
-2. Serializer ausserhalb und innerhalb von repository
-3. Neue Update Funktionalität
-4. In Memory behalten?
-5. Delete / Update Mechanismus optimieren?
-6. Update im Service (statt add)

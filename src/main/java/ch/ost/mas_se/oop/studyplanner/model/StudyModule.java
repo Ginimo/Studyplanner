@@ -16,7 +16,7 @@ public class StudyModule {
   private final String name;
   private final String description;
   private final int ects;
-    private final List<String> prerequisiteKeys;
+  private final List<String> prerequisiteKeys;
   private final LocalDate offeredFrom;
   private final LocalDate offeredTo;
 
