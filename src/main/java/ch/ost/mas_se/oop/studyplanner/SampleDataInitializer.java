@@ -26,6 +26,10 @@ public class SampleDataInitializer implements ApplicationRunner {
   public void run(ApplicationArguments args) {
     String progId = "sample-id-1234";
     LocalDate since = LocalDate.of(2026, 6, 1);
+    LocalDate since2 = LocalDate.of(2026, 7, 1);
+    LocalDate since3 = LocalDate.of(2026, 8, 1);
+    LocalDate to = LocalDate.of(2027, 6, 1);
+    LocalDate to_2 = LocalDate.of(2028, 6, 1);
 
     degreeProgramService.create(
         new DegreeProgram(progId, "BSc Informatik", "Studiengang Informatik der OST", 12));
@@ -42,7 +46,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             4,
             List.of(),
             since,
-            null));
+            to));
     studyModuleService.create(
         new StudyModule(
             "Math",
@@ -51,8 +55,8 @@ public class SampleDataInitializer implements ApplicationRunner {
             "Mathematical foundations for computer science.",
             4,
             List.of(),
-            since,
-            null));
+            since3,
+            to));
     studyModuleService.create(
         new StudyModule(
             "DB1",
@@ -62,7 +66,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             4,
             List.of("OO"),
             since,
-            null));
+            to));
     studyModuleService.create(
         new StudyModule(
             "AD1",
@@ -72,7 +76,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             4,
             List.of("OO"),
             since,
-            null));
+            to));
     studyModuleService.create(
         new StudyModule(
             "AD2",
@@ -82,7 +86,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             4,
             List.of("OO", "AD1"),
             since,
-            null));
+            to_2));
     studyModuleService.create(
         new StudyModule(
             "CPI",
@@ -92,7 +96,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             4,
             List.of("OO", "Math"),
             since,
-            null));
+            to));
     studyModuleService.create(
         new StudyModule(
             "DB2",
@@ -102,7 +106,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             4,
             List.of("DB1"),
             since,
-            null));
+            to_2));
     studyModuleService.create(
         new StudyModule(
             "SE1",
@@ -112,7 +116,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             4,
             List.of("AD1", "CPI", "DB1"),
             since,
-            null));
+            to));
     studyModuleService.create(
         new StudyModule(
             "UI1",
@@ -121,8 +125,8 @@ public class SampleDataInitializer implements ApplicationRunner {
             "Introduction to UI design and implementation.",
             4,
             List.of("AD1"),
-            since,
-            null));
+            since2,
+            to));
     studyModuleService.create(
         new StudyModule(
             "SE2",
@@ -131,8 +135,8 @@ public class SampleDataInitializer implements ApplicationRunner {
             "Advanced software engineering and architecture.",
             4,
             List.of("DB1", "SE1", "UI1"),
-            since,
-            null));
+            since3,
+            to));
     studyModuleService.create(
         new StudyModule(
             "UI2",
@@ -141,8 +145,8 @@ public class SampleDataInitializer implements ApplicationRunner {
             "Advanced UI patterns and frameworks.",
             4,
             List.of("UI1"),
-            since,
-            null));
+            since2,
+            to));
     studyModuleService.create(
         new StudyModule(
             "Thesis",
@@ -152,6 +156,6 @@ public class SampleDataInitializer implements ApplicationRunner {
             12,
             List.of("DB2", "SE2", "UI2"),
             since,
-            null));
+            to));
   }
 }

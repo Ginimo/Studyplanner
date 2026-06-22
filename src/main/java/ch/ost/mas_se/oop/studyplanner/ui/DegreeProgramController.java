@@ -1,6 +1,7 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
+import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.DegreeProgramForm;
@@ -9,6 +10,7 @@ import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleListView;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -32,6 +34,60 @@ public class DegreeProgramController {
       final StudyModuleService studyModuleService) {
     this.degreeProgramService = degreeProgramService;
     this.studyModuleService = studyModuleService;
+  }
+
+  private List<StudyModuleListView> MapfilterAndSort(
+      List<StudyModule> modules,
+      String nameFilter,
+      LocalDate offeredAt,
+      String sortBy,
+      String sortDir) {
+
+    return modules.stream()
+        .filter(m -> nameFilter == null || m.getName().contains(nameFilter))
+        .filter(
+            m ->
+                offeredAt == null
+                    || (m.getOfferedFrom() != null
+                        && m.getOfferedTo() != null
+                        && (offeredAt.isAfter(m.getOfferedFrom())
+                            || offeredAt.isEqual(m.getOfferedFrom()))
+                        && (offeredAt.isBefore(m.getOfferedTo())
+                            || offeredAt.isEqual(m.getOfferedTo()))))
+        .map(
+            m ->
+                new StudyModuleListView(
+                    new StudyModuleKey(m.getStudyModuleKey()),
+                    m.getName(),
+                    m.getEcts(),
+                    m.getOfferedFrom(),
+                    m.getOfferedTo(),
+                    !m.getPrerequisiteKeys().isEmpty(),
+                    m.getPrerequisiteKeys().size()))
+        .sorted(
+            (moduleA, moduleB) -> {
+              if (sortDir == null || sortBy == null) {
+                return moduleA.getName().compareTo(moduleB.getName()); // default
+              }
+              if (sortDir.equals("DESC") && sortBy.equals("NAME")) {
+                return moduleB.getName().compareTo(moduleA.getName());
+              } else if (sortDir.equals("ASC") && sortBy.equals("ECTS")) {
+                return Integer.compare(moduleA.getEcts(), moduleB.getEcts());
+              } else if (sortDir.equals("DESC") && sortBy.equals("ECTS")) {
+                return Integer.compare(moduleB.getEcts(), moduleA.getEcts());
+              } else if (sortDir.equals("ASC") && sortBy.equals("OFFERED_FROM")) {
+                return moduleA.getOfferedFrom().compareTo(moduleB.getOfferedFrom());
+              } else if (sortDir.equals("DESC") && sortBy.equals("OFFERED_FROM")) {
+                return moduleB.getOfferedFrom().compareTo(moduleA.getOfferedFrom());
+              } else if (sortDir.equals("ASC") && sortBy.equals("OFFERED_TO")) {
+                return moduleA.getOfferedTo().compareTo(moduleB.getOfferedTo());
+              } else if (sortDir.equals("DESC") && sortBy.equals("OFFERED_TO")) {
+                return moduleB.getOfferedTo().compareTo(moduleA.getOfferedTo());
+              } else {
+                return moduleA.getName().compareTo(moduleB.getName()); // default
+              }
+            })
+        .collect(Collectors.toList());
   }
 
   /** Renders the list of all degree programs. */
@@ -82,6 +138,11 @@ public class DegreeProgramController {
    * Renders the detail view for a degree program, including its study modules and the current
    * filter/sort state passed as query parameters.
    */
+
+  // private StudyModuleListView Sorting(String sortDir, String sortBy){
+  //
+  // }
+
   @GetMapping("/{id}")
   public String showDetails(
       @PathVariable final String id,
@@ -116,6 +177,16 @@ public class DegreeProgramController {
     model.addAttribute("offeredAt", offeredAt != null ? offeredAt : LocalDate.now());
     model.addAttribute("sortBy", sortBy != null ? sortBy : "NAME");
     model.addAttribute("sortDir", sortDir != null ? sortDir : "ASC");
+
+    model.addAttribute(
+        "studyModules",
+        MapfilterAndSort(
+            studyModuleService.findAllByDegreeProgramId(id),
+            nameFilter,
+            offeredAt,
+            sortBy,
+            sortDir));
+
     return "degreeprograms/details";
   }
 
