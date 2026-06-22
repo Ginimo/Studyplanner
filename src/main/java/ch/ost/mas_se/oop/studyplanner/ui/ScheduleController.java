@@ -48,7 +48,7 @@ public class ScheduleController {
 
     Schedule schedule = resolveSchedule(program, model);
     if (schedule != null) {
-       addScheduleToModel(schedule, model);
+      addScheduleToModel(schedule, model);
     }
 
     return "schedules/view";

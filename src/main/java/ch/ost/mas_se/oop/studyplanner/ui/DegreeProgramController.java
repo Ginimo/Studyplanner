@@ -36,7 +36,7 @@ public class DegreeProgramController {
     this.studyModuleService = studyModuleService;
   }
 
-  private List<StudyModuleListView> MapfilterAndSort(
+  private List<StudyModuleListView> MapFilterAndSort(
       List<StudyModule> modules,
       String nameFilter,
       LocalDate offeredAt,
@@ -180,7 +180,7 @@ public class DegreeProgramController {
 
     model.addAttribute(
         "studyModules",
-        MapfilterAndSort(
+        MapFilterAndSort(
             studyModuleService.findAllByDegreeProgramId(id),
             nameFilter,
             offeredAt,
