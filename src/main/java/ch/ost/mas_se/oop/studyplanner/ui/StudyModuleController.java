@@ -54,8 +54,15 @@ public class StudyModuleController extends AbstractController {
       return showCreateFormView(degreeProgramId, form, model);
     }
 
-    StudyModule module = buildStudyModule(form.getStudyModuleKey(), degreeProgramId, form);
-    studyModuleService.createStudyModule(module);
+    studyModuleService.createStudyModule(
+        form.getStudyModuleKey(),
+        degreeProgramId,
+        form.getName(),
+        form.getDescription(),
+        form.getEcts(),
+        form.getPrerequisiteKeys(),
+        form.getOfferedFrom(),
+        form.getOfferedTo());
 
     redirectAttributes.addFlashAttribute(
         "successMessage", "Study module \"" + form.getName() + "\" created.");
@@ -74,8 +81,9 @@ public class StudyModuleController extends AbstractController {
     StudyModule module = requireStudyModule(degreeProgramId, studyModuleKey);
 
     List<StudyModuleView> prerequisites =
-        module.getPrerequisiteKeys().stream()
-            .flatMap(key -> studyModuleService.findStudyModuleByKey(degreeProgramId, key).stream())
+        studyModuleService
+            .findStudyModulesByKeys(degreeProgramId, module.getPrerequisiteKeys())
+            .stream()
             .map(StudyModuleView::from)
             .collect(Collectors.toList());
 
@@ -124,8 +132,15 @@ public class StudyModuleController extends AbstractController {
       return showEditFormView(degreeProgramId, studyModuleKey, form, model);
     }
 
-    StudyModule module = buildStudyModule(studyModuleKey, degreeProgramId, form);
-    studyModuleService.updateStudyModule(module);
+    studyModuleService.updateStudyModule(
+        studyModuleKey,
+        degreeProgramId,
+        form.getName(),
+        form.getDescription(),
+        form.getEcts(),
+        form.getPrerequisiteKeys(),
+        form.getOfferedFrom(),
+        form.getOfferedTo());
 
     redirectAttributes.addFlashAttribute(
         "successMessage", "Study module \"" + form.getName() + "\" updated.");
@@ -208,18 +223,5 @@ public class StudyModuleController extends AbstractController {
             () ->
                 new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Study module not found: " + studyModuleKey));
-  }
-
-  private StudyModule buildStudyModule(
-      final String key, final String degreeProgramId, final StudyModuleForm form) {
-    return new StudyModule(
-        key,
-        degreeProgramId,
-        form.getName(),
-        form.getDescription(),
-        form.getEcts(),
-        form.getPrerequisiteKeys(),
-        form.getOfferedFrom(),
-        form.getOfferedTo());
   }
 }

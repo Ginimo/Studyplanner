@@ -1,13 +1,22 @@
 package ch.ost.mas_se.oop.studyplanner.service;
 
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 public interface StudyModuleService {
 
-  /** Persists a new study module. */
-  void createStudyModule(StudyModule module);
+  /** Constructs and persists a new study module from the given field values. */
+  void createStudyModule(
+      String key,
+      String degreeProgramId,
+      String name,
+      String description,
+      int ects,
+      List<String> prerequisiteKeys,
+      LocalDate offeredFrom,
+      LocalDate offeredTo);
 
   /**
    * Returns the study module identified by the composite key ({@code degreeProgramId}, {@code
@@ -19,10 +28,24 @@ public interface StudyModuleService {
   List<StudyModule> findAllStudyModulesByDegreeProgramId(String degreeProgramId);
 
   /**
-   * Replaces the stored study module matching {@code module}'s composite key with the given updated
-   * version.
+   * Returns all study modules in {@code degreeProgramId} whose key appears in {@code keys}. Loads
+   * the program's modules once and filters by a set lookup; unknown keys are silently skipped.
    */
-  void updateStudyModule(StudyModule module);
+  List<StudyModule> findStudyModulesByKeys(String degreeProgramId, List<String> keys);
+
+  /**
+   * Constructs a replacement and persists it, matching the stored module by its composite key
+   * ({@code key}, {@code degreeProgramId}).
+   */
+  void updateStudyModule(
+      String key,
+      String degreeProgramId,
+      String name,
+      String description,
+      int ects,
+      List<String> prerequisiteKeys,
+      LocalDate offeredFrom,
+      LocalDate offeredTo);
 
   /**
    * Deletes the study module identified by ({@code degreeProgramId}, {@code key}) and removes its

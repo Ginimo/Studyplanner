@@ -2,9 +2,12 @@ package ch.ost.mas_se.oop.studyplanner.service;
 
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.repository.StudyModuleRepository;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,8 +19,25 @@ public class StudyModuleServiceImpl implements StudyModuleService {
   }
 
   @Override
-  public void createStudyModule(StudyModule module) {
-    repository.saveStudyModule(module);
+  public void createStudyModule(
+      String key,
+      String degreeProgramId,
+      String name,
+      String description,
+      int ects,
+      List<String> prerequisiteKeys,
+      LocalDate offeredFrom,
+      LocalDate offeredTo) {
+    repository.saveStudyModule(
+        new StudyModule(
+            key,
+            degreeProgramId,
+            name,
+            description,
+            ects,
+            prerequisiteKeys,
+            offeredFrom,
+            offeredTo));
   }
 
   @Override
@@ -31,8 +51,37 @@ public class StudyModuleServiceImpl implements StudyModuleService {
   }
 
   @Override
-  public void updateStudyModule(StudyModule module) {
-    repository.saveStudyModule(module);
+  public List<StudyModule> findStudyModulesByKeys(String degreeProgramId, List<String> keys) {
+    Set<String> keySet = new HashSet<>(keys);
+    List<StudyModule> result = new ArrayList<>();
+    for (StudyModule m : repository.findAllStudyModulesByDegreeProgramId(degreeProgramId)) {
+      if (keySet.contains(m.getStudyModuleKey())) {
+        result.add(m);
+      }
+    }
+    return result;
+  }
+
+  @Override
+  public void updateStudyModule(
+      String key,
+      String degreeProgramId,
+      String name,
+      String description,
+      int ects,
+      List<String> prerequisiteKeys,
+      LocalDate offeredFrom,
+      LocalDate offeredTo) {
+    repository.saveStudyModule(
+        new StudyModule(
+            key,
+            degreeProgramId,
+            name,
+            description,
+            ects,
+            prerequisiteKeys,
+            offeredFrom,
+            offeredTo));
   }
 
   @Override
