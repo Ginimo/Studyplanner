@@ -1,7 +1,6 @@
 package ch.ost.mas_se.oop.studyplanner;
 
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
-import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import java.time.LocalDate;
@@ -24,134 +23,126 @@ public class SampleDataInitializer implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
-    String progId = "sample-id-1234";
+    if (!degreeProgramService.findAllDegreePrograms().isEmpty()) {
+      return;
+    }
+
     LocalDate since = LocalDate.of(2026, 6, 1);
 
-    degreeProgramService.create(
-        new DegreeProgram(progId, "BSc Informatik", "Studiengang Informatik der OST", 12));
-    degreeProgramService.create(
-        new DegreeProgram(
-            "sample-id-5678", "BSc Soziale Arbeit", "Studiengang Soziale Arbeit der OST", 12));
+    DegreeProgram bscInfo =
+        degreeProgramService.createDegreeProgram(
+            "BSc Informatik", "Studiengang Informatik der OST", 12);
+    degreeProgramService.createDegreeProgram(
+        "BSc Soziale Arbeit", "Studiengang Soziale Arbeit der OST", 12);
+    String progId = bscInfo.getId();
 
-    studyModuleService.create(
-        new StudyModule(
-            "OO",
-            progId,
-            "Object-Oriented Programming",
-            "Foundations of object-oriented design and programming.",
-            4,
-            List.of(),
-            since,
-            null));
-    studyModuleService.create(
-        new StudyModule(
-            "Math",
-            progId,
-            "Mathematics",
-            "Mathematical foundations for computer science.",
-            4,
-            List.of(),
-            since,
-            null));
-    studyModuleService.create(
-        new StudyModule(
-            "DB1",
-            progId,
-            "Databases 1",
-            "Introduction to relational databases and SQL.",
-            4,
-            List.of("OO"),
-            since,
-            null));
-    studyModuleService.create(
-        new StudyModule(
-            "AD1",
-            progId,
-            "Algorithms and Data Structures 1",
-            "Fundamental algorithms and data structures.",
-            4,
-            List.of("OO"),
-            since,
-            null));
-    studyModuleService.create(
-        new StudyModule(
-            "AD2",
-            progId,
-            "Algorithms and Data Structures 2",
-            "Advanced algorithms and data structures.",
-            4,
-            List.of("OO", "AD1"),
-            since,
-            null));
-    studyModuleService.create(
-        new StudyModule(
-            "CPI",
-            progId,
-            "Computer Programming and Interfaces",
-            "Advanced programming concepts and interfaces.",
-            4,
-            List.of("OO", "Math"),
-            since,
-            null));
-    studyModuleService.create(
-        new StudyModule(
-            "DB2",
-            progId,
-            "Databases 2",
-            "Advanced database concepts and NoSQL.",
-            4,
-            List.of("DB1"),
-            since,
-            null));
-    studyModuleService.create(
-        new StudyModule(
-            "SE1",
-            progId,
-            "Software Engineering 1",
-            "Software development processes and practices.",
-            4,
-            List.of("AD1", "CPI", "DB1"),
-            since,
-            null));
-    studyModuleService.create(
-        new StudyModule(
-            "UI1",
-            progId,
-            "User Interfaces 1",
-            "Introduction to UI design and implementation.",
-            4,
-            List.of("AD1"),
-            since,
-            null));
-    studyModuleService.create(
-        new StudyModule(
-            "SE2",
-            progId,
-            "Software Engineering 2",
-            "Advanced software engineering and architecture.",
-            4,
-            List.of("DB1", "SE1", "UI1"),
-            since,
-            null));
-    studyModuleService.create(
-        new StudyModule(
-            "UI2",
-            progId,
-            "User Interfaces 2",
-            "Advanced UI patterns and frameworks.",
-            4,
-            List.of("UI1"),
-            since,
-            null));
-    studyModuleService.create(
-        new StudyModule(
-            "Thesis",
-            progId,
-            "Bachelor Thesis",
-            "Independent research project and thesis.",
-            12,
-            List.of("DB2", "SE2", "UI2"),
-            since,
-            null));
+    studyModuleService.createStudyModule(
+        "OO",
+        progId,
+        "Object-Oriented Programming",
+        "Foundations of object-oriented design and programming.",
+        4,
+        List.of(),
+        since,
+        null);
+    studyModuleService.createStudyModule(
+        "Math",
+        progId,
+        "Mathematics",
+        "Mathematical foundations for computer science.",
+        4,
+        List.of(),
+        since,
+        null);
+    studyModuleService.createStudyModule(
+        "DB1",
+        progId,
+        "Databases 1",
+        "Introduction to relational databases and SQL.",
+        4,
+        List.of("OO"),
+        since,
+        null);
+    studyModuleService.createStudyModule(
+        "AD1",
+        progId,
+        "Algorithms and Data Structures 1",
+        "Fundamental algorithms and data structures.",
+        4,
+        List.of("OO"),
+        since,
+        null);
+    studyModuleService.createStudyModule(
+        "AD2",
+        progId,
+        "Algorithms and Data Structures 2",
+        "Advanced algorithms and data structures.",
+        4,
+        List.of("OO", "AD1"),
+        since,
+        null);
+    studyModuleService.createStudyModule(
+        "CPI",
+        progId,
+        "Computer Programming and Interfaces",
+        "Advanced programming concepts and interfaces.",
+        4,
+        List.of("OO", "Math"),
+        since,
+        null);
+    studyModuleService.createStudyModule(
+        "DB2",
+        progId,
+        "Databases 2",
+        "Advanced database concepts and NoSQL.",
+        4,
+        List.of("DB1"),
+        since,
+        null);
+    studyModuleService.createStudyModule(
+        "SE1",
+        progId,
+        "Software Engineering 1",
+        "Software development processes and practices.",
+        4,
+        List.of("AD1", "CPI", "DB1"),
+        since,
+        null);
+    studyModuleService.createStudyModule(
+        "UI1",
+        progId,
+        "User Interfaces 1",
+        "Introduction to UI design and implementation.",
+        4,
+        List.of("AD1"),
+        since,
+        null);
+    studyModuleService.createStudyModule(
+        "SE2",
+        progId,
+        "Software Engineering 2",
+        "Advanced software engineering and architecture.",
+        4,
+        List.of("DB1", "SE1", "UI1"),
+        since,
+        null);
+    studyModuleService.createStudyModule(
+        "UI2",
+        progId,
+        "User Interfaces 2",
+        "Advanced UI patterns and frameworks.",
+        4,
+        List.of("UI1"),
+        since,
+        null);
+    studyModuleService.createStudyModule(
+        "Thesis",
+        progId,
+        "Bachelor Thesis",
+        "Independent research project and thesis.",
+        12,
+        List.of("DB2", "SE2", "UI2"),
+        since,
+        null);
   }
 }

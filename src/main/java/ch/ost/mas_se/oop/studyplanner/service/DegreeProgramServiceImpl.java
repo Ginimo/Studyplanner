@@ -4,38 +4,55 @@ import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.repository.DegreeProgramRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DegreeProgramServiceImpl implements DegreeProgramService {
   private final DegreeProgramRepository repository;
+  private final StudyModuleService studyModuleService;
+  private final ScheduleService scheduleService;
 
-  public DegreeProgramServiceImpl(DegreeProgramRepository repository) {
+  public DegreeProgramServiceImpl(
+      DegreeProgramRepository repository,
+      StudyModuleService studyModuleService,
+      ScheduleService scheduleService) {
     this.repository = repository;
+    this.studyModuleService = studyModuleService;
+    this.scheduleService = scheduleService;
   }
 
   @Override
-  public void create(DegreeProgram program) {
-    repository.save(program);
+  public DegreeProgram createDegreeProgram(
+      String name, String description, int maxDurationInSemesters) {
+    DegreeProgram program =
+        new DegreeProgram(UUID.randomUUID().toString(), name, description, maxDurationInSemesters);
+    repository.saveDegreeProgram(program);
+    return program;
   }
 
   @Override
-  public Optional<DegreeProgram> findById(String id) {
-    return repository.findById(id);
+  public Optional<DegreeProgram> findDegreeProgramById(String id) {
+    return repository.findDegreeProgramById(id);
   }
 
   @Override
-  public List<DegreeProgram> findAll() {
-    return repository.findAll();
+  public List<DegreeProgram> findAllDegreePrograms() {
+    return repository.findAllDegreePrograms();
   }
 
   @Override
-  public void update(DegreeProgram program) {
-    repository.save(program);
+  public void updateDegreeProgram(
+      String id, String name, String description, int maxDurationInSemesters) {
+    repository.saveDegreeProgram(new DegreeProgram(id, name, description, maxDurationInSemesters));
   }
 
   @Override
-  public void delete(String id) {
-    repository.delete(id);
+  public void deleteDegreeProgram(String id) {
+    studyModuleService
+        .findAllStudyModulesByDegreeProgramId(id)
+        .forEach(m -> studyModuleService.deleteStudyModule(id, m.getStudyModuleKey()));
+    scheduleService.deleteSchedule(id);
+    repository.deleteDegreeProgram(id);
   }
 }

@@ -17,7 +17,7 @@ public class WelcomeController {
   /** Renders the welcome page with the total number of registered degree programs. */
   @GetMapping("/")
   public String welcome(Model model) {
-    model.addAttribute("programCount", degreeProgramService.findAll().size());
+    model.addAttribute("programCount", degreeProgramService.findAllDegreePrograms().size());
     return "welcome";
   }
 }

@@ -5,15 +5,19 @@ import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.model.Schedule;
 import ch.ost.mas_se.oop.studyplanner.model.Semester;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
+import ch.ost.mas_se.oop.studyplanner.repository.ScheduleRepository;
 import java.util.*;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
   private final StudyModuleService studyModuleService;
+  private final ScheduleRepository scheduleRepository;
 
-  public ScheduleServiceImpl(StudyModuleService studyModuleService) {
+  public ScheduleServiceImpl(
+      StudyModuleService studyModuleService, ScheduleRepository scheduleRepository) {
     this.studyModuleService = studyModuleService;
+    this.scheduleRepository = scheduleRepository;
   }
 
   /**
@@ -26,10 +30,9 @@ public class ScheduleServiceImpl implements ScheduleService {
    * @throws CyclicDependencyException if the prerequisite graph contains a cycle
    */
   @Override
-  public Schedule calculate(DegreeProgram program) {
-    List<StudyModule> allModules = studyModuleService.findAllByDegreeProgramId(program.getId());
+  public Schedule calculateSchedule(List<StudyModule> allModules) {
 
-    // create 3 auxiliary data structures
+    // build 3 auxiliary data structures
     Map<String, StudyModule> moduleMap = buildModuleMap(allModules);
     Map<String, Integer> inDegree = buildInDegree(allModules, moduleMap.keySet());
     Map<String, List<String>> dependents = buildDependents(allModules, moduleMap.keySet());
@@ -137,5 +140,23 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
     Collections.sort(cycleKeys);
     return cycleKeys;
+  }
+
+  @Override
+  public void calculateAndSaveSchedule(DegreeProgram program) {
+    List<StudyModule> modules =
+        studyModuleService.findAllStudyModulesByDegreeProgramId(program.getId());
+    Schedule schedule = calculateSchedule(modules);
+    scheduleRepository.saveSchedule(program.getId(), schedule);
+  }
+
+  @Override
+  public Optional<Schedule> findScheduleByDegreeProgramId(String degreeProgramId) {
+    return scheduleRepository.findScheduleByDegreeProgramId(degreeProgramId);
+  }
+
+  @Override
+  public void deleteSchedule(String degreeProgramId) {
+    scheduleRepository.deleteSchedule(degreeProgramId);
   }
 }
