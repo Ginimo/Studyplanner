@@ -21,12 +21,12 @@ public interface StudyModuleRepository {
   /** Returns all study modules belonging to the given degree program in insertion order. */
   List<StudyModule> findAllStudyModulesByDegreeProgramId(String degreeProgramId);
 
-  /**
-   * Removes the study module identified by the composite key ({@code degreeProgramId}, {@code
-   * studyModuleKey}). No-op if it does not exist.
-   */
-  void deleteStudyModule(String degreeProgramId, String studyModuleKey);
-
   /** Removes all study modules belonging to the given degree program. No-op if none exist. */
   void deleteAllStudyModulesByDegreeProgramId(String degreeProgramId);
+
+  /**
+   * Replaces all study modules belonging to {@code degreeProgramId} with {@code modules} in a
+   * single read/write cycle. Modules belonging to other degree programs are not affected.
+   */
+  void replaceAllStudyModulesForProgram(String degreeProgramId, List<StudyModule> modules);
 }

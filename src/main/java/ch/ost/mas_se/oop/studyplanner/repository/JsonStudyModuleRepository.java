@@ -68,19 +68,17 @@ public class JsonStudyModuleRepository extends AbstractJsonRepository<List<Study
   }
 
   @Override
-  public void deleteStudyModule(String degreeProgramId, String studyModuleKey) {
+  public void deleteAllStudyModulesByDegreeProgramId(String degreeProgramId) {
     List<StudyModule> list = load();
-    list.removeIf(
-        module ->
-            module.getDegreeProgramId().equals(degreeProgramId)
-                && module.getStudyModuleKey().equals(studyModuleKey));
+    list.removeIf(module -> module.getDegreeProgramId().equals(degreeProgramId));
     store(list);
   }
 
   @Override
-  public void deleteAllStudyModulesByDegreeProgramId(String degreeProgramId) {
+  public void replaceAllStudyModulesForProgram(String degreeProgramId, List<StudyModule> modules) {
     List<StudyModule> list = load();
     list.removeIf(module -> module.getDegreeProgramId().equals(degreeProgramId));
+    list.addAll(modules);
     store(list);
   }
 }

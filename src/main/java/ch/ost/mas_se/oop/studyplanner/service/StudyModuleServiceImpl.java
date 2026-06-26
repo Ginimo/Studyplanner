@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -96,12 +97,16 @@ public class StudyModuleServiceImpl implements StudyModuleService {
 
   @Override
   public void deleteStudyModule(String degreeProgramId, String studyModuleKey) {
-    studyModuleRepository.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
-        .filter(module -> module.getPrerequisiteKeys().contains(studyModuleKey))
-        .forEach(
-            module ->
-                studyModuleRepository.saveStudyModule(module.withoutPrerequisite(studyModuleKey)));
-    studyModuleRepository.deleteStudyModule(degreeProgramId, studyModuleKey);
+    List<StudyModule> updated =
+        studyModuleRepository.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
+            .filter(module -> !module.getStudyModuleKey().equals(studyModuleKey))
+            .map(
+                module ->
+                    module.getPrerequisiteKeys().contains(studyModuleKey)
+                        ? module.withoutPrerequisite(studyModuleKey)
+                        : module)
+            .collect(Collectors.toList());
+    studyModuleRepository.replaceAllStudyModulesForProgram(degreeProgramId, updated);
     scheduleRepository.deleteSchedule(degreeProgramId);
   }
 }
