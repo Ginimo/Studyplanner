@@ -5,9 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
+import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
+import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
+import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.StudyModuleForm;
-import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
-import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleView;
 import java.util.List;
 import java.util.Optional;
@@ -27,24 +29,25 @@ class StudyModuleControllerTest {
   private static final String PROGRAM_ID = "prog-1";
   private static final String STUDY_MODULE_KEY = "OOP1";
 
-  @Mock private DummyDataGenerator dummyDataGenerator;
+  @Mock private DegreeProgramService degreeProgramService;
+  @Mock private StudyModuleService studyModuleService;
   @Mock private BindingResult bindingResult;
 
   @InjectMocks private StudyModuleController testee;
 
-  private static DegreeProgramView testProgramView() {
-    return new DegreeProgramView(PROGRAM_ID, "Software Engineering", "", 6);
+  private static DegreeProgram testProgram() {
+    return new DegreeProgram(PROGRAM_ID, "Software Engineering", "", 6);
   }
 
-  private static StudyModuleView testStudyModuleView() {
-    return new StudyModuleView(new StudyModuleKey(STUDY_MODULE_KEY), "OOP 1", "", 4, List.of());
+  private static StudyModule testStudyModule() {
+    return new StudyModule(STUDY_MODULE_KEY, PROGRAM_ID, "OOP 1", "", 4, List.of(), null, null);
   }
 
   @Test
   void showCreateForm_returnsFormViewWithEmptyForm() {
-    when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID))
-        .thenReturn(Optional.of(testProgramView()));
-    when(dummyDataGenerator.getStudyModuleViewByProgramId(PROGRAM_ID)).thenReturn(List.of());
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
+    when(studyModuleService.findAllStudyModulesByDegreeProgramId(PROGRAM_ID)).thenReturn(List.of());
     var model = new ConcurrentModel();
 
     String view = testee.showCreateForm(PROGRAM_ID, model);
@@ -52,13 +55,16 @@ class StudyModuleControllerTest {
     assertThat(view).isEqualTo("studymodules/form");
     StudyModuleForm form = (StudyModuleForm) model.getAttribute("studyModule");
     assertThat(form).isNotNull();
-    assertThat(form.getIsNew()).isTrue();
+    assertThat(form.isNewEntry()).isTrue();
   }
 
   @Test
   void createStudyModule_withValidForm_redirectsToProgram() {
     when(bindingResult.hasErrors()).thenReturn(false);
+    when(studyModuleService.findStudyModuleByKey(PROGRAM_ID, STUDY_MODULE_KEY))
+        .thenReturn(Optional.empty());
     StudyModuleForm form = new StudyModuleForm();
+    form.setStudyModuleKey(STUDY_MODULE_KEY);
     form.setName("OOP 1");
     var redirectAttributes = new RedirectAttributesModelMap();
 
@@ -73,9 +79,9 @@ class StudyModuleControllerTest {
   @Test
   void createStudyModule_withInvalidForm_returnsFormView() {
     when(bindingResult.hasErrors()).thenReturn(true);
-    when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID))
-        .thenReturn(Optional.of(testProgramView()));
-    when(dummyDataGenerator.getStudyModuleViewByProgramId(PROGRAM_ID)).thenReturn(List.of());
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
+    when(studyModuleService.findAllStudyModulesByDegreeProgramId(PROGRAM_ID)).thenReturn(List.of());
 
     String view =
         testee.createStudyModule(
@@ -90,23 +96,23 @@ class StudyModuleControllerTest {
 
   @Test
   void showDetails_returnsDetailsViewWithStudyModuleAndPrerequisites() {
-    StudyModuleView studyModuleView = testStudyModuleView();
-    when(dummyDataGenerator.getStudyModuleViewByKey(STUDY_MODULE_KEY))
-        .thenReturn(Optional.of(studyModuleView));
-    when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID))
-        .thenReturn(Optional.of(testProgramView()));
+    when(studyModuleService.findStudyModuleByKey(PROGRAM_ID, STUDY_MODULE_KEY))
+        .thenReturn(Optional.of(testStudyModule()));
+    when(studyModuleService.findStudyModulesByKeys(PROGRAM_ID, List.of())).thenReturn(List.of());
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
     var model = new ConcurrentModel();
 
     String view = testee.showDetails(PROGRAM_ID, STUDY_MODULE_KEY, model);
 
     assertThat(view).isEqualTo("studymodules/details");
-    assertThat(model.getAttribute("studyModule")).isSameAs(studyModuleView);
+    assertThat(model.getAttribute("studyModule")).isInstanceOf(StudyModuleView.class);
     assertThat(model.getAttribute("prerequisites")).isNotNull();
   }
 
   @Test
   void showDetails_withUnknownStudyModuleKey_throwsNotFoundException() {
-    when(dummyDataGenerator.getStudyModuleViewByKey(any())).thenReturn(Optional.empty());
+    when(studyModuleService.findStudyModuleByKey(any(), any())).thenReturn(Optional.empty());
 
     assertThatThrownBy(
             () -> testee.showDetails(PROGRAM_ID, STUDY_MODULE_KEY, new ConcurrentModel()))
@@ -114,13 +120,12 @@ class StudyModuleControllerTest {
   }
 
   @Test
-  void showEditForm_returnsFormViewWithValuesFromView() {
-    StudyModuleView view = testStudyModuleView();
-    when(dummyDataGenerator.getStudyModuleViewByKey(STUDY_MODULE_KEY))
-        .thenReturn(Optional.of(view));
-    when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID))
-        .thenReturn(Optional.of(testProgramView()));
-    when(dummyDataGenerator.getStudyModuleViewByProgramId(PROGRAM_ID)).thenReturn(List.of());
+  void showEditForm_returnsFormViewWithValuesFromModule() {
+    when(studyModuleService.findStudyModuleByKey(PROGRAM_ID, STUDY_MODULE_KEY))
+        .thenReturn(Optional.of(testStudyModule()));
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
+    when(studyModuleService.findAllStudyModulesByDegreeProgramId(PROGRAM_ID)).thenReturn(List.of());
     var model = new ConcurrentModel();
 
     String result = testee.showEditForm(PROGRAM_ID, STUDY_MODULE_KEY, model);
@@ -128,7 +133,7 @@ class StudyModuleControllerTest {
     assertThat(result).isEqualTo("studymodules/form");
     StudyModuleForm form = (StudyModuleForm) model.getAttribute("studyModule");
     assertThat(form).isNotNull();
-    assertThat(form.getIsNew()).isFalse();
+    assertThat(form.isNewEntry()).isFalse();
     assertThat(form.getName()).isEqualTo("OOP 1");
   }
 
@@ -155,9 +160,9 @@ class StudyModuleControllerTest {
   @Test
   void updateStudyModule_withInvalidForm_returnsFormView() {
     when(bindingResult.hasErrors()).thenReturn(true);
-    when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID))
-        .thenReturn(Optional.of(testProgramView()));
-    when(dummyDataGenerator.getStudyModuleViewByProgramId(PROGRAM_ID)).thenReturn(List.of());
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
+    when(studyModuleService.findAllStudyModulesByDegreeProgramId(PROGRAM_ID)).thenReturn(List.of());
 
     String view =
         testee.updateStudyModule(
@@ -173,8 +178,8 @@ class StudyModuleControllerTest {
 
   @Test
   void deleteStudyModule_redirectsToProgram() {
-    when(dummyDataGenerator.getStudyModuleViewByKey(STUDY_MODULE_KEY))
-        .thenReturn(Optional.of(testStudyModuleView()));
+    when(studyModuleService.findStudyModuleByKey(PROGRAM_ID, STUDY_MODULE_KEY))
+        .thenReturn(Optional.of(testStudyModule()));
     var redirectAttributes = new RedirectAttributesModelMap();
 
     String view = testee.deleteStudyModule(PROGRAM_ID, STUDY_MODULE_KEY, redirectAttributes);

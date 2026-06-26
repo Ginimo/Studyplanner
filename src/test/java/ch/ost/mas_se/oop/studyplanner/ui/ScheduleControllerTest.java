@@ -3,9 +3,13 @@ package ch.ost.mas_se.oop.studyplanner.ui;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
+import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
+import ch.ost.mas_se.oop.studyplanner.model.Schedule;
+import ch.ost.mas_se.oop.studyplanner.model.Semester;
+import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
+import ch.ost.mas_se.oop.studyplanner.service.ScheduleService;
+import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.views.ScheduleView;
-import ch.ost.mas_se.oop.studyplanner.ui.views.SemesterView;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -22,51 +26,52 @@ class ScheduleControllerTest {
 
   private static final String PROGRAM_ID = "prog-1";
 
-  @Mock private DummyDataGenerator dummyDataGenerator;
+  @Mock private DegreeProgramService degreeProgramService;
+  @Mock private ScheduleService scheduleService;
+  @Mock private StudyModuleService studyModuleService;
 
   @InjectMocks private ScheduleController testee;
 
-  private static DegreeProgramView testProgramView() {
-    return new DegreeProgramView(PROGRAM_ID, "Software Engineering", "", 6);
+  private static DegreeProgram testProgram() {
+    return new DegreeProgram(PROGRAM_ID, "Software Engineering", "", 6);
   }
 
   @Test
   void showSchedule_withoutExistingSchedule_returnsViewWithProgramOnly() {
-    DegreeProgramView programView = testProgramView();
-    when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(programView));
-    when(dummyDataGenerator.getScheduleViewForProgram(PROGRAM_ID)).thenReturn(Optional.empty());
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
+    when(scheduleService.findScheduleByDegreeProgramId(PROGRAM_ID)).thenReturn(Optional.empty());
     var model = new ConcurrentModel();
 
     String view = testee.showSchedule(PROGRAM_ID, model);
 
     assertThat(view).isEqualTo("schedules/view");
-    assertThat(model.getAttribute("degreeProgram")).isSameAs(programView);
+    assertThat(model.getAttribute("degreeProgram")).isNotNull();
     assertThat(model.getAttribute("schedule")).isNull();
     assertThat(model.getAttribute("semesterViews")).isNull();
   }
 
   @Test
   void showSchedule_withExistingSchedule_addsScheduleAndSemesterViewsToModel() {
-    DegreeProgramView programView = testProgramView();
-    ScheduleView scheduleView = new ScheduleView(LocalDateTime.now(), 3);
-    List<SemesterView> semesterViews = List.of();
-    when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(programView));
-    when(dummyDataGenerator.getScheduleViewForProgram(PROGRAM_ID))
-        .thenReturn(Optional.of(scheduleView));
-    when(dummyDataGenerator.getSemesterViewForProgram(PROGRAM_ID)).thenReturn(semesterViews);
+    Schedule schedule = new Schedule(LocalDateTime.now(), List.of(new Semester(1, List.of())));
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
+    when(scheduleService.findScheduleByDegreeProgramId(PROGRAM_ID))
+        .thenReturn(Optional.of(schedule));
+    when(studyModuleService.findAllStudyModulesByDegreeProgramId(PROGRAM_ID)).thenReturn(List.of());
     var model = new ConcurrentModel();
 
     String view = testee.showSchedule(PROGRAM_ID, model);
 
     assertThat(view).isEqualTo("schedules/view");
-    assertThat(model.getAttribute("schedule")).isSameAs(scheduleView);
-    assertThat(model.getAttribute("semesterViews")).isSameAs(semesterViews);
+    assertThat(model.getAttribute("schedule")).isInstanceOf(ScheduleView.class);
+    assertThat(model.getAttribute("semesterViews")).isNotNull();
   }
 
   @Test
   void calculateSchedule_redirectsWithSuccessMessage() {
-    when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID))
-        .thenReturn(Optional.of(testProgramView()));
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
     var redirectAttributes = new RedirectAttributesModelMap();
 
     String view = testee.calculateSchedule(PROGRAM_ID, redirectAttributes);

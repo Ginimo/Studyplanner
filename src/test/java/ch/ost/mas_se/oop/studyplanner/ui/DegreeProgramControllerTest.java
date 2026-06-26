@@ -5,8 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
+import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
+import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.DegreeProgramForm;
-import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -24,18 +26,19 @@ class DegreeProgramControllerTest {
 
   private static final String PROGRAM_ID = "prog-1";
 
-  @Mock private DummyDataGenerator dummyDataGenerator;
+  @Mock private DegreeProgramService degreeProgramService;
+  @Mock private StudyModuleService studyModuleService;
   @Mock private BindingResult bindingResult;
 
   @InjectMocks private DegreeProgramController testee;
 
-  private static DegreeProgramView testProgramView() {
-    return new DegreeProgramView(PROGRAM_ID, "Software Engineering", "A great program.", 6);
+  private static DegreeProgram testProgram() {
+    return new DegreeProgram(PROGRAM_ID, "Software Engineering", "A great program.", 6);
   }
 
   @Test
   void listDegreePrograms_returnsListViewWithPrograms() {
-    when(dummyDataGenerator.getListOfDegreePrograms()).thenReturn(List.of(testProgramView()));
+    when(degreeProgramService.findAllDegreePrograms()).thenReturn(List.of(testProgram()));
     var model = new ConcurrentModel();
 
     String view = testee.listDegreePrograms(model);
@@ -84,32 +87,30 @@ class DegreeProgramControllerTest {
 
   @Test
   void showDetails_returnsDetailsViewWithProgramAndStudyModules() {
-    DegreeProgramView programView = testProgramView();
-    when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID)).thenReturn(Optional.of(programView));
-    when(dummyDataGenerator.getStudyModuleListViewEntriesByProgramId(PROGRAM_ID))
-        .thenReturn(List.of());
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
+    when(studyModuleService.findAllStudyModulesByDegreeProgramId(PROGRAM_ID)).thenReturn(List.of());
     var model = new ConcurrentModel();
 
-    String view = testee.showDetails(PROGRAM_ID, null, null, null, null, model);
+    String view = testee.showDetails(PROGRAM_ID, model);
 
     assertThat(view).isEqualTo("degreeprograms/details");
-    assertThat(model.getAttribute("degreeProgram")).isSameAs(programView);
+    assertThat(model.getAttribute("degreeProgram")).isNotNull();
     assertThat(model.getAttribute("studyModules")).isNotNull();
   }
 
   @Test
   void showDetails_withUnknownId_throwsNotFoundException() {
-    when(dummyDataGenerator.getDegreeProgramById(any())).thenReturn(Optional.empty());
+    when(degreeProgramService.findDegreeProgramById(any())).thenReturn(Optional.empty());
 
-    assertThatThrownBy(
-            () -> testee.showDetails("unknown-id", null, null, null, null, new ConcurrentModel()))
+    assertThatThrownBy(() -> testee.showDetails("unknown-id", new ConcurrentModel()))
         .isInstanceOf(ResponseStatusException.class);
   }
 
   @Test
-  void showEditForm_returnsFormViewWithValuesFromView() {
-    when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID))
-        .thenReturn(Optional.of(testProgramView()));
+  void showEditForm_returnsFormViewWithValuesFromProgram() {
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
     var model = new ConcurrentModel();
 
     String view = testee.showEditForm(PROGRAM_ID, model);
@@ -157,8 +158,8 @@ class DegreeProgramControllerTest {
 
   @Test
   void deleteDegreeProgram_redirectsToDegreePrograms() {
-    when(dummyDataGenerator.getDegreeProgramById(PROGRAM_ID))
-        .thenReturn(Optional.of(testProgramView()));
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
     var redirectAttributes = new RedirectAttributesModelMap();
 
     String view = testee.deleteDegreeProgram(PROGRAM_ID, redirectAttributes);
