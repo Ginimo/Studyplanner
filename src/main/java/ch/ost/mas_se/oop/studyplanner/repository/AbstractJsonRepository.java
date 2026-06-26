@@ -5,16 +5,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.springframework.beans.factory.annotation.Value;
 
 abstract class AbstractJsonRepository<T> {
 
   protected final ObjectMapper mapper;
 
+  @Value("${studyplanner.data.dir}")
+  private Path dataDir;
+
   protected AbstractJsonRepository(ObjectMapper mapper) {
     this.mapper = mapper;
   }
 
-  protected abstract Path filePath();
+  protected abstract String fileName();
+
+  protected Path filePath() {
+    return dataDir.resolve(fileName());
+  }
 
   protected abstract TypeReference<T> typeRef();
 

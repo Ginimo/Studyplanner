@@ -3,7 +3,6 @@ package ch.ost.mas_se.oop.studyplanner.repository;
 import ch.ost.mas_se.oop.studyplanner.model.Schedule;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -18,8 +17,8 @@ public class JsonScheduleRepository extends AbstractJsonRepository<Map<String, S
   }
 
   @Override
-  protected Path filePath() {
-    return Path.of("data", "schedules.json");
+  protected String fileName() {
+    return "schedules.json";
   }
 
   @Override

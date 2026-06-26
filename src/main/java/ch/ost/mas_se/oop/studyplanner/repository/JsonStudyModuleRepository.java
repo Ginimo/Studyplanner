@@ -3,7 +3,6 @@ package ch.ost.mas_se.oop.studyplanner.repository;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,8 +17,8 @@ public class JsonStudyModuleRepository extends AbstractJsonRepository<List<Study
   }
 
   @Override
-  protected Path filePath() {
-    return Path.of("data", "study-modules.json");
+  protected String fileName() {
+    return "study-modules.json";
   }
 
   @Override
