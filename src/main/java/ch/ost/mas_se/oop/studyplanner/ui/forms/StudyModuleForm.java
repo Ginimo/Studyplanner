@@ -28,7 +28,7 @@ public class StudyModuleForm {
   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
   private LocalDate offeredTo;
 
-  private boolean newEntry;
+  private boolean isNew;
 
   public String getStudyModuleKey() {
     return studyModuleKey;
@@ -86,11 +86,11 @@ public class StudyModuleForm {
     this.offeredTo = offeredTo;
   }
 
-  public boolean isNewEntry() {
-    return newEntry;
+  public boolean getIsNew() {
+    return isNew;
   }
 
-  public void setNewEntry(final boolean newEntry) {
-    this.newEntry = newEntry;
+  public void setIsNew(final boolean isNew) {
+    this.isNew = isNew;
   }
 }

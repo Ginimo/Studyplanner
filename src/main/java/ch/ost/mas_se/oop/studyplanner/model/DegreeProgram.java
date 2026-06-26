@@ -8,6 +8,12 @@ public class DegreeProgram {
   private final String description;
   private final int maxDurationInSemesters;
 
+  /**
+   * @param id unique identifier; must not be null
+   * @param name human-readable program name; must not be null
+   * @param description optional description; may be null
+   * @param maxDurationInSemesters maximum allowed study duration in semesters
+   */
   public DegreeProgram(String id, String name, String description, int maxDurationInSemesters) {
     this.id = Objects.requireNonNull(id);
     this.name = Objects.requireNonNull(name);

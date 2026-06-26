@@ -15,11 +15,6 @@ public class Schedule {
     this.semesters = new ArrayList<>();
   }
 
-  public Schedule(LocalDateTime calculatedAt, List<Semester> semesters) {
-    this.calculatedAt = calculatedAt;
-    this.semesters = semesters != null ? new ArrayList<>(semesters) : new ArrayList<>();
-  }
-
   public LocalDateTime getCalculatedAt() {
     return calculatedAt;
   }

@@ -1,7 +1,6 @@
 #!/bin/sh
-MVN="${HOME}/.m2/wrapper/dists/apache-maven-3.9.6-bin/bin/mvn"
-"${MVN}" spotless:check -q || {
+mvn spotless:check -q || {
   echo ""
-  echo "Formatting issues found. Run '${MVN} spotless:apply' then re-commit."
+  echo "Formatting issues found. Run 'mvn spotless:apply' then re-commit."
   exit 1
 }

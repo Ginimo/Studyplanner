@@ -51,6 +51,3 @@ Thumbs.db
 HELP.md
 .env
 .env.local
-
-# JSON persistence
-data/

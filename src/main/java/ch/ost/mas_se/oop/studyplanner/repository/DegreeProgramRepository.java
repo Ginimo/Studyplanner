@@ -10,17 +10,17 @@ public interface DegreeProgramRepository {
    * Persists the given degree program, creating it if new or replacing the existing one with the
    * same ID.
    */
-  void saveDegreeProgram(DegreeProgram program);
+  void save(DegreeProgram program);
 
   /**
    * Returns the degree program with the given ID, or {@link java.util.Optional#empty()} if none
    * exists.
    */
-  Optional<DegreeProgram> findDegreeProgramById(String id);
+  Optional<DegreeProgram> findById(String id);
 
   /** Returns all stored degree programs in insertion order. */
-  List<DegreeProgram> findAllDegreePrograms();
+  List<DegreeProgram> findAll();
 
   /** Removes the degree program with the given ID. No-op if it does not exist. */
-  void deleteDegreeProgram(String id);
+  void delete(String id);
 }
