@@ -90,22 +90,9 @@ public class StudyModuleServiceImpl implements StudyModuleService {
   public void deleteStudyModule(String degreeProgramId, String studyModuleKey) {
     studyModuleRepository.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
         .filter(module -> module.getPrerequisiteKeys().contains(studyModuleKey))
-        .forEach(module -> removePrerequisiteAndSave(module, studyModuleKey));
+        .forEach(
+            module ->
+                studyModuleRepository.saveStudyModule(module.withoutPrerequisite(studyModuleKey)));
     studyModuleRepository.deleteStudyModule(degreeProgramId, studyModuleKey);
-  }
-
-  private void removePrerequisiteAndSave(StudyModule module, String prerequisiteKey) {
-    List<String> updatedPrerequisiteKeys = new ArrayList<>(module.getPrerequisiteKeys());
-    updatedPrerequisiteKeys.remove(prerequisiteKey);
-    studyModuleRepository.saveStudyModule(
-        new StudyModule(
-            module.getStudyModuleKey(),
-            module.getDegreeProgramId(),
-            module.getName(),
-            module.getDescription(),
-            module.getEcts(),
-            updatedPrerequisiteKeys,
-            module.getOfferedFrom(),
-            module.getOfferedTo()));
   }
 }

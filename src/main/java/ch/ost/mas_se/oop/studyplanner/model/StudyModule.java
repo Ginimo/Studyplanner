@@ -1,6 +1,7 @@
 package ch.ost.mas_se.oop.studyplanner.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -76,6 +77,14 @@ public class StudyModule {
 
   public LocalDate getOfferedTo() {
     return offeredTo;
+  }
+
+  /** Returns a copy of this module with {@code prerequisiteKey} removed from its prerequisites. */
+  public StudyModule withoutPrerequisite(String prerequisiteKey) {
+    List<String> updated = new ArrayList<>(prerequisiteKeys);
+    updated.remove(prerequisiteKey);
+    return new StudyModule(
+        studyModuleKey, degreeProgramId, name, description, ects, updated, offeredFrom, offeredTo);
   }
 
   /**
