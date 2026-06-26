@@ -7,6 +7,7 @@ import ch.ost.mas_se.oop.studyplanner.model.Semester;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.repository.ScheduleRepository;
 import ch.ost.mas_se.oop.studyplanner.repository.StudyModuleRepository;
+import java.time.LocalDateTime;
 import java.util.*;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +40,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     Map<String, List<String>> dependents = buildDependents(allModules, moduleMap.keySet());
 
     Queue<String> ready = seedReady(inDegree);
-    Schedule schedule = new Schedule();
+    List<Semester> semesters = new ArrayList<>();
     int placedModuleCount =
         0; // tracks how many modules were placed; less than total at the end means a cycle exists
 
@@ -48,9 +49,9 @@ public class ScheduleServiceImpl implements ScheduleService {
       // 1 layer = 1 semester
       List<String> layer = List.copyOf(ready);
       ready.clear();
-      Semester semester = new Semester(semesterNumber);
+      List<String> semesterKeys = new ArrayList<>();
       for (String studyModuleKey : layer) {
-        semester.addStudyModuleKey(studyModuleKey);
+        semesterKeys.add(studyModuleKey);
         placedModuleCount++;
         for (String dependentKey : dependents.get(studyModuleKey)) {
           // one more prerequisite of dependentKey is now satisfied; if none remain, it is ready
@@ -61,14 +62,14 @@ public class ScheduleServiceImpl implements ScheduleService {
           }
         }
       }
-      schedule.addSemester(semester);
+      semesters.add(new Semester(semesterNumber, semesterKeys));
     }
 
     // any module that never reached inDegree 0 is stuck in a cycle and was never placed
     if (placedModuleCount < allModules.size()) {
       throw new CyclicDependencyException(collectCycleKeys(inDegree));
     }
-    return schedule;
+    return new Schedule(LocalDateTime.now(), semesters);
   }
 
   /** Returns modules indexed by their key for O(1) lookup during schedule construction. */
