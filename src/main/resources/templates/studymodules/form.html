@@ -31,14 +31,14 @@
                     <input type="text" id="studyModuleKey" th:field="*{studyModuleKey}"
                            class="form-control"
                            th:classappend="${#fields.hasErrors('studyModuleKey')} ? 'is-invalid'"
-                           th:readonly="${!studyModule.isNew}"
+                           th:readonly="${!studyModule.newEntry}"
                            placeholder="e.g. SEP2"/>
                     <div class="invalid-feedback" th:errors="*{studyModuleKey}"></div>
-                    <div class="form-text" th:if="${studyModule.isNew}">
+                    <div class="form-text" th:if="${studyModule.newEntry}">
                         Short, unique identifier for this study module (e.g. "OOP1", "SEP2").
                         Cannot be changed after creation.
                     </div>
-                    <div class="form-text text-muted" th:unless="${studyModule.isNew}">
+                    <div class="form-text text-muted" th:unless="${studyModule.newEntry}">
                         The study module key cannot be changed after creation.
                     </div>
                 </div>

@@ -16,6 +16,11 @@ public class Semester {
     this.studyModules = new ArrayList<>();
   }
 
+  public Semester(int semesterNumber, List<StudyModule> studyModules) {
+    this.semesterNumber = semesterNumber;
+    this.studyModules = studyModules != null ? new ArrayList<>(studyModules) : new ArrayList<>();
+  }
+
   public int getSemesterNumber() {
     return semesterNumber;
   }

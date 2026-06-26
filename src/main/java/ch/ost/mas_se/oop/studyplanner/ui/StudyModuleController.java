@@ -1,12 +1,10 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
-import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.StudyModuleForm;
 import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
-import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleKey;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleView;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -21,15 +19,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/degree-programs/{degreeProgramId}/study-modules")
-public class StudyModuleController {
+public class StudyModuleController extends AbstractController {
 
-  private final DegreeProgramService degreeProgramService;
   private final StudyModuleService studyModuleService;
 
   public StudyModuleController(
       final DegreeProgramService degreeProgramService,
       final StudyModuleService studyModuleService) {
-    this.degreeProgramService = degreeProgramService;
+    super(degreeProgramService);
     this.studyModuleService = studyModuleService;
   }
 
@@ -57,8 +54,15 @@ public class StudyModuleController {
       return showCreateFormView(degreeProgramId, form, model);
     }
 
-    StudyModule module = toModule(form.getStudyModuleKey(), degreeProgramId, form);
-    studyModuleService.create(module);
+    studyModuleService.createStudyModule(
+        form.getStudyModuleKey(),
+        degreeProgramId,
+        form.getName(),
+        form.getDescription(),
+        form.getEcts(),
+        form.getPrerequisiteKeys(),
+        form.getOfferedFrom(),
+        form.getOfferedTo());
 
     redirectAttributes.addFlashAttribute(
         "successMessage", "Study module \"" + form.getName() + "\" created.");
@@ -77,13 +81,14 @@ public class StudyModuleController {
     StudyModule module = requireStudyModule(degreeProgramId, studyModuleKey);
 
     List<StudyModuleView> prerequisites =
-        module.getPrerequisiteKeys().stream()
-            .flatMap(key -> studyModuleService.findByKey(degreeProgramId, key).stream())
-            .map(this::toView)
+        studyModuleService
+            .findStudyModulesByKeys(degreeProgramId, module.getPrerequisiteKeys())
+            .stream()
+            .map(StudyModuleView::from)
             .collect(Collectors.toList());
 
-    model.addAttribute("degreeProgram", toView(requireProgram(degreeProgramId)));
-    model.addAttribute("studyModule", toView(module));
+    model.addAttribute("degreeProgram", DegreeProgramView.from(requireProgram(degreeProgramId)));
+    model.addAttribute("studyModule", StudyModuleView.from(module));
     model.addAttribute("prerequisites", prerequisites);
     return "studymodules/details";
   }
@@ -127,8 +132,15 @@ public class StudyModuleController {
       return showEditFormView(degreeProgramId, studyModuleKey, form, model);
     }
 
-    StudyModule module = toModule(studyModuleKey, degreeProgramId, form);
-    studyModuleService.update(module);
+    studyModuleService.updateStudyModule(
+        studyModuleKey,
+        degreeProgramId,
+        form.getName(),
+        form.getDescription(),
+        form.getEcts(),
+        form.getPrerequisiteKeys(),
+        form.getOfferedFrom(),
+        form.getOfferedTo());
 
     redirectAttributes.addFlashAttribute(
         "successMessage", "Study module \"" + form.getName() + "\" updated.");
@@ -139,25 +151,28 @@ public class StudyModuleController {
    * Deletes the study module, removing its key from the prerequisite lists of any sibling modules,
    * then redirects to the degree program's detail view.
    */
-  @PostMapping("/{studyModuleKey}/delete")
+  @PostMapping("/{studyModuleKey}/deleteStudyModule")
   public String deleteStudyModule(
       @PathVariable final String degreeProgramId,
       @PathVariable final String studyModuleKey,
       final RedirectAttributes redirectAttributes) {
     StudyModule module = requireStudyModule(degreeProgramId, studyModuleKey);
 
-    studyModuleService.delete(degreeProgramId, studyModuleKey);
+    studyModuleService.deleteStudyModule(degreeProgramId, studyModuleKey);
 
     redirectAttributes.addFlashAttribute(
         "successMessage", "Study module \"" + module.getName() + "\" deleted.");
     return "redirect:/degree-programs/" + degreeProgramId;
   }
 
-  /** Populates the model with metadata for the create form and returns the form view name. */
+  /**
+   * Populates the model with metadata for the createDegreeProgram form and returns the form view
+   * name.
+   */
   private String showCreateFormView(
       final String degreeProgramId, final StudyModuleForm form, final Model model) {
-    form.setIsNew(true);
-    model.addAttribute("degreeProgram", toView(requireProgram(degreeProgramId)));
+    form.setNewEntry(true);
+    model.addAttribute("degreeProgram", DegreeProgramView.from(requireProgram(degreeProgramId)));
     model.addAttribute("formAction", "/degree-programs/" + degreeProgramId + "/study-modules/new");
     model.addAttribute("pageTitle", "New Study Module");
     addAvailableStudyModulesForPrerequisiteSelection(degreeProgramId, null, model);
@@ -170,8 +185,8 @@ public class StudyModuleController {
       final String studyModuleKey,
       final StudyModuleForm form,
       final Model model) {
-    form.setIsNew(false);
-    model.addAttribute("degreeProgram", toView(requireProgram(degreeProgramId)));
+    form.setNewEntry(false);
+    model.addAttribute("degreeProgram", DegreeProgramView.from(requireProgram(degreeProgramId)));
     model.addAttribute(
         "formAction",
         "/degree-programs/" + degreeProgramId + "/study-modules/" + studyModuleKey + "/edit");
@@ -189,9 +204,9 @@ public class StudyModuleController {
   private void addAvailableStudyModulesForPrerequisiteSelection(
       final String degreeProgramId, final String excludeStudyModuleKey, final Model model) {
     List<StudyModuleView> available =
-        studyModuleService.findAllByDegreeProgramId(degreeProgramId).stream()
+        studyModuleService.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
             .filter(sm -> !sm.getStudyModuleKey().equals(excludeStudyModuleKey))
-            .map(this::toView)
+            .map(StudyModuleView::from)
             .collect(Collectors.toList());
     model.addAttribute("availableStudyModules", available);
   }
@@ -203,59 +218,10 @@ public class StudyModuleController {
   private StudyModule requireStudyModule(
       final String degreeProgramId, final String studyModuleKey) {
     return studyModuleService
-        .findByKey(degreeProgramId, studyModuleKey)
+        .findStudyModuleByKey(degreeProgramId, studyModuleKey)
         .orElseThrow(
             () ->
                 new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Study module not found: " + studyModuleKey));
-  }
-
-  /**
-   * Builds a {@link StudyModule} domain object from a form, using the given key (create vs. update
-   * supply different keys).
-   */
-  private StudyModule toModule(
-      final String key, final String degreeProgramId, final StudyModuleForm form) {
-    return new StudyModule(
-        key,
-        degreeProgramId,
-        form.getName(),
-        form.getDescription(),
-        form.getEcts(),
-        form.getPrerequisiteKeys(),
-        form.getOfferedFrom(),
-        form.getOfferedTo());
-  }
-
-  /**
-   * Looks up a degree program by ID, throwing a 404 {@link
-   * org.springframework.web.server.ResponseStatusException} if it does not exist.
-   */
-  private DegreeProgram requireProgram(final String id) {
-    return degreeProgramService
-        .findById(id)
-        .orElseThrow(
-            () ->
-                new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Degree program not found: " + id));
-  }
-
-  /** Converts a {@link DegreeProgram} domain object to its view model. */
-  private DegreeProgramView toView(DegreeProgram program) {
-    return new DegreeProgramView(
-        program.getId(),
-        program.getName(),
-        program.getDescription(),
-        program.getMaxDurationInSemesters());
-  }
-
-  /** Converts a {@link StudyModule} domain object to its view model. */
-  private StudyModuleView toView(StudyModule module) {
-    return new StudyModuleView(
-        new StudyModuleKey(module.getStudyModuleKey()),
-        module.getName(),
-        module.getDescription(),
-        module.getEcts(),
-        module.getPrerequisiteKeys());
   }
 }
