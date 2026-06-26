@@ -43,6 +43,9 @@ public class StudyModule {
     }
     this.ects = ects;
     this.prerequisiteKeys = List.copyOf(prerequisiteKeys != null ? prerequisiteKeys : List.of());
+    if (offeredFrom != null && offeredTo != null && offeredTo.isBefore(offeredFrom)) {
+      throw new IllegalArgumentException("offeredTo must not be before offeredFrom");
+    }
     this.offeredFrom = offeredFrom;
     this.offeredTo = offeredTo;
   }

@@ -82,7 +82,9 @@
                     <div class="col">
                         <label for="offeredTo" class="form-label fw-semibold">Offered To</label>
                         <input type="date" id="offeredTo" th:field="*{offeredTo}"
-                               class="form-control"/>
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('offeredToAfterOfferedFrom')} ? 'is-invalid'"/>
+                        <div class="invalid-feedback" th:errors="*{offeredToAfterOfferedFrom}"></div>
                         <div class="form-text">Last date this study module is available (optional).</div>
                     </div>
                 </div>

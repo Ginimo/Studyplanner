@@ -1,5 +1,6 @@
 package ch.ost.mas_se.oop.studyplanner.ui.forms;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
@@ -84,6 +85,12 @@ public class StudyModuleForm {
 
   public void setOfferedTo(final LocalDate offeredTo) {
     this.offeredTo = offeredTo;
+  }
+
+  @AssertTrue(message = "Offered-to date must not be before offered-from date")
+  public boolean isOfferedToAfterOfferedFrom() {
+    if (offeredFrom == null || offeredTo == null) return true;
+    return !offeredTo.isBefore(offeredFrom);
   }
 
   public boolean isNewEntry() {
