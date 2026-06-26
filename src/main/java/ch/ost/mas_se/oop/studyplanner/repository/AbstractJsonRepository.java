@@ -5,9 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 abstract class AbstractJsonRepository<T> {
+
+  private static final Logger log = LoggerFactory.getLogger(AbstractJsonRepository.class);
 
   protected final ObjectMapper mapper;
 
@@ -29,20 +33,24 @@ abstract class AbstractJsonRepository<T> {
   protected abstract T emptyValue();
 
   protected T load() {
-    if (!Files.exists(filePath())) return emptyValue();
+    Path path = filePath();
+    if (!Files.exists(path)) return emptyValue();
     try {
-      return mapper.readValue(filePath().toFile(), typeRef());
+      return mapper.readValue(path.toFile(), typeRef());
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      log.error("Failed to read {}", path, e);
+      throw new RuntimeException("Failed to read " + path, e);
     }
   }
 
   protected void store(T data) {
+    Path path = filePath();
     try {
-      Files.createDirectories(filePath().getParent());
-      mapper.writeValue(filePath().toFile(), data);
+      Files.createDirectories(path.getParent());
+      mapper.writeValue(path.toFile(), data);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      log.error("Failed to write {}", path, e);
+      throw new RuntimeException("Failed to write " + path, e);
     }
   }
 }
