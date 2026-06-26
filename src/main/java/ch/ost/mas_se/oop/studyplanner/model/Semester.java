@@ -12,11 +12,19 @@ public class Semester {
    * @param semesterNumber position of this semester in the study plan (1-based)
    */
   public Semester(int semesterNumber) {
+    if (semesterNumber < 1) {
+      throw new IllegalArgumentException(
+          "semesterNumber must be at least 1, got: " + semesterNumber);
+    }
     this.semesterNumber = semesterNumber;
     this.studyModules = new ArrayList<>();
   }
 
   public Semester(int semesterNumber, List<StudyModule> studyModules) {
+    if (semesterNumber < 1) {
+      throw new IllegalArgumentException(
+          "semesterNumber must be at least 1, got: " + semesterNumber);
+    }
     this.semesterNumber = semesterNumber;
     this.studyModules = studyModules != null ? new ArrayList<>(studyModules) : new ArrayList<>();
   }

@@ -13,6 +13,10 @@ public class DegreeProgram {
     this.degreeProgramId = Objects.requireNonNull(degreeProgramId);
     this.name = Objects.requireNonNull(name);
     this.description = description;
+    if (maxDurationInSemesters < 1) {
+      throw new IllegalArgumentException(
+          "maxDurationInSemesters must be at least 1, got: " + maxDurationInSemesters);
+    }
     this.maxDurationInSemesters = maxDurationInSemesters;
   }
 

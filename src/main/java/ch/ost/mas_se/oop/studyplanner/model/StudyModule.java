@@ -37,6 +37,9 @@ public class StudyModule {
     this.degreeProgramId = Objects.requireNonNull(degreeProgramId);
     this.name = Objects.requireNonNull(name);
     this.description = description;
+    if (ects < 1) {
+      throw new IllegalArgumentException("ects must be at least 1, got: " + ects);
+    }
     this.ects = ects;
     this.prerequisiteKeys = List.copyOf(prerequisiteKeys != null ? prerequisiteKeys : List.of());
     this.offeredFrom = offeredFrom;
