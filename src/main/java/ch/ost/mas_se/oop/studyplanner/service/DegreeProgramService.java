@@ -22,11 +22,8 @@ public interface DegreeProgramService {
   /** Returns all degree programs. */
   List<DegreeProgram> findAllDegreePrograms();
 
-  /**
-   * Replaces the stored degree program matching {@code program}'s ID with the given updated
-   * version.
-   */
-  void updateDegreeProgram(DegreeProgram program);
+  /** Replaces the stored degree program matching {@code id} with new field values. */
+  void updateDegreeProgram(String id, String name, String description, int maxDurationInSemesters);
 
   /**
    * Deletes the degree program with the given ID, together with all of its study modules and its

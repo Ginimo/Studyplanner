@@ -3,8 +3,6 @@ package ch.ost.mas_se.oop.studyplanner.repository;
 import ch.ost.mas_se.oop.studyplanner.model.Schedule;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,13 +10,26 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class JsonScheduleRepository implements ScheduleRepository {
-
-  private final Path file = Path.of("data", "schedules.json");
-  private final ObjectMapper mapper;
+public class JsonScheduleRepository extends AbstractJsonRepository<Map<String, Schedule>>
+    implements ScheduleRepository {
 
   public JsonScheduleRepository(ObjectMapper mapper) {
-    this.mapper = mapper;
+    super(mapper);
+  }
+
+  @Override
+  protected Path filePath() {
+    return Path.of("data", "schedules.json");
+  }
+
+  @Override
+  protected TypeReference<Map<String, Schedule>> typeRef() {
+    return new TypeReference<>() {};
+  }
+
+  @Override
+  protected Map<String, Schedule> emptyValue() {
+    return new HashMap<>();
   }
 
   @Override
@@ -40,23 +51,5 @@ public class JsonScheduleRepository implements ScheduleRepository {
     Map<String, Schedule> map = load();
     map.remove(degreeProgramId);
     store(map);
-  }
-
-  private Map<String, Schedule> load() {
-    if (!Files.exists(file)) return new HashMap<>();
-    try {
-      return mapper.readValue(file.toFile(), new TypeReference<HashMap<String, Schedule>>() {});
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private void store(Map<String, Schedule> map) {
-    try {
-      Files.createDirectories(file.getParent());
-      mapper.writeValue(file.toFile(), map);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 }

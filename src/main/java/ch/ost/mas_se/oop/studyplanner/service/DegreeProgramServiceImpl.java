@@ -42,8 +42,9 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
   }
 
   @Override
-  public void updateDegreeProgram(DegreeProgram program) {
-    repository.saveDegreeProgram(program);
+  public void updateDegreeProgram(
+      String id, String name, String description, int maxDurationInSemesters) {
+    repository.saveDegreeProgram(new DegreeProgram(id, name, description, maxDurationInSemesters));
   }
 
   @Override

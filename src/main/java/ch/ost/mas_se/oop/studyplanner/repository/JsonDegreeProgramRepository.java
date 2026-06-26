@@ -3,8 +3,6 @@ package ch.ost.mas_se.oop.studyplanner.repository;
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,13 +10,26 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class JsonDegreeProgramRepository implements DegreeProgramRepository {
-
-  private final Path file = Path.of("data", "degree-programs.json");
-  private final ObjectMapper mapper;
+public class JsonDegreeProgramRepository extends AbstractJsonRepository<List<DegreeProgram>>
+    implements DegreeProgramRepository {
 
   public JsonDegreeProgramRepository(ObjectMapper mapper) {
-    this.mapper = mapper;
+    super(mapper);
+  }
+
+  @Override
+  protected Path filePath() {
+    return Path.of("data", "degree-programs.json");
+  }
+
+  @Override
+  protected TypeReference<List<DegreeProgram>> typeRef() {
+    return new TypeReference<>() {};
+  }
+
+  @Override
+  protected List<DegreeProgram> emptyValue() {
+    return new ArrayList<>();
   }
 
   @Override
@@ -53,23 +64,5 @@ public class JsonDegreeProgramRepository implements DegreeProgramRepository {
     List<DegreeProgram> list = load();
     list.removeIf(p -> p.getId().equals(id));
     store(list);
-  }
-
-  private List<DegreeProgram> load() {
-    if (!Files.exists(file)) return new ArrayList<>();
-    try {
-      return mapper.readValue(file.toFile(), new TypeReference<>() {});
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private void store(List<DegreeProgram> list) {
-    try {
-      Files.createDirectories(file.getParent());
-      mapper.writeValue(file.toFile(), list);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 }

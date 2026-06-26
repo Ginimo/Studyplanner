@@ -3,8 +3,6 @@ package ch.ost.mas_se.oop.studyplanner.repository;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,13 +10,26 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class JsonStudyModuleRepository implements StudyModuleRepository {
-
-  private final Path file = Path.of("data", "study-modules.json");
-  private final ObjectMapper mapper;
+public class JsonStudyModuleRepository extends AbstractJsonRepository<List<StudyModule>>
+    implements StudyModuleRepository {
 
   public JsonStudyModuleRepository(ObjectMapper mapper) {
-    this.mapper = mapper;
+    super(mapper);
+  }
+
+  @Override
+  protected Path filePath() {
+    return Path.of("data", "study-modules.json");
+  }
+
+  @Override
+  protected TypeReference<List<StudyModule>> typeRef() {
+    return new TypeReference<>() {};
+  }
+
+  @Override
+  protected List<StudyModule> emptyValue() {
+    return new ArrayList<>();
   }
 
   @Override
@@ -62,23 +73,5 @@ public class JsonStudyModuleRepository implements StudyModuleRepository {
     list.removeIf(
         m -> m.getDegreeProgramId().equals(degreeProgramId) && m.getStudyModuleKey().equals(key));
     store(list);
-  }
-
-  private List<StudyModule> load() {
-    if (!Files.exists(file)) return new ArrayList<>();
-    try {
-      return mapper.readValue(file.toFile(), new TypeReference<>() {});
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private void store(List<StudyModule> list) {
-    try {
-      Files.createDirectories(file.getParent());
-      mapper.writeValue(file.toFile(), list);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 }

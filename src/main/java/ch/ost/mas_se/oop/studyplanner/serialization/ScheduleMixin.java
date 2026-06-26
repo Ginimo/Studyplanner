@@ -1,4 +1,4 @@
-package ch.ost.mas_se.oop.studyplanner.repository.mixin;
+package ch.ost.mas_se.oop.studyplanner.serialization;
 
 import ch.ost.mas_se.oop.studyplanner.model.Semester;
 import com.fasterxml.jackson.annotation.JsonCreator;

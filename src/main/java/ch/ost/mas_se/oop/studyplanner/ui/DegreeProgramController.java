@@ -117,10 +117,8 @@ public class DegreeProgramController extends AbstractController {
       return showEditFormView(id, model);
     }
 
-    DegreeProgram program =
-        new DegreeProgram(
-            id, form.getName(), form.getDescription(), form.getMaxDurationInSemesters());
-    degreeProgramService.updateDegreeProgram(program);
+    degreeProgramService.updateDegreeProgram(
+        id, form.getName(), form.getDescription(), form.getMaxDurationInSemesters());
 
     redirectAttributes.addFlashAttribute("successMessage", "Degree program updated.");
     return "redirect:/degree-programs/" + id;
