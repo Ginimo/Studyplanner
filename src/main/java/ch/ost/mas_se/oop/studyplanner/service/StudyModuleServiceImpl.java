@@ -16,37 +16,37 @@ public class StudyModuleServiceImpl implements StudyModuleService {
   }
 
   @Override
-  public void create(StudyModule module) {
-    repository.save(module);
+  public void createStudyModule(StudyModule module) {
+    repository.saveStudyModule(module);
   }
 
   @Override
-  public Optional<StudyModule> findByKey(String degreeProgramId, String key) {
-    return repository.findByKey(degreeProgramId, key);
+  public Optional<StudyModule> findStudyModuleByKey(String degreeProgramId, String key) {
+    return repository.findStudyModuleByKey(degreeProgramId, key);
   }
 
   @Override
-  public List<StudyModule> findAllByDegreeProgramId(String degreeProgramId) {
-    return repository.findAllByDegreeProgramId(degreeProgramId);
+  public List<StudyModule> findAllStudyModulesByDegreeProgramId(String degreeProgramId) {
+    return repository.findAllStudyModulesByDegreeProgramId(degreeProgramId);
   }
 
   @Override
-  public void update(StudyModule module) {
-    repository.save(module);
+  public void updateStudyModules(StudyModule module) {
+    repository.saveStudyModule(module);
   }
 
   @Override
-  public void delete(String degreeProgramId, String key) {
-    repository.findAllByDegreeProgramId(degreeProgramId).stream()
+  public void deleteStudyModule(String degreeProgramId, String key) {
+    repository.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
         .filter(m -> m.getPrerequisiteKeys().contains(key))
         .forEach(m -> removePrerequisiteAndSave(m, key));
-    repository.delete(degreeProgramId, key);
+    repository.deleteStudyModule(degreeProgramId, key);
   }
 
   private void removePrerequisiteAndSave(StudyModule module, String prerequisiteKey) {
     List<String> updatedPrereqs = new ArrayList<>(module.getPrerequisiteKeys());
     updatedPrereqs.remove(prerequisiteKey);
-    repository.save(
+    repository.saveStudyModule(
         new StudyModule(
             module.getStudyModuleKey(),
             module.getDegreeProgramId(),

@@ -30,9 +30,9 @@ public class ScheduleServiceImpl implements ScheduleService {
    * @throws CyclicDependencyException if the prerequisite graph contains a cycle
    */
   @Override
-  public Schedule calculate(List<StudyModule> allModules) {
+  public Schedule calculateSchedule(List<StudyModule> allModules) {
 
-    // create 3 auxiliary data structures
+    // createDegreeProgram 3 auxiliary data structures
     Map<String, StudyModule> moduleMap = buildModuleMap(allModules);
     Map<String, Integer> inDegree = buildInDegree(allModules, moduleMap.keySet());
     Map<String, List<String>> dependents = buildDependents(allModules, moduleMap.keySet());
@@ -143,19 +143,20 @@ public class ScheduleServiceImpl implements ScheduleService {
   }
 
   @Override
-  public void calculateAndSave(DegreeProgram program) {
-    List<StudyModule> modules = studyModuleService.findAllByDegreeProgramId(program.getId());
-    Schedule schedule = calculate(modules);
-    scheduleRepository.save(program.getId(), schedule);
+  public void calculateAndSaveSchedule(DegreeProgram program) {
+    List<StudyModule> modules =
+        studyModuleService.findAllStudyModulesByDegreeProgramId(program.getId());
+    Schedule schedule = calculateSchedule(modules);
+    scheduleRepository.saveSchedule(program.getId(), schedule);
   }
 
   @Override
-  public Optional<Schedule> findByDegreeProgramId(String degreeProgramId) {
-    return scheduleRepository.findByDegreeProgramId(degreeProgramId);
+  public Optional<Schedule> findScheduleByDegreeProgramId(String degreeProgramId) {
+    return scheduleRepository.findScheduleByDegreeProgramId(degreeProgramId);
   }
 
   @Override
-  public void deleteByDegreeProgramId(String degreeProgramId) {
-    scheduleRepository.delete(degreeProgramId);
+  public void deleteSchedule(String degreeProgramId) {
+    scheduleRepository.deleteSchedule(degreeProgramId);
   }
 }

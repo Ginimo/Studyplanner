@@ -22,21 +22,21 @@ public class JsonScheduleRepository implements ScheduleRepository {
   }
 
   @Override
-  public void save(String degreeProgramId, Schedule schedule) {
+  public void saveSchedule(String degreeProgramId, Schedule schedule) {
     Map<String, Schedule> map = load();
     map.put(degreeProgramId, schedule);
     store(map);
   }
 
   @Override
-  public Optional<Schedule> findByDegreeProgramId(String degreeProgramId) {
+  public Optional<Schedule> findScheduleByDegreeProgramId(String degreeProgramId) {
     Schedule schedule = load().get(degreeProgramId);
     if (schedule == null) return Optional.empty();
     return Optional.of(schedule);
   }
 
   @Override
-  public void delete(String degreeProgramId) {
+  public void deleteSchedule(String degreeProgramId) {
     Map<String, Schedule> map = load();
     map.remove(degreeProgramId);
     store(map);

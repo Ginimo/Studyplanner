@@ -39,7 +39,7 @@ public class ScheduleController extends AbstractController {
     model.addAttribute("degreeProgram", DegreeProgramView.toView(program));
 
     scheduleService
-        .findByDegreeProgramId(degreeProgramId)
+        .findScheduleByDegreeProgramId(degreeProgramId)
         .ifPresent(schedule -> addScheduleToModel(schedule, model));
 
     return "schedules/view";
@@ -56,12 +56,12 @@ public class ScheduleController extends AbstractController {
    * Calculates the schedule, persists it, then redirects to {@link #showSchedule} which loads the
    * result from the repository.
    */
-  @PostMapping("/calculate")
+  @PostMapping("/calculateSchedule")
   public String calculateSchedule(
       @PathVariable final String degreeProgramId, final RedirectAttributes redirectAttributes) {
     DegreeProgram program = requireProgram(degreeProgramId);
     try {
-      scheduleService.calculateAndSave(program);
+      scheduleService.calculateAndSaveSchedule(program);
       redirectAttributes.addFlashAttribute("successMessage", "Study plan calculated successfully.");
     } catch (CyclicDependencyException e) {
       redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());

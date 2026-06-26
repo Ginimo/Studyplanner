@@ -55,7 +55,7 @@ public class StudyModuleController extends AbstractController {
     }
 
     StudyModule module = toModule(form.getStudyModuleKey(), degreeProgramId, form);
-    studyModuleService.create(module);
+    studyModuleService.createStudyModule(module);
 
     redirectAttributes.addFlashAttribute(
         "successMessage", "Study module \"" + form.getName() + "\" created.");
@@ -75,7 +75,7 @@ public class StudyModuleController extends AbstractController {
 
     List<StudyModuleView> prerequisites =
         module.getPrerequisiteKeys().stream()
-            .flatMap(key -> studyModuleService.findByKey(degreeProgramId, key).stream())
+            .flatMap(key -> studyModuleService.findStudyModuleByKey(degreeProgramId, key).stream())
             .map(StudyModuleView::toView)
             .collect(Collectors.toList());
 
@@ -125,7 +125,7 @@ public class StudyModuleController extends AbstractController {
     }
 
     StudyModule module = toModule(studyModuleKey, degreeProgramId, form);
-    studyModuleService.update(module);
+    studyModuleService.updateStudyModules(module);
 
     redirectAttributes.addFlashAttribute(
         "successMessage", "Study module \"" + form.getName() + "\" updated.");
@@ -136,21 +136,24 @@ public class StudyModuleController extends AbstractController {
    * Deletes the study module, removing its key from the prerequisite lists of any sibling modules,
    * then redirects to the degree program's detail view.
    */
-  @PostMapping("/{studyModuleKey}/delete")
+  @PostMapping("/{studyModuleKey}/deleteDegreeProgram")
   public String deleteStudyModule(
       @PathVariable final String degreeProgramId,
       @PathVariable final String studyModuleKey,
       final RedirectAttributes redirectAttributes) {
     StudyModule module = requireStudyModule(degreeProgramId, studyModuleKey);
 
-    studyModuleService.delete(degreeProgramId, studyModuleKey);
+    studyModuleService.deleteStudyModule(degreeProgramId, studyModuleKey);
 
     redirectAttributes.addFlashAttribute(
         "successMessage", "Study module \"" + module.getName() + "\" deleted.");
     return "redirect:/degree-programs/" + degreeProgramId;
   }
 
-  /** Populates the model with metadata for the create form and returns the form view name. */
+  /**
+   * Populates the model with metadata for the createDegreeProgram form and returns the form view
+   * name.
+   */
   private String showCreateFormView(
       final String degreeProgramId, final StudyModuleForm form, final Model model) {
     form.setIsNew(true);
@@ -186,7 +189,7 @@ public class StudyModuleController extends AbstractController {
   private void addAvailableStudyModulesForPrerequisiteSelection(
       final String degreeProgramId, final String excludeStudyModuleKey, final Model model) {
     List<StudyModuleView> available =
-        studyModuleService.findAllByDegreeProgramId(degreeProgramId).stream()
+        studyModuleService.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
             .filter(sm -> !sm.getStudyModuleKey().equals(excludeStudyModuleKey))
             .map(StudyModuleView::toView)
             .collect(Collectors.toList());
@@ -200,7 +203,7 @@ public class StudyModuleController extends AbstractController {
   private StudyModule requireStudyModule(
       final String degreeProgramId, final String studyModuleKey) {
     return studyModuleService
-        .findByKey(degreeProgramId, studyModuleKey)
+        .findStudyModuleByKey(degreeProgramId, studyModuleKey)
         .orElseThrow(
             () ->
                 new ResponseStatusException(
@@ -208,8 +211,8 @@ public class StudyModuleController extends AbstractController {
   }
 
   /**
-   * Builds a {@link StudyModule} domain object from a form, using the given key (create vs. update
-   * supply different keys).
+   * Builds a {@link StudyModule} domain object from a form, using the given key
+   * (createDegreeProgram vs. updateDegreeProgram supply different keys).
    */
   private StudyModule toModule(
       final String key, final String degreeProgramId, final StudyModuleForm form) {

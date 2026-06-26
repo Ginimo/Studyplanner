@@ -32,7 +32,7 @@ public class DegreeProgramController extends AbstractController {
   public String listDegreePrograms(final Model model) {
     model.addAttribute(
         "degreePrograms",
-        degreeProgramService.findAll().stream()
+        degreeProgramService.findAllDegreePrograms().stream()
             .map(DegreeProgramView::toView)
             .collect(Collectors.toList()));
     return "degreeprograms/list";
@@ -60,7 +60,7 @@ public class DegreeProgramController extends AbstractController {
       return showCreateFormView(model);
     }
 
-    degreeProgramService.create(
+    degreeProgramService.createDegreeProgram(
         form.getName(), form.getDescription(), form.getMaxDurationInSemesters());
 
     redirectAttributes.addFlashAttribute(
@@ -80,7 +80,7 @@ public class DegreeProgramController extends AbstractController {
 
     model.addAttribute(
         "studyModules",
-        studyModuleService.findAllByDegreeProgramId(id).stream()
+        studyModuleService.findAllStudyModulesByDegreeProgramId(id).stream()
             .map(StudyModuleListView::toView)
             .collect(Collectors.toList()));
 
@@ -120,24 +120,27 @@ public class DegreeProgramController extends AbstractController {
     DegreeProgram program =
         new DegreeProgram(
             id, form.getName(), form.getDescription(), form.getMaxDurationInSemesters());
-    degreeProgramService.update(program);
+    degreeProgramService.updateDegreeProgram(program);
 
     redirectAttributes.addFlashAttribute("successMessage", "Degree program updated.");
     return "redirect:/degree-programs/" + id;
   }
 
   /** Deletes the degree program together with all of its study modules and schedule. */
-  @PostMapping("/{id}/delete")
+  @PostMapping("/{id}/deleteDegreeProgram")
   public String deleteDegreeProgram(
       @PathVariable final String id, final RedirectAttributes redirectAttributes) {
     DegreeProgram program = requireProgram(id);
-    degreeProgramService.delete(id);
+    degreeProgramService.deleteDegreeProgram(id);
     redirectAttributes.addFlashAttribute(
         "successMessage", "Degree program \"" + program.getName() + "\" deleted.");
     return "redirect:/degree-programs";
   }
 
-  /** Populates the model with metadata for the create form and returns the form view name. */
+  /**
+   * Populates the model with metadata for the createDegreeProgram form and returns the form view
+   * name.
+   */
   private String showCreateFormView(final Model model) {
     model.addAttribute("formAction", "/degree-programs/new");
     model.addAttribute("pageTitle", "New Degree Program");

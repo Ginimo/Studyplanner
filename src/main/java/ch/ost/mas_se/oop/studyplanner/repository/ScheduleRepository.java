@@ -5,9 +5,9 @@ import java.util.Optional;
 
 public interface ScheduleRepository {
 
-  void save(String degreeProgramId, Schedule schedule);
+  void saveSchedule(String degreeProgramId, Schedule schedule);
 
-  Optional<Schedule> findByDegreeProgramId(String degreeProgramId);
+  Optional<Schedule> findScheduleByDegreeProgramId(String degreeProgramId);
 
-  void delete(String degreeProgramId);
+  void deleteSchedule(String degreeProgramId);
 }

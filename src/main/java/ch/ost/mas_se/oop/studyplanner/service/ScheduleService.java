@@ -8,11 +8,11 @@ import java.util.Optional;
 
 public interface ScheduleService {
 
-  Schedule calculate(List<StudyModule> modules);
+  Schedule calculateSchedule(List<StudyModule> modules);
 
-  void calculateAndSave(DegreeProgram program);
+  void calculateAndSaveSchedule(DegreeProgram program);
 
-  Optional<Schedule> findByDegreeProgramId(String degreeProgramId);
+  Optional<Schedule> findScheduleByDegreeProgramId(String degreeProgramId);
 
-  void deleteByDegreeProgramId(String degreeProgramId);
+  void deleteSchedule(String degreeProgramId);
 }

@@ -15,7 +15,7 @@ abstract class AbstractController {
 
   protected DegreeProgram requireProgram(String id) {
     return degreeProgramService
-        .findById(id)
+        .findDegreeProgramById(id)
         .orElseThrow(
             () ->
                 new ResponseStatusException(

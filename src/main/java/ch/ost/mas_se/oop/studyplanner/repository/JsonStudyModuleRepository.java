@@ -22,7 +22,7 @@ public class JsonStudyModuleRepository implements StudyModuleRepository {
   }
 
   @Override
-  public void save(StudyModule module) {
+  public void saveStudyModule(StudyModule module) {
     List<StudyModule> list = load();
     for (int i = 0; i < list.size(); i++) {
       StudyModule m = list.get(i);
@@ -38,7 +38,7 @@ public class JsonStudyModuleRepository implements StudyModuleRepository {
   }
 
   @Override
-  public Optional<StudyModule> findByKey(String degreeProgramId, String key) {
+  public Optional<StudyModule> findStudyModuleByKey(String degreeProgramId, String key) {
     for (StudyModule m : load()) {
       if (m.getDegreeProgramId().equals(degreeProgramId) && m.getStudyModuleKey().equals(key)) {
         return Optional.of(m);
@@ -48,7 +48,7 @@ public class JsonStudyModuleRepository implements StudyModuleRepository {
   }
 
   @Override
-  public List<StudyModule> findAllByDegreeProgramId(String degreeProgramId) {
+  public List<StudyModule> findAllStudyModulesByDegreeProgramId(String degreeProgramId) {
     List<StudyModule> result = new ArrayList<>();
     for (StudyModule m : load()) {
       if (m.getDegreeProgramId().equals(degreeProgramId)) result.add(m);
@@ -57,7 +57,7 @@ public class JsonStudyModuleRepository implements StudyModuleRepository {
   }
 
   @Override
-  public void delete(String degreeProgramId, String key) {
+  public void deleteStudyModule(String degreeProgramId, String key) {
     List<StudyModule> list = load();
     list.removeIf(
         m -> m.getDegreeProgramId().equals(degreeProgramId) && m.getStudyModuleKey().equals(key));

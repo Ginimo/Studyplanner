@@ -22,7 +22,7 @@ public class JsonDegreeProgramRepository implements DegreeProgramRepository {
   }
 
   @Override
-  public void save(DegreeProgram program) {
+  public void saveDegreeProgram(DegreeProgram program) {
     List<DegreeProgram> list = load();
     for (int i = 0; i < list.size(); i++) {
       if (list.get(i).getId().equals(program.getId())) {
@@ -36,7 +36,7 @@ public class JsonDegreeProgramRepository implements DegreeProgramRepository {
   }
 
   @Override
-  public Optional<DegreeProgram> findById(String id) {
+  public Optional<DegreeProgram> findByDegreeProgramId(String id) {
     for (DegreeProgram p : load()) {
       if (p.getId().equals(id)) return Optional.of(p);
     }
@@ -44,12 +44,12 @@ public class JsonDegreeProgramRepository implements DegreeProgramRepository {
   }
 
   @Override
-  public List<DegreeProgram> findAll() {
+  public List<DegreeProgram> findAllDegreePrograms() {
     return load();
   }
 
   @Override
-  public void delete(String id) {
+  public void deleteDegreeProgram(String id) {
     List<DegreeProgram> list = load();
     list.removeIf(p -> p.getId().equals(id));
     store(list);

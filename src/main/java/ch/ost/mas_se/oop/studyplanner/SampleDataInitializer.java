@@ -24,18 +24,20 @@ public class SampleDataInitializer implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
-    if (!degreeProgramService.findAll().isEmpty()) {
+    if (!degreeProgramService.findAllDegreePrograms().isEmpty()) {
       return;
     }
 
     LocalDate since = LocalDate.of(2026, 6, 1);
 
     DegreeProgram bscInfo =
-        degreeProgramService.create("BSc Informatik", "Studiengang Informatik der OST", 12);
-    degreeProgramService.create("BSc Soziale Arbeit", "Studiengang Soziale Arbeit der OST", 12);
+        degreeProgramService.createDegreeProgram(
+            "BSc Informatik", "Studiengang Informatik der OST", 12);
+    degreeProgramService.createDegreeProgram(
+        "BSc Soziale Arbeit", "Studiengang Soziale Arbeit der OST", 12);
     String progId = bscInfo.getId();
 
-    studyModuleService.create(
+    studyModuleService.createStudyModule(
         new StudyModule(
             "OO",
             progId,
@@ -45,7 +47,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             List.of(),
             since,
             null));
-    studyModuleService.create(
+    studyModuleService.createStudyModule(
         new StudyModule(
             "Math",
             progId,
@@ -55,7 +57,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             List.of(),
             since,
             null));
-    studyModuleService.create(
+    studyModuleService.createStudyModule(
         new StudyModule(
             "DB1",
             progId,
@@ -65,7 +67,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             List.of("OO"),
             since,
             null));
-    studyModuleService.create(
+    studyModuleService.createStudyModule(
         new StudyModule(
             "AD1",
             progId,
@@ -75,7 +77,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             List.of("OO"),
             since,
             null));
-    studyModuleService.create(
+    studyModuleService.createStudyModule(
         new StudyModule(
             "AD2",
             progId,
@@ -85,7 +87,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             List.of("OO", "AD1"),
             since,
             null));
-    studyModuleService.create(
+    studyModuleService.createStudyModule(
         new StudyModule(
             "CPI",
             progId,
@@ -95,7 +97,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             List.of("OO", "Math"),
             since,
             null));
-    studyModuleService.create(
+    studyModuleService.createStudyModule(
         new StudyModule(
             "DB2",
             progId,
@@ -105,7 +107,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             List.of("DB1"),
             since,
             null));
-    studyModuleService.create(
+    studyModuleService.createStudyModule(
         new StudyModule(
             "SE1",
             progId,
@@ -115,7 +117,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             List.of("AD1", "CPI", "DB1"),
             since,
             null));
-    studyModuleService.create(
+    studyModuleService.createStudyModule(
         new StudyModule(
             "UI1",
             progId,
@@ -125,7 +127,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             List.of("AD1"),
             since,
             null));
-    studyModuleService.create(
+    studyModuleService.createStudyModule(
         new StudyModule(
             "SE2",
             progId,
@@ -135,7 +137,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             List.of("DB1", "SE1", "UI1"),
             since,
             null));
-    studyModuleService.create(
+    studyModuleService.createStudyModule(
         new StudyModule(
             "UI2",
             progId,
@@ -145,7 +147,7 @@ public class SampleDataInitializer implements ApplicationRunner {
             List.of("UI1"),
             since,
             null));
-    studyModuleService.create(
+    studyModuleService.createStudyModule(
         new StudyModule(
             "Thesis",
             progId,

@@ -23,34 +23,35 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
   }
 
   @Override
-  public DegreeProgram create(String name, String description, int maxDurationInSemesters) {
+  public DegreeProgram createDegreeProgram(
+      String name, String description, int maxDurationInSemesters) {
     DegreeProgram program =
         new DegreeProgram(UUID.randomUUID().toString(), name, description, maxDurationInSemesters);
-    repository.save(program);
+    repository.saveDegreeProgram(program);
     return program;
   }
 
   @Override
-  public Optional<DegreeProgram> findById(String id) {
-    return repository.findById(id);
+  public Optional<DegreeProgram> findDegreeProgramById(String id) {
+    return repository.findByDegreeProgramId(id);
   }
 
   @Override
-  public List<DegreeProgram> findAll() {
-    return repository.findAll();
+  public List<DegreeProgram> findAllDegreePrograms() {
+    return repository.findAllDegreePrograms();
   }
 
   @Override
-  public void update(DegreeProgram program) {
-    repository.save(program);
+  public void updateDegreeProgram(DegreeProgram program) {
+    repository.saveDegreeProgram(program);
   }
 
   @Override
-  public void delete(String id) {
+  public void deleteDegreeProgram(String id) {
     studyModuleService
-        .findAllByDegreeProgramId(id)
-        .forEach(m -> studyModuleService.delete(id, m.getStudyModuleKey()));
-    scheduleService.deleteByDegreeProgramId(id);
-    repository.delete(id);
+        .findAllStudyModulesByDegreeProgramId(id)
+        .forEach(m -> studyModuleService.deleteStudyModule(id, m.getStudyModuleKey()));
+    scheduleService.deleteSchedule(id);
+    repository.deleteDegreeProgram(id);
   }
 }
