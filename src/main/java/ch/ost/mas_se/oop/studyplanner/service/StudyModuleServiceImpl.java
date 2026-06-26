@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
+@Validated
 public class StudyModuleServiceImpl implements StudyModuleService {
   private final StudyModuleRepository studyModuleRepository;
 

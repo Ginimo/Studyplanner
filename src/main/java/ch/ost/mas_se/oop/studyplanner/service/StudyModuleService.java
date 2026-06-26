@@ -1,6 +1,8 @@
 package ch.ost.mas_se.oop.studyplanner.service;
 
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -9,11 +11,11 @@ public interface StudyModuleService {
 
   /** Constructs and persists a new study module from the given field values. */
   void createStudyModule(
-      String studyModuleKey,
-      String degreeProgramId,
-      String name,
+      @NotBlank String studyModuleKey,
+      @NotBlank String degreeProgramId,
+      @NotBlank String name,
       String description,
-      int ects,
+      @Min(1) int ects,
       List<String> prerequisiteKeys,
       LocalDate offeredFrom,
       LocalDate offeredTo);
@@ -39,11 +41,11 @@ public interface StudyModuleService {
    * ({@code studyModuleKey}, {@code degreeProgramId}).
    */
   void updateStudyModule(
-      String studyModuleKey,
-      String degreeProgramId,
-      String name,
+      @NotBlank String studyModuleKey,
+      @NotBlank String degreeProgramId,
+      @NotBlank String name,
       String description,
-      int ects,
+      @Min(1) int ects,
       List<String> prerequisiteKeys,
       LocalDate offeredFrom,
       LocalDate offeredTo);

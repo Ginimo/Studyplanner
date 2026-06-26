@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
+@Validated
 public class DegreeProgramServiceImpl implements DegreeProgramService {
   private final DegreeProgramRepository degreeProgramRepository;
   private final StudyModuleRepository studyModuleRepository;
