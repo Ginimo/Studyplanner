@@ -2,17 +2,7 @@ package ch.ost.mas_se.oop.studyplanner.ui.views;
 
 import java.util.Objects;
 
-public class StudyModuleKey {
-
-  private final String value;
-
-  public StudyModuleKey(String value) {
-    this.value = value;
-  }
-
-  public String getValue() {
-    return value;
-  }
+public record StudyModuleKey(String value) {
 
   @Override
   public boolean equals(Object other) {
@@ -24,11 +14,6 @@ public class StudyModuleKey {
     }
     StudyModuleKey that = (StudyModuleKey) other;
     return Objects.equals(value, that.value);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(value);
   }
 
   @Override
