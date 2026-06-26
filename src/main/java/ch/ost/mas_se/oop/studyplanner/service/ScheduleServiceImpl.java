@@ -5,15 +5,19 @@ import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.model.Schedule;
 import ch.ost.mas_se.oop.studyplanner.model.Semester;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
+import ch.ost.mas_se.oop.studyplanner.repository.ScheduleRepository;
 import java.util.*;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
   private final StudyModuleService studyModuleService;
+  private final ScheduleRepository scheduleRepository;
 
-  public ScheduleServiceImpl(StudyModuleService studyModuleService) {
+  public ScheduleServiceImpl(
+      StudyModuleService studyModuleService, ScheduleRepository scheduleRepository) {
     this.studyModuleService = studyModuleService;
+    this.scheduleRepository = scheduleRepository;
   }
 
   /**
@@ -26,8 +30,7 @@ public class ScheduleServiceImpl implements ScheduleService {
    * @throws CyclicDependencyException if the prerequisite graph contains a cycle
    */
   @Override
-  public Schedule calculate(DegreeProgram program) {
-    List<StudyModule> allModules = studyModuleService.findAllByDegreeProgramId(program.getId());
+  public Schedule calculate(List<StudyModule> allModules) {
 
     // create 3 auxiliary data structures
     Map<String, StudyModule> moduleMap = buildModuleMap(allModules);
@@ -137,5 +140,22 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
     Collections.sort(cycleKeys);
     return cycleKeys;
+  }
+
+  @Override
+  public void calculateAndSave(DegreeProgram program) {
+    List<StudyModule> modules = studyModuleService.findAllByDegreeProgramId(program.getId());
+    Schedule schedule = calculate(modules);
+    scheduleRepository.save(program.getId(), schedule);
+  }
+
+  @Override
+  public Optional<Schedule> findByDegreeProgramId(String degreeProgramId) {
+    return scheduleRepository.findByDegreeProgramId(degreeProgramId);
+  }
+
+  @Override
+  public void deleteByDegreeProgramId(String degreeProgramId) {
+    scheduleRepository.delete(degreeProgramId);
   }
 }

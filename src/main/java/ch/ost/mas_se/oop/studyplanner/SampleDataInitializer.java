@@ -24,14 +24,16 @@ public class SampleDataInitializer implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
-    String progId = "sample-id-1234";
+    if (!degreeProgramService.findAll().isEmpty()) {
+      return;
+    }
+
     LocalDate since = LocalDate.of(2026, 6, 1);
 
-    degreeProgramService.create(
-        new DegreeProgram(progId, "BSc Informatik", "Studiengang Informatik der OST", 12));
-    degreeProgramService.create(
-        new DegreeProgram(
-            "sample-id-5678", "BSc Soziale Arbeit", "Studiengang Soziale Arbeit der OST", 12));
+    DegreeProgram bscInfo =
+        degreeProgramService.create("BSc Informatik", "Studiengang Informatik der OST", 12);
+    degreeProgramService.create("BSc Soziale Arbeit", "Studiengang Soziale Arbeit der OST", 12);
+    String progId = bscInfo.getId();
 
     studyModuleService.create(
         new StudyModule(

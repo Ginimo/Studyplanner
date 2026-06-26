@@ -1,5 +1,6 @@
 package ch.ost.mas_se.oop.studyplanner.ui.views;
 
+import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import java.util.List;
 
 public class StudyModuleView {
@@ -9,6 +10,15 @@ public class StudyModuleView {
   private final String description;
   private final int ects;
   private final List<String> prerequisiteKeys;
+
+  public static StudyModuleView toView(StudyModule module) {
+    return new StudyModuleView(
+        new StudyModuleKey(module.getStudyModuleKey()),
+        module.getName(),
+        module.getDescription(),
+        module.getEcts(),
+        module.getPrerequisiteKeys());
+  }
 
   public StudyModuleView(
       final StudyModuleKey studyModuleKey,
