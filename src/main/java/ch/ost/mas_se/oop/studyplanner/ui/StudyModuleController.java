@@ -54,6 +54,16 @@ public class StudyModuleController extends AbstractController {
       return showCreateFormView(degreeProgramId, form, model);
     }
 
+    if (studyModuleService
+        .findStudyModuleByKey(degreeProgramId, form.getStudyModuleKey())
+        .isPresent()) {
+      result.rejectValue(
+          "studyModuleKey",
+          "duplicate",
+          "A study module with this key already exists in this degree program.");
+      return showCreateFormView(degreeProgramId, form, model);
+    }
+
     studyModuleService.createStudyModule(
         form.getStudyModuleKey(),
         degreeProgramId,
