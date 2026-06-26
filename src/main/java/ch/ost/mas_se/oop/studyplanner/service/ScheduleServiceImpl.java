@@ -106,7 +106,7 @@ public class ScheduleServiceImpl implements ScheduleService {
    */
   private Map<String, List<String>> buildDependents(
       List<StudyModule> modules, Set<String> allStudyModuleKeys) {
-    Map<String, List<String>> dependents = new HashMap<>();
+    Map<String, List<String>> dependents = new LinkedHashMap<>();
     for (String studyModuleKey : allStudyModuleKeys) {
       dependents.put(
           studyModuleKey, new ArrayList<>()); // pre-populate so every key has a non-null list
