@@ -33,7 +33,7 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
 
   @Override
   public Optional<DegreeProgram> findDegreeProgramById(String id) {
-    return repository.findByDegreeProgramId(id);
+    return repository.findDegreeProgramById(id);
   }
 
   @Override

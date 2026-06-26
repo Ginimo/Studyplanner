@@ -11,7 +11,7 @@ public class StudyModuleView {
   private final int ects;
   private final List<String> prerequisiteKeys;
 
-  public static StudyModuleView toView(StudyModule module) {
+  public static StudyModuleView from(StudyModule module) {
     return new StudyModuleView(
         new StudyModuleKey(module.getStudyModuleKey()),
         module.getName(),

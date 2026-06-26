@@ -16,7 +16,7 @@ public interface DegreeProgramRepository {
    * Returns the degree program with the given ID, or {@link java.util.Optional#empty()} if none
    * exists.
    */
-  Optional<DegreeProgram> findByDegreeProgramId(String id);
+  Optional<DegreeProgram> findDegreeProgramById(String id);
 
   /** Returns all stored degree programs in insertion order. */
   List<DegreeProgram> findAllDegreePrograms();

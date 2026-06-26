@@ -8,7 +8,7 @@ public class ScheduleView {
   private final LocalDateTime calculatedAt;
   private final int totalSemesters;
 
-  public static ScheduleView toView(Schedule schedule) {
+  public static ScheduleView from(Schedule schedule) {
     return new ScheduleView(schedule.getCalculatedAt(), schedule.getTotalSemesters());
   }
 

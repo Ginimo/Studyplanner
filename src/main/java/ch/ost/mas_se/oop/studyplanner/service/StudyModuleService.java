@@ -22,7 +22,7 @@ public interface StudyModuleService {
    * Replaces the stored study module matching {@code module}'s composite key with the given updated
    * version.
    */
-  void updateStudyModules(StudyModule module);
+  void updateStudyModule(StudyModule module);
 
   /**
    * Deletes the study module identified by ({@code degreeProgramId}, {@code key}) and removes its

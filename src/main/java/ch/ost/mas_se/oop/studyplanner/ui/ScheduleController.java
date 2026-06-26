@@ -36,7 +36,7 @@ public class ScheduleController extends AbstractController {
   @GetMapping
   public String showSchedule(@PathVariable final String degreeProgramId, final Model model) {
     DegreeProgram program = requireProgram(degreeProgramId);
-    model.addAttribute("degreeProgram", DegreeProgramView.toView(program));
+    model.addAttribute("degreeProgram", DegreeProgramView.from(program));
 
     scheduleService
         .findScheduleByDegreeProgramId(degreeProgramId)
@@ -46,10 +46,10 @@ public class ScheduleController extends AbstractController {
   }
 
   private void addScheduleToModel(final Schedule schedule, final Model model) {
-    model.addAttribute("schedule", ScheduleView.toView(schedule));
+    model.addAttribute("schedule", ScheduleView.from(schedule));
     model.addAttribute(
         "semesterViews",
-        schedule.getSemesters().stream().map(SemesterView::toView).collect(Collectors.toList()));
+        schedule.getSemesters().stream().map(SemesterView::from).collect(Collectors.toList()));
   }
 
   /**

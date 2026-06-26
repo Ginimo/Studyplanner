@@ -20,7 +20,7 @@ public class DegreeProgramView {
     this.maxDurationInSemesters = maxDurationInSemesters;
   }
 
-  public static DegreeProgramView toView(DegreeProgram program) {
+  public static DegreeProgramView from(DegreeProgram program) {
     return new DegreeProgramView(
         program.getId(),
         program.getName(),

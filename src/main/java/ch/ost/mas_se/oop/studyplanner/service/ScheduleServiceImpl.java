@@ -32,7 +32,7 @@ public class ScheduleServiceImpl implements ScheduleService {
   @Override
   public Schedule calculateSchedule(List<StudyModule> allModules) {
 
-    // createDegreeProgram 3 auxiliary data structures
+    // build 3 auxiliary data structures
     Map<String, StudyModule> moduleMap = buildModuleMap(allModules);
     Map<String, Integer> inDegree = buildInDegree(allModules, moduleMap.keySet());
     Map<String, List<String>> dependents = buildDependents(allModules, moduleMap.keySet());

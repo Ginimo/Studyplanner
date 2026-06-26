@@ -13,7 +13,7 @@ public class StudyModuleListView {
   private final boolean hasPrerequisites;
   private final int prerequisiteCount;
 
-  public static StudyModuleListView toView(StudyModule module) {
+  public static StudyModuleListView from(StudyModule module) {
     return new StudyModuleListView(
         new StudyModuleKey(module.getStudyModuleKey()),
         module.getName(),

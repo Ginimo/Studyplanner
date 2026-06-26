@@ -31,7 +31,7 @@ public class StudyModuleServiceImpl implements StudyModuleService {
   }
 
   @Override
-  public void updateStudyModules(StudyModule module) {
+  public void updateStudyModule(StudyModule module) {
     repository.saveStudyModule(module);
   }
 

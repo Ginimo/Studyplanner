@@ -36,7 +36,7 @@ public class JsonDegreeProgramRepository implements DegreeProgramRepository {
   }
 
   @Override
-  public Optional<DegreeProgram> findByDegreeProgramId(String id) {
+  public Optional<DegreeProgram> findDegreeProgramById(String id) {
     for (DegreeProgram p : load()) {
       if (p.getId().equals(id)) return Optional.of(p);
     }

@@ -33,7 +33,7 @@ public class DegreeProgramController extends AbstractController {
     model.addAttribute(
         "degreePrograms",
         degreeProgramService.findAllDegreePrograms().stream()
-            .map(DegreeProgramView::toView)
+            .map(DegreeProgramView::from)
             .collect(Collectors.toList()));
     return "degreeprograms/list";
   }
@@ -76,12 +76,12 @@ public class DegreeProgramController extends AbstractController {
   public String showDetails(@PathVariable final String id, final Model model) {
     DegreeProgram program = requireProgram(id);
 
-    model.addAttribute("degreeProgram", DegreeProgramView.toView(program));
+    model.addAttribute("degreeProgram", DegreeProgramView.from(program));
 
     model.addAttribute(
         "studyModules",
         studyModuleService.findAllStudyModulesByDegreeProgramId(id).stream()
-            .map(StudyModuleListView::toView)
+            .map(StudyModuleListView::from)
             .collect(Collectors.toList()));
 
     return "degreeprograms/details";

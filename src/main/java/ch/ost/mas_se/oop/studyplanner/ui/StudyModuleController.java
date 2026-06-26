@@ -54,7 +54,7 @@ public class StudyModuleController extends AbstractController {
       return showCreateFormView(degreeProgramId, form, model);
     }
 
-    StudyModule module = toModule(form.getStudyModuleKey(), degreeProgramId, form);
+    StudyModule module = buildStudyModule(form.getStudyModuleKey(), degreeProgramId, form);
     studyModuleService.createStudyModule(module);
 
     redirectAttributes.addFlashAttribute(
@@ -76,11 +76,11 @@ public class StudyModuleController extends AbstractController {
     List<StudyModuleView> prerequisites =
         module.getPrerequisiteKeys().stream()
             .flatMap(key -> studyModuleService.findStudyModuleByKey(degreeProgramId, key).stream())
-            .map(StudyModuleView::toView)
+            .map(StudyModuleView::from)
             .collect(Collectors.toList());
 
-    model.addAttribute("degreeProgram", DegreeProgramView.toView(requireProgram(degreeProgramId)));
-    model.addAttribute("studyModule", StudyModuleView.toView(module));
+    model.addAttribute("degreeProgram", DegreeProgramView.from(requireProgram(degreeProgramId)));
+    model.addAttribute("studyModule", StudyModuleView.from(module));
     model.addAttribute("prerequisites", prerequisites);
     return "studymodules/details";
   }
@@ -124,8 +124,8 @@ public class StudyModuleController extends AbstractController {
       return showEditFormView(degreeProgramId, studyModuleKey, form, model);
     }
 
-    StudyModule module = toModule(studyModuleKey, degreeProgramId, form);
-    studyModuleService.updateStudyModules(module);
+    StudyModule module = buildStudyModule(studyModuleKey, degreeProgramId, form);
+    studyModuleService.updateStudyModule(module);
 
     redirectAttributes.addFlashAttribute(
         "successMessage", "Study module \"" + form.getName() + "\" updated.");
@@ -136,7 +136,7 @@ public class StudyModuleController extends AbstractController {
    * Deletes the study module, removing its key from the prerequisite lists of any sibling modules,
    * then redirects to the degree program's detail view.
    */
-  @PostMapping("/{studyModuleKey}/deleteDegreeProgram")
+  @PostMapping("/{studyModuleKey}/deleteStudyModule")
   public String deleteStudyModule(
       @PathVariable final String degreeProgramId,
       @PathVariable final String studyModuleKey,
@@ -156,8 +156,8 @@ public class StudyModuleController extends AbstractController {
    */
   private String showCreateFormView(
       final String degreeProgramId, final StudyModuleForm form, final Model model) {
-    form.setIsNew(true);
-    model.addAttribute("degreeProgram", DegreeProgramView.toView(requireProgram(degreeProgramId)));
+    form.setNewEntry(true);
+    model.addAttribute("degreeProgram", DegreeProgramView.from(requireProgram(degreeProgramId)));
     model.addAttribute("formAction", "/degree-programs/" + degreeProgramId + "/study-modules/new");
     model.addAttribute("pageTitle", "New Study Module");
     addAvailableStudyModulesForPrerequisiteSelection(degreeProgramId, null, model);
@@ -170,8 +170,8 @@ public class StudyModuleController extends AbstractController {
       final String studyModuleKey,
       final StudyModuleForm form,
       final Model model) {
-    form.setIsNew(false);
-    model.addAttribute("degreeProgram", DegreeProgramView.toView(requireProgram(degreeProgramId)));
+    form.setNewEntry(false);
+    model.addAttribute("degreeProgram", DegreeProgramView.from(requireProgram(degreeProgramId)));
     model.addAttribute(
         "formAction",
         "/degree-programs/" + degreeProgramId + "/study-modules/" + studyModuleKey + "/edit");
@@ -191,7 +191,7 @@ public class StudyModuleController extends AbstractController {
     List<StudyModuleView> available =
         studyModuleService.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
             .filter(sm -> !sm.getStudyModuleKey().equals(excludeStudyModuleKey))
-            .map(StudyModuleView::toView)
+            .map(StudyModuleView::from)
             .collect(Collectors.toList());
     model.addAttribute("availableStudyModules", available);
   }
@@ -210,11 +210,7 @@ public class StudyModuleController extends AbstractController {
                     HttpStatus.NOT_FOUND, "Study module not found: " + studyModuleKey));
   }
 
-  /**
-   * Builds a {@link StudyModule} domain object from a form, using the given key
-   * (createDegreeProgram vs. updateDegreeProgram supply different keys).
-   */
-  private StudyModule toModule(
+  private StudyModule buildStudyModule(
       final String key, final String degreeProgramId, final StudyModuleForm form) {
     return new StudyModule(
         key,

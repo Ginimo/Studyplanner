@@ -12,11 +12,9 @@ public class SemesterView {
   private final int totalEcts;
   private final String studyModuleKeys;
 
-  public static SemesterView toView(Semester semester) {
+  public static SemesterView from(Semester semester) {
     List<StudyModuleView> modules =
-        semester.getStudyModules().stream()
-            .map(StudyModuleView::toView)
-            .collect(Collectors.toList());
+        semester.getStudyModules().stream().map(StudyModuleView::from).collect(Collectors.toList());
     String keys =
         semester.getStudyModules().stream()
             .map(StudyModule::getStudyModuleKey)
