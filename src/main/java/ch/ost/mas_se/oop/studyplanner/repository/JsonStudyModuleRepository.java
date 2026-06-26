@@ -36,9 +36,9 @@ public class JsonStudyModuleRepository extends AbstractJsonRepository<List<Study
   public void saveStudyModule(StudyModule module) {
     List<StudyModule> list = load();
     for (int i = 0; i < list.size(); i++) {
-      StudyModule m = list.get(i);
-      if (m.getDegreeProgramId().equals(module.getDegreeProgramId())
-          && m.getStudyModuleKey().equals(module.getStudyModuleKey())) {
+      StudyModule existing = list.get(i);
+      if (existing.getDegreeProgramId().equals(module.getDegreeProgramId())
+          && existing.getStudyModuleKey().equals(module.getStudyModuleKey())) {
         list.set(i, module);
         store(list);
         return;
@@ -49,10 +49,11 @@ public class JsonStudyModuleRepository extends AbstractJsonRepository<List<Study
   }
 
   @Override
-  public Optional<StudyModule> findStudyModuleByKey(String degreeProgramId, String key) {
-    for (StudyModule m : load()) {
-      if (m.getDegreeProgramId().equals(degreeProgramId) && m.getStudyModuleKey().equals(key)) {
-        return Optional.of(m);
+  public Optional<StudyModule> findStudyModuleByKey(String degreeProgramId, String studyModuleKey) {
+    for (StudyModule module : load()) {
+      if (module.getDegreeProgramId().equals(degreeProgramId)
+          && module.getStudyModuleKey().equals(studyModuleKey)) {
+        return Optional.of(module);
       }
     }
     return Optional.empty();
@@ -61,17 +62,19 @@ public class JsonStudyModuleRepository extends AbstractJsonRepository<List<Study
   @Override
   public List<StudyModule> findAllStudyModulesByDegreeProgramId(String degreeProgramId) {
     List<StudyModule> result = new ArrayList<>();
-    for (StudyModule m : load()) {
-      if (m.getDegreeProgramId().equals(degreeProgramId)) result.add(m);
+    for (StudyModule module : load()) {
+      if (module.getDegreeProgramId().equals(degreeProgramId)) result.add(module);
     }
     return result;
   }
 
   @Override
-  public void deleteStudyModule(String degreeProgramId, String key) {
+  public void deleteStudyModule(String degreeProgramId, String studyModuleKey) {
     List<StudyModule> list = load();
     list.removeIf(
-        m -> m.getDegreeProgramId().equals(degreeProgramId) && m.getStudyModuleKey().equals(key));
+        module ->
+            module.getDegreeProgramId().equals(degreeProgramId)
+                && module.getStudyModuleKey().equals(studyModuleKey));
     store(list);
   }
 }

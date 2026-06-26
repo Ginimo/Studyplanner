@@ -16,11 +16,11 @@ public interface DegreeProgramRepository {
    * Returns the degree program with the given ID, or {@link java.util.Optional#empty()} if none
    * exists.
    */
-  Optional<DegreeProgram> findDegreeProgramById(String id);
+  Optional<DegreeProgram> findDegreeProgramById(String degreeProgramId);
 
   /** Returns all stored degree programs in insertion order. */
   List<DegreeProgram> findAllDegreePrograms();
 
   /** Removes the degree program with the given ID. No-op if it does not exist. */
-  void deleteDegreeProgram(String id);
+  void deleteDegreeProgram(String degreeProgramId);
 }

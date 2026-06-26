@@ -72,15 +72,15 @@ public class DegreeProgramController extends AbstractController {
    * Renders the detail view for a degree program, including its study modules filtered and sorted
    * according to the query parameters.
    */
-  @GetMapping("/{id}")
-  public String showDetails(@PathVariable final String id, final Model model) {
-    DegreeProgram program = requireProgram(id);
+  @GetMapping("/{degreeProgramId}")
+  public String showDetails(@PathVariable final String degreeProgramId, final Model model) {
+    DegreeProgram program = requireDegreeProgram(degreeProgramId);
 
     model.addAttribute("degreeProgram", DegreeProgramView.from(program));
 
     model.addAttribute(
         "studyModules",
-        studyModuleService.findAllStudyModulesByDegreeProgramId(id).stream()
+        studyModuleService.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
             .map(StudyModuleListView::from)
             .collect(Collectors.toList()));
 
@@ -88,9 +88,9 @@ public class DegreeProgramController extends AbstractController {
   }
 
   /** Loads the existing degree program into the edit form. */
-  @GetMapping("/{id}/edit")
-  public String showEditForm(@PathVariable final String id, final Model model) {
-    DegreeProgram program = requireProgram(id);
+  @GetMapping("/{degreeProgramId}/edit")
+  public String showEditForm(@PathVariable final String degreeProgramId, final Model model) {
+    DegreeProgram program = requireDegreeProgram(degreeProgramId);
 
     DegreeProgramForm form = new DegreeProgramForm();
     form.setName(program.getName());
@@ -98,38 +98,38 @@ public class DegreeProgramController extends AbstractController {
     form.setMaxDurationInSemesters(program.getMaxDurationInSemesters());
 
     model.addAttribute("degreeProgram", form);
-    return showEditFormView(id, model);
+    return showEditFormView(degreeProgramId, model);
   }
 
   /**
    * Processes the edit form. On validation errors the form is re-displayed; on success the program
    * is updated and the user is redirected to its detail view.
    */
-  @PostMapping("/{id}/edit")
+  @PostMapping("/{degreeProgramId}/edit")
   public String updateDegreeProgram(
-      @PathVariable final String id,
+      @PathVariable final String degreeProgramId,
       @Valid @ModelAttribute("degreeProgram") final DegreeProgramForm form,
       final BindingResult result,
       final Model model,
       final RedirectAttributes redirectAttributes) {
 
     if (result.hasErrors()) {
-      return showEditFormView(id, model);
+      return showEditFormView(degreeProgramId, model);
     }
 
     degreeProgramService.updateDegreeProgram(
-        id, form.getName(), form.getDescription(), form.getMaxDurationInSemesters());
+        degreeProgramId, form.getName(), form.getDescription(), form.getMaxDurationInSemesters());
 
     redirectAttributes.addFlashAttribute("successMessage", "Degree program updated.");
-    return "redirect:/degree-programs/" + id;
+    return "redirect:/degree-programs/" + degreeProgramId;
   }
 
   /** Deletes the degree program together with all of its study modules and schedule. */
-  @PostMapping("/{id}/deleteDegreeProgram")
+  @PostMapping("/{degreeProgramId}/deleteDegreeProgram")
   public String deleteDegreeProgram(
-      @PathVariable final String id, final RedirectAttributes redirectAttributes) {
-    DegreeProgram program = requireProgram(id);
-    degreeProgramService.deleteDegreeProgram(id);
+      @PathVariable final String degreeProgramId, final RedirectAttributes redirectAttributes) {
+    DegreeProgram program = requireDegreeProgram(degreeProgramId);
+    degreeProgramService.deleteDegreeProgram(degreeProgramId);
     redirectAttributes.addFlashAttribute(
         "successMessage", "Degree program \"" + program.getName() + "\" deleted.");
     return "redirect:/degree-programs";
@@ -146,8 +146,8 @@ public class DegreeProgramController extends AbstractController {
   }
 
   /** Populates the model with metadata for the edit form and returns the form view name. */
-  private String showEditFormView(final String id, final Model model) {
-    model.addAttribute("formAction", "/degree-programs/" + id + "/edit");
+  private String showEditFormView(final String degreeProgramId, final Model model) {
+    model.addAttribute("formAction", "/degree-programs/" + degreeProgramId + "/edit");
     model.addAttribute("pageTitle", "Edit Degree Program");
     return "degreeprograms/form";
   }

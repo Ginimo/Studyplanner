@@ -87,7 +87,8 @@ public class StudyModuleController extends AbstractController {
             .map(StudyModuleView::from)
             .collect(Collectors.toList());
 
-    model.addAttribute("degreeProgram", DegreeProgramView.from(requireProgram(degreeProgramId)));
+    model.addAttribute(
+        "degreeProgram", DegreeProgramView.from(requireDegreeProgram(degreeProgramId)));
     model.addAttribute("studyModule", StudyModuleView.from(module));
     model.addAttribute("prerequisites", prerequisites);
     return "studymodules/details";
@@ -166,13 +167,14 @@ public class StudyModuleController extends AbstractController {
   }
 
   /**
-   * Populates the model with metadata for the createDegreeProgram form and returns the form view
+   * Populates the model with metadata for the createStudyModule form and returns the form view
    * name.
    */
   private String showCreateFormView(
       final String degreeProgramId, final StudyModuleForm form, final Model model) {
     form.setNewEntry(true);
-    model.addAttribute("degreeProgram", DegreeProgramView.from(requireProgram(degreeProgramId)));
+    model.addAttribute(
+        "degreeProgram", DegreeProgramView.from(requireDegreeProgram(degreeProgramId)));
     model.addAttribute("formAction", "/degree-programs/" + degreeProgramId + "/study-modules/new");
     model.addAttribute("pageTitle", "New Study Module");
     addAvailableStudyModulesForPrerequisiteSelection(degreeProgramId, null, model);
@@ -186,7 +188,8 @@ public class StudyModuleController extends AbstractController {
       final StudyModuleForm form,
       final Model model) {
     form.setNewEntry(false);
-    model.addAttribute("degreeProgram", DegreeProgramView.from(requireProgram(degreeProgramId)));
+    model.addAttribute(
+        "degreeProgram", DegreeProgramView.from(requireDegreeProgram(degreeProgramId)));
     model.addAttribute(
         "formAction",
         "/degree-programs/" + degreeProgramId + "/study-modules/" + studyModuleKey + "/edit");
@@ -205,7 +208,7 @@ public class StudyModuleController extends AbstractController {
       final String degreeProgramId, final String excludeStudyModuleKey, final Model model) {
     List<StudyModuleView> available =
         studyModuleService.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
-            .filter(sm -> !sm.getStudyModuleKey().equals(excludeStudyModuleKey))
+            .filter(studyModule -> !studyModule.getStudyModuleKey().equals(excludeStudyModuleKey))
             .map(StudyModuleView::from)
             .collect(Collectors.toList());
     model.addAttribute("availableStudyModules", available);

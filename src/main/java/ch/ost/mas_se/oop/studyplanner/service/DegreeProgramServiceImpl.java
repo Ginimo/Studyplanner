@@ -9,15 +9,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DegreeProgramServiceImpl implements DegreeProgramService {
-  private final DegreeProgramRepository repository;
+  private final DegreeProgramRepository degreeProgramRepository;
   private final StudyModuleService studyModuleService;
   private final ScheduleService scheduleService;
 
   public DegreeProgramServiceImpl(
-      DegreeProgramRepository repository,
+      DegreeProgramRepository degreeProgramRepository,
       StudyModuleService studyModuleService,
       ScheduleService scheduleService) {
-    this.repository = repository;
+    this.degreeProgramRepository = degreeProgramRepository;
     this.studyModuleService = studyModuleService;
     this.scheduleService = scheduleService;
   }
@@ -27,32 +27,35 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
       String name, String description, int maxDurationInSemesters) {
     DegreeProgram program =
         new DegreeProgram(UUID.randomUUID().toString(), name, description, maxDurationInSemesters);
-    repository.saveDegreeProgram(program);
+    degreeProgramRepository.saveDegreeProgram(program);
     return program;
   }
 
   @Override
-  public Optional<DegreeProgram> findDegreeProgramById(String id) {
-    return repository.findDegreeProgramById(id);
+  public Optional<DegreeProgram> findDegreeProgramById(String degreeProgramId) {
+    return degreeProgramRepository.findDegreeProgramById(degreeProgramId);
   }
 
   @Override
   public List<DegreeProgram> findAllDegreePrograms() {
-    return repository.findAllDegreePrograms();
+    return degreeProgramRepository.findAllDegreePrograms();
   }
 
   @Override
   public void updateDegreeProgram(
-      String id, String name, String description, int maxDurationInSemesters) {
-    repository.saveDegreeProgram(new DegreeProgram(id, name, description, maxDurationInSemesters));
+      String degreeProgramId, String name, String description, int maxDurationInSemesters) {
+    degreeProgramRepository.saveDegreeProgram(
+        new DegreeProgram(degreeProgramId, name, description, maxDurationInSemesters));
   }
 
   @Override
-  public void deleteDegreeProgram(String id) {
+  public void deleteDegreeProgram(String degreeProgramId) {
     studyModuleService
-        .findAllStudyModulesByDegreeProgramId(id)
-        .forEach(m -> studyModuleService.deleteStudyModule(id, m.getStudyModuleKey()));
-    scheduleService.deleteSchedule(id);
-    repository.deleteDegreeProgram(id);
+        .findAllStudyModulesByDegreeProgramId(degreeProgramId)
+        .forEach(
+            module ->
+                studyModuleService.deleteStudyModule(degreeProgramId, module.getStudyModuleKey()));
+    scheduleService.deleteSchedule(degreeProgramId);
+    degreeProgramRepository.deleteDegreeProgram(degreeProgramId);
   }
 }

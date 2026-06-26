@@ -14,16 +14,16 @@ public interface StudyModuleRepository {
 
   /**
    * Returns the study module identified by the composite key ({@code degreeProgramId}, {@code
-   * key}), or {@link java.util.Optional#empty()} if none exists.
+   * studyModuleKey}), or {@link java.util.Optional#empty()} if none exists.
    */
-  Optional<StudyModule> findStudyModuleByKey(String degreeProgramId, String key);
+  Optional<StudyModule> findStudyModuleByKey(String degreeProgramId, String studyModuleKey);
 
   /** Returns all study modules belonging to the given degree program in insertion order. */
   List<StudyModule> findAllStudyModulesByDegreeProgramId(String degreeProgramId);
 
   /**
    * Removes the study module identified by the composite key ({@code degreeProgramId}, {@code
-   * key}). No-op if it does not exist.
+   * studyModuleKey}). No-op if it does not exist.
    */
-  void deleteStudyModule(String degreeProgramId, String key);
+  void deleteStudyModule(String degreeProgramId, String studyModuleKey);
 }

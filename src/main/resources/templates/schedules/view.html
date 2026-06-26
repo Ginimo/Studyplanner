@@ -12,7 +12,7 @@
                 <a th:href="@{/degree-programs}">Degree Programs</a>
             </li>
             <li class="breadcrumb-item">
-                <a th:href="@{/degree-programs/{id}(id=${degreeProgram.id})}"
+                <a th:href="@{/degree-programs/{degreeProgramId}(degreeProgramId=${degreeProgram.degreeProgramId})}"
                    th:text="${degreeProgram.name}">Program</a>
             </li>
             <li class="breadcrumb-item active">Study Plan</li>
@@ -24,7 +24,7 @@
         <h2 class="mb-0">
             <i class="bi bi-calendar-check me-2 text-success"></i>Study Plan
         </h2>
-        <form th:action="@{/degree-programs/{id}/schedule/calculate(id=${degreeProgram.id})}"
+        <form th:action="@{/degree-programs/{degreeProgramId}/schedule/calculate(degreeProgramId=${degreeProgram.degreeProgramId})}"
               method="post">
             <button type="submit" class="btn btn-success">
                 <i class="bi bi-arrow-repeat me-1"></i>Recalculate
@@ -36,7 +36,7 @@
     <div th:if="${schedule == null}" class="text-center py-5 border rounded text-muted">
         <i class="bi bi-calculator display-4 d-block mb-3"></i>
         <p>No study plan has been calculated yet.</p>
-        <form th:action="@{/degree-programs/{id}/schedule/calculate(id=${degreeProgram.id})}"
+        <form th:action="@{/degree-programs/{degreeProgramId}/schedule/calculate(degreeProgramId=${degreeProgram.degreeProgramId})}"
               method="post">
             <button type="submit" class="btn btn-success">
                 <i class="bi bi-calculator me-1"></i>Calculate Now
@@ -94,14 +94,14 @@
             <tr th:each="sem : ${semesterViews}">
                 <td th:text="${sem.semesterNumber}">1</td>
                 <td th:text="${sem.studyModules.size()}">0</td>
-                <td th:text="${sem.studyModuleKeys}">KEY1, KEY2</td>
+                <td th:text="${sem.joinedStudyModuleKeys}">KEY1, KEY2</td>
                 <td th:text="${sem.totalEcts}">0</td>
             </tr>
             </tbody>
         </table>
     </div>
 
-    <a th:href="@{/degree-programs/{id}(id=${degreeProgram.id})}"
+    <a th:href="@{/degree-programs/{degreeProgramId}(degreeProgramId=${degreeProgram.degreeProgramId})}"
        class="btn btn-outline-primary btn-sm mt-3">
         <i class="bi bi-arrow-left me-1"></i>Back to Program
     </a>

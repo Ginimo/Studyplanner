@@ -35,7 +35,7 @@ public class ScheduleController extends AbstractController {
    */
   @GetMapping
   public String showSchedule(@PathVariable final String degreeProgramId, final Model model) {
-    DegreeProgram program = requireProgram(degreeProgramId);
+    DegreeProgram program = requireDegreeProgram(degreeProgramId);
     model.addAttribute("degreeProgram", DegreeProgramView.from(program));
 
     scheduleService
@@ -59,7 +59,7 @@ public class ScheduleController extends AbstractController {
   @PostMapping("/calculateSchedule")
   public String calculateSchedule(
       @PathVariable final String degreeProgramId, final RedirectAttributes redirectAttributes) {
-    DegreeProgram program = requireProgram(degreeProgramId);
+    DegreeProgram program = requireDegreeProgram(degreeProgramId);
     try {
       scheduleService.calculateAndSaveSchedule(program);
       redirectAttributes.addFlashAttribute("successMessage", "Study plan calculated successfully.");

@@ -9,7 +9,7 @@ public interface StudyModuleService {
 
   /** Constructs and persists a new study module from the given field values. */
   void createStudyModule(
-      String key,
+      String studyModuleKey,
       String degreeProgramId,
       String name,
       String description,
@@ -20,25 +20,26 @@ public interface StudyModuleService {
 
   /**
    * Returns the study module identified by the composite key ({@code degreeProgramId}, {@code
-   * key}), or {@link java.util.Optional#empty()} if none exists.
+   * studyModuleKey}), or {@link java.util.Optional#empty()} if none exists.
    */
-  Optional<StudyModule> findStudyModuleByKey(String degreeProgramId, String key);
+  Optional<StudyModule> findStudyModuleByKey(String degreeProgramId, String studyModuleKey);
 
   /** Returns all study modules belonging to the given degree program. */
   List<StudyModule> findAllStudyModulesByDegreeProgramId(String degreeProgramId);
 
   /**
-   * Returns all study modules in {@code degreeProgramId} whose key appears in {@code keys}. Loads
-   * the program's modules once and filters by a set lookup; unknown keys are silently skipped.
+   * Returns all study modules in {@code degreeProgramId} whose key appears in {@code
+   * studyModuleKeys}. Loads the program's modules once and filters by a set lookup; unknown keys
+   * are silently skipped.
    */
-  List<StudyModule> findStudyModulesByKeys(String degreeProgramId, List<String> keys);
+  List<StudyModule> findStudyModulesByKeys(String degreeProgramId, List<String> studyModuleKeys);
 
   /**
    * Constructs a replacement and persists it, matching the stored module by its composite key
-   * ({@code key}, {@code degreeProgramId}).
+   * ({@code studyModuleKey}, {@code degreeProgramId}).
    */
   void updateStudyModule(
-      String key,
+      String studyModuleKey,
       String degreeProgramId,
       String name,
       String description,
@@ -48,9 +49,9 @@ public interface StudyModuleService {
       LocalDate offeredTo);
 
   /**
-   * Deletes the study module identified by ({@code degreeProgramId}, {@code key}) and removes its
-   * key from the prerequisite lists of any sibling modules in the same program to avoid dangling
-   * references.
+   * Deletes the study module identified by ({@code degreeProgramId}, {@code studyModuleKey}) and
+   * removes its key from the prerequisite lists of any sibling modules in the same program to avoid
+   * dangling references.
    */
-  void deleteStudyModule(String degreeProgramId, String key);
+  void deleteStudyModule(String degreeProgramId, String studyModuleKey);
 }

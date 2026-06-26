@@ -13,12 +13,12 @@ abstract class AbstractController {
     this.degreeProgramService = degreeProgramService;
   }
 
-  protected DegreeProgram requireProgram(String id) {
+  protected DegreeProgram requireDegreeProgram(String degreeProgramId) {
     return degreeProgramService
-        .findDegreeProgramById(id)
+        .findDegreeProgramById(degreeProgramId)
         .orElseThrow(
             () ->
                 new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Degree program not found: " + id));
+                    HttpStatus.NOT_FOUND, "Degree program not found: " + degreeProgramId));
   }
 }

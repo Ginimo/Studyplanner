@@ -10,27 +10,28 @@ public class SemesterView {
   private final int semesterNumber;
   private final List<StudyModuleView> studyModules;
   private final int totalEcts;
-  private final String studyModuleKeys;
+  private final String joinedStudyModuleKeys;
 
   public static SemesterView from(Semester semester) {
     List<StudyModuleView> modules =
         semester.getStudyModules().stream().map(StudyModuleView::from).collect(Collectors.toList());
-    String keys =
+    String joinedStudyModuleKeys =
         semester.getStudyModules().stream()
             .map(StudyModule::getStudyModuleKey)
             .collect(Collectors.joining(", "));
-    return new SemesterView(semester.getSemesterNumber(), modules, semester.getTotalEcts(), keys);
+    return new SemesterView(
+        semester.getSemesterNumber(), modules, semester.getTotalEcts(), joinedStudyModuleKeys);
   }
 
   public SemesterView(
       final int semesterNumber,
       final List<StudyModuleView> studyModules,
       final int totalEcts,
-      final String studyModuleKeys) {
+      final String joinedStudyModuleKeys) {
     this.semesterNumber = semesterNumber;
     this.studyModules = studyModules;
     this.totalEcts = totalEcts;
-    this.studyModuleKeys = studyModuleKeys;
+    this.joinedStudyModuleKeys = joinedStudyModuleKeys;
   }
 
   public int getSemesterNumber() {
@@ -45,7 +46,7 @@ public class SemesterView {
     return totalEcts;
   }
 
-  public String getStudyModuleKeys() {
-    return studyModuleKeys;
+  public String getJoinedStudyModuleKeys() {
+    return joinedStudyModuleKeys;
   }
 }

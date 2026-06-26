@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface ScheduleService {
 
-  Schedule calculateSchedule(List<StudyModule> modules);
+  Schedule calculateSchedule(List<StudyModule> allModules);
 
   void calculateAndSaveSchedule(DegreeProgram program);
 

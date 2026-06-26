@@ -12,7 +12,7 @@
                 <a th:href="@{/degree-programs}">Degree Programs</a>
             </li>
             <li class="breadcrumb-item">
-                <a th:href="@{/degree-programs/{id}(id=${degreeProgram.id})}"
+                <a th:href="@{/degree-programs/{degreeProgramId}(degreeProgramId=${degreeProgram.degreeProgramId})}"
                    th:text="${degreeProgram.name}">Program</a>
             </li>
             <li class="breadcrumb-item active" th:text="${pageTitle}">Form</li>
@@ -100,12 +100,12 @@
                             <input type="checkbox"
                                    class="form-check-input"
                                    name="prerequisiteKeys"
-                                   th:id="${'prereq-' + avail.studyModuleKey.key}"
+                                   th:id="${'prereq-' + avail.studyModuleKey.value}"
                                    th:value="${avail.studyModuleKey}"
                                    th:checked="${studyModule.prerequisiteKeys != null
-                                                 and studyModule.prerequisiteKeys.contains(avail.studyModuleKey.key)}"/>
+                                                 and studyModule.prerequisiteKeys.contains(avail.studyModuleKey.value)}"/>
                             <label class="form-check-label"
-                                   th:for="${'prereq-' + avail.studyModuleKey.key}"
+                                   th:for="${'prereq-' + avail.studyModuleKey.value}"
                                    th:text="${avail.studyModuleKey + ' – ' + avail.name}">
                             </label>
                         </div>
@@ -119,7 +119,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-save me-1"></i>Save
                     </button>
-                    <a th:href="@{/degree-programs/{id}(id=${degreeProgram.id})}"
+                    <a th:href="@{/degree-programs/{degreeProgramId}(degreeProgramId=${degreeProgram.degreeProgramId})}"
                        class="btn btn-outline-secondary">
                         <i class="bi bi-x-circle me-1"></i>Cancel
                     </a>

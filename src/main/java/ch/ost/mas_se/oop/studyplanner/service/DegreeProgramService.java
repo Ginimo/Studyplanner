@@ -17,17 +17,18 @@ public interface DegreeProgramService {
    * Returns the degree program with the given ID, or {@link java.util.Optional#empty()} if none
    * exists.
    */
-  Optional<DegreeProgram> findDegreeProgramById(String id);
+  Optional<DegreeProgram> findDegreeProgramById(String degreeProgramId);
 
   /** Returns all degree programs. */
   List<DegreeProgram> findAllDegreePrograms();
 
-  /** Replaces the stored degree program matching {@code id} with new field values. */
-  void updateDegreeProgram(String id, String name, String description, int maxDurationInSemesters);
+  /** Replaces the stored degree program matching {@code degreeProgramId} with new field values. */
+  void updateDegreeProgram(
+      String degreeProgramId, String name, String description, int maxDurationInSemesters);
 
   /**
    * Deletes the degree program with the given ID, together with all of its study modules and its
    * persisted schedule.
    */
-  void deleteDegreeProgram(String id);
+  void deleteDegreeProgram(String degreeProgramId);
 }

@@ -7,7 +7,7 @@ public abstract class DegreeProgramMixin {
 
   @JsonCreator
   DegreeProgramMixin(
-      @JsonProperty("id") String id,
+      @JsonProperty("degreeProgramId") String degreeProgramId,
       @JsonProperty("name") String name,
       @JsonProperty("description") String description,
       @JsonProperty("maxDurationInSemesters") int maxDurationInSemesters) {}

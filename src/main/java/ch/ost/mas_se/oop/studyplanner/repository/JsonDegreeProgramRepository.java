@@ -36,7 +36,7 @@ public class JsonDegreeProgramRepository extends AbstractJsonRepository<List<Deg
   public void saveDegreeProgram(DegreeProgram program) {
     List<DegreeProgram> list = load();
     for (int i = 0; i < list.size(); i++) {
-      if (list.get(i).getId().equals(program.getId())) {
+      if (list.get(i).getDegreeProgramId().equals(program.getDegreeProgramId())) {
         list.set(i, program);
         store(list);
         return;
@@ -47,9 +47,9 @@ public class JsonDegreeProgramRepository extends AbstractJsonRepository<List<Deg
   }
 
   @Override
-  public Optional<DegreeProgram> findDegreeProgramById(String id) {
-    for (DegreeProgram p : load()) {
-      if (p.getId().equals(id)) return Optional.of(p);
+  public Optional<DegreeProgram> findDegreeProgramById(String degreeProgramId) {
+    for (DegreeProgram program : load()) {
+      if (program.getDegreeProgramId().equals(degreeProgramId)) return Optional.of(program);
     }
     return Optional.empty();
   }
@@ -60,9 +60,9 @@ public class JsonDegreeProgramRepository extends AbstractJsonRepository<List<Deg
   }
 
   @Override
-  public void deleteDegreeProgram(String id) {
+  public void deleteDegreeProgram(String degreeProgramId) {
     List<DegreeProgram> list = load();
-    list.removeIf(p -> p.getId().equals(id));
+    list.removeIf(program -> program.getDegreeProgramId().equals(degreeProgramId));
     store(list);
   }
 }

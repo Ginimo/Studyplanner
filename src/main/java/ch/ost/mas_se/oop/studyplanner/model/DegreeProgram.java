@@ -3,20 +3,21 @@ package ch.ost.mas_se.oop.studyplanner.model;
 import java.util.Objects;
 
 public class DegreeProgram {
-  private final String id;
+  private final String degreeProgramId;
   private final String name;
   private final String description;
   private final int maxDurationInSemesters;
 
-  public DegreeProgram(String id, String name, String description, int maxDurationInSemesters) {
-    this.id = Objects.requireNonNull(id);
+  public DegreeProgram(
+      String degreeProgramId, String name, String description, int maxDurationInSemesters) {
+    this.degreeProgramId = Objects.requireNonNull(degreeProgramId);
     this.name = Objects.requireNonNull(name);
     this.description = description;
     this.maxDurationInSemesters = maxDurationInSemesters;
   }
 
-  public String getId() {
-    return id;
+  public String getDegreeProgramId() {
+    return degreeProgramId;
   }
 
   public String getName() {
@@ -32,9 +33,9 @@ public class DegreeProgram {
   }
 
   /**
-   * Two degree programs are equal if and only if they have the same {@code id}. Equality is based
-   * on the business key rather than all fields, so that a fetched and an in-memory instance of the
-   * same program compare as equal.
+   * Two degree programs are equal if and only if they have the same {@code degreeProgramId}.
+   * Equality is based on the business key rather than all fields, so that a fetched and an
+   * in-memory instance of the same program compare as equal.
    */
   @Override
   public boolean equals(Object other) {
@@ -45,12 +46,12 @@ public class DegreeProgram {
       return false;
     }
     DegreeProgram that = (DegreeProgram) other;
-    return Objects.equals(id, that.id);
+    return Objects.equals(degreeProgramId, that.degreeProgramId);
   }
 
-  /** Consistent with {@link #equals}: based solely on {@code id}. */
+  /** Consistent with {@link #equals}: based solely on {@code degreeProgramId}. */
   @Override
   public int hashCode() {
-    return Objects.hash(id);
+    return Objects.hash(degreeProgramId);
   }
 }

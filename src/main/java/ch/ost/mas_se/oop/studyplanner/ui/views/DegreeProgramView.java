@@ -4,17 +4,17 @@ import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 
 public class DegreeProgramView {
 
-  private final String id;
+  private final String degreeProgramId;
   private final String name;
   private final String description;
   private final int maxDurationInSemesters;
 
   public DegreeProgramView(
-      final String id,
+      final String degreeProgramId,
       final String name,
       final String description,
       final int maxDurationInSemesters) {
-    this.id = id;
+    this.degreeProgramId = degreeProgramId;
     this.name = name;
     this.description = description;
     this.maxDurationInSemesters = maxDurationInSemesters;
@@ -22,14 +22,14 @@ public class DegreeProgramView {
 
   public static DegreeProgramView from(DegreeProgram program) {
     return new DegreeProgramView(
-        program.getId(),
+        program.getDegreeProgramId(),
         program.getName(),
         program.getDescription(),
         program.getMaxDurationInSemesters());
   }
 
-  public String getId() {
-    return id;
+  public String getDegreeProgramId() {
+    return degreeProgramId;
   }
 
   public String getName() {

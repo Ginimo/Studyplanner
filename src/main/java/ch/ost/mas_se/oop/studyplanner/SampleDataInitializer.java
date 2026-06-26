@@ -27,14 +27,14 @@ public class SampleDataInitializer implements ApplicationRunner {
       return;
     }
 
-    LocalDate since = LocalDate.of(2026, 6, 1);
+    LocalDate offeredFrom = LocalDate.of(2026, 6, 1);
 
     DegreeProgram bscInfo =
         degreeProgramService.createDegreeProgram(
             "BSc Informatik", "Studiengang Informatik der OST", 12);
     degreeProgramService.createDegreeProgram(
         "BSc Soziale Arbeit", "Studiengang Soziale Arbeit der OST", 12);
-    String progId = bscInfo.getId();
+    String progId = bscInfo.getDegreeProgramId();
 
     studyModuleService.createStudyModule(
         "OO",
@@ -43,7 +43,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         "Foundations of object-oriented design and programming.",
         4,
         List.of(),
-        since,
+        offeredFrom,
         null);
     studyModuleService.createStudyModule(
         "Math",
@@ -52,7 +52,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         "Mathematical foundations for computer science.",
         4,
         List.of(),
-        since,
+        offeredFrom,
         null);
     studyModuleService.createStudyModule(
         "DB1",
@@ -61,7 +61,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         "Introduction to relational databases and SQL.",
         4,
         List.of("OO"),
-        since,
+        offeredFrom,
         null);
     studyModuleService.createStudyModule(
         "AD1",
@@ -70,7 +70,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         "Fundamental algorithms and data structures.",
         4,
         List.of("OO"),
-        since,
+        offeredFrom,
         null);
     studyModuleService.createStudyModule(
         "AD2",
@@ -79,7 +79,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         "Advanced algorithms and data structures.",
         4,
         List.of("OO", "AD1"),
-        since,
+        offeredFrom,
         null);
     studyModuleService.createStudyModule(
         "CPI",
@@ -88,7 +88,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         "Advanced programming concepts and interfaces.",
         4,
         List.of("OO", "Math"),
-        since,
+        offeredFrom,
         null);
     studyModuleService.createStudyModule(
         "DB2",
@@ -97,7 +97,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         "Advanced database concepts and NoSQL.",
         4,
         List.of("DB1"),
-        since,
+        offeredFrom,
         null);
     studyModuleService.createStudyModule(
         "SE1",
@@ -106,7 +106,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         "Software development processes and practices.",
         4,
         List.of("AD1", "CPI", "DB1"),
-        since,
+        offeredFrom,
         null);
     studyModuleService.createStudyModule(
         "UI1",
@@ -115,7 +115,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         "Introduction to UI design and implementation.",
         4,
         List.of("AD1"),
-        since,
+        offeredFrom,
         null);
     studyModuleService.createStudyModule(
         "SE2",
@@ -124,7 +124,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         "Advanced software engineering and architecture.",
         4,
         List.of("DB1", "SE1", "UI1"),
-        since,
+        offeredFrom,
         null);
     studyModuleService.createStudyModule(
         "UI2",
@@ -133,7 +133,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         "Advanced UI patterns and frameworks.",
         4,
         List.of("UI1"),
-        since,
+        offeredFrom,
         null);
     studyModuleService.createStudyModule(
         "Thesis",
@@ -142,7 +142,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         "Independent research project and thesis.",
         12,
         List.of("DB2", "SE2", "UI2"),
-        since,
+        offeredFrom,
         null);
   }
 }

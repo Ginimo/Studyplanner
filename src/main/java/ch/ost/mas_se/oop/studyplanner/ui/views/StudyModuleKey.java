@@ -4,14 +4,14 @@ import java.util.Objects;
 
 public class StudyModuleKey {
 
-  private final String key;
+  private final String value;
 
-  public StudyModuleKey(String key) {
-    this.key = key;
+  public StudyModuleKey(String value) {
+    this.value = value;
   }
 
-  public String getKey() {
-    return key;
+  public String getValue() {
+    return value;
   }
 
   @Override
@@ -23,16 +23,16 @@ public class StudyModuleKey {
       return false;
     }
     StudyModuleKey that = (StudyModuleKey) other;
-    return Objects.equals(key, that.key);
+    return Objects.equals(value, that.value);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(key);
+    return Objects.hash(value);
   }
 
   @Override
   public String toString() {
-    return key;
+    return value;
   }
 }
