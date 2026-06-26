@@ -1,6 +1,7 @@
 package ch.ost.mas_se.oop.studyplanner.service;
 
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
+import ch.ost.mas_se.oop.studyplanner.repository.ScheduleRepository;
 import ch.ost.mas_se.oop.studyplanner.repository.StudyModuleRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -15,9 +16,12 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class StudyModuleServiceImpl implements StudyModuleService {
   private final StudyModuleRepository studyModuleRepository;
+  private final ScheduleRepository scheduleRepository;
 
-  public StudyModuleServiceImpl(StudyModuleRepository studyModuleRepository) {
+  public StudyModuleServiceImpl(
+      StudyModuleRepository studyModuleRepository, ScheduleRepository scheduleRepository) {
     this.studyModuleRepository = studyModuleRepository;
+    this.scheduleRepository = scheduleRepository;
   }
 
   @Override
@@ -40,6 +44,7 @@ public class StudyModuleServiceImpl implements StudyModuleService {
             prerequisiteKeys,
             offeredFrom,
             offeredTo));
+    scheduleRepository.deleteSchedule(degreeProgramId);
   }
 
   @Override
@@ -86,6 +91,7 @@ public class StudyModuleServiceImpl implements StudyModuleService {
             prerequisiteKeys,
             offeredFrom,
             offeredTo));
+    scheduleRepository.deleteSchedule(degreeProgramId);
   }
 
   @Override
@@ -96,5 +102,6 @@ public class StudyModuleServiceImpl implements StudyModuleService {
             module ->
                 studyModuleRepository.saveStudyModule(module.withoutPrerequisite(studyModuleKey)));
     studyModuleRepository.deleteStudyModule(degreeProgramId, studyModuleKey);
+    scheduleRepository.deleteSchedule(degreeProgramId);
   }
 }
