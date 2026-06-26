@@ -3,17 +3,20 @@ package ch.ost.mas_se.oop.studyplanner.repository;
 import ch.ost.mas_se.oop.studyplanner.model.Schedule;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class JsonScheduleRepository extends AbstractJsonRepository<Map<String, Schedule>>
     implements ScheduleRepository {
 
-  public JsonScheduleRepository(ObjectMapper mapper) {
-    super(mapper);
+  public JsonScheduleRepository(
+      ObjectMapper mapper, @Value("${studyplanner.data.dir}") Path dataDir) {
+    super(mapper, dataDir);
   }
 
   @Override

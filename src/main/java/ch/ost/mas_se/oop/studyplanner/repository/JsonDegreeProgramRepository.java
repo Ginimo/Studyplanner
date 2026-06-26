@@ -3,17 +3,20 @@ package ch.ost.mas_se.oop.studyplanner.repository;
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class JsonDegreeProgramRepository extends AbstractJsonRepository<List<DegreeProgram>>
     implements DegreeProgramRepository {
 
-  public JsonDegreeProgramRepository(ObjectMapper mapper) {
-    super(mapper);
+  public JsonDegreeProgramRepository(
+      ObjectMapper mapper, @Value("${studyplanner.data.dir}") Path dataDir) {
+    super(mapper, dataDir);
   }
 
   @Override

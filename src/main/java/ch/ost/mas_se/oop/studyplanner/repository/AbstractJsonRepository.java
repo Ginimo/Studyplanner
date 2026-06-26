@@ -5,21 +5,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 abstract class AbstractJsonRepository<T> {
 
   private static final Logger log = LoggerFactory.getLogger(AbstractJsonRepository.class);
 
   protected final ObjectMapper mapper;
+  private final Path dataDir;
 
-  @Value("${studyplanner.data.dir}")
-  private Path dataDir;
-
-  protected AbstractJsonRepository(ObjectMapper mapper) {
+  protected AbstractJsonRepository(ObjectMapper mapper, Path dataDir) {
     this.mapper = mapper;
+    this.dataDir = Objects.requireNonNull(dataDir);
   }
 
   protected abstract String fileName();
