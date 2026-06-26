@@ -2,6 +2,8 @@ package ch.ost.mas_se.oop.studyplanner.service;
 
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.repository.DegreeProgramRepository;
+import ch.ost.mas_se.oop.studyplanner.repository.ScheduleRepository;
+import ch.ost.mas_se.oop.studyplanner.repository.StudyModuleRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -10,16 +12,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class DegreeProgramServiceImpl implements DegreeProgramService {
   private final DegreeProgramRepository degreeProgramRepository;
-  private final StudyModuleService studyModuleService;
-  private final ScheduleService scheduleService;
+  private final StudyModuleRepository studyModuleRepository;
+  private final ScheduleRepository scheduleRepository;
 
   public DegreeProgramServiceImpl(
       DegreeProgramRepository degreeProgramRepository,
-      StudyModuleService studyModuleService,
-      ScheduleService scheduleService) {
+      StudyModuleRepository studyModuleRepository,
+      ScheduleRepository scheduleRepository) {
     this.degreeProgramRepository = degreeProgramRepository;
-    this.studyModuleService = studyModuleService;
-    this.scheduleService = scheduleService;
+    this.studyModuleRepository = studyModuleRepository;
+    this.scheduleRepository = scheduleRepository;
   }
 
   @Override
@@ -50,12 +52,8 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
 
   @Override
   public void deleteDegreeProgram(String degreeProgramId) {
-    studyModuleService
-        .findAllStudyModulesByDegreeProgramId(degreeProgramId)
-        .forEach(
-            module ->
-                studyModuleService.deleteStudyModule(degreeProgramId, module.getStudyModuleKey()));
-    scheduleService.deleteSchedule(degreeProgramId);
+    studyModuleRepository.deleteAllStudyModulesByDegreeProgramId(degreeProgramId);
+    scheduleRepository.deleteSchedule(degreeProgramId);
     degreeProgramRepository.deleteDegreeProgram(degreeProgramId);
   }
 }

@@ -6,17 +6,18 @@ import ch.ost.mas_se.oop.studyplanner.model.Schedule;
 import ch.ost.mas_se.oop.studyplanner.model.Semester;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.repository.ScheduleRepository;
+import ch.ost.mas_se.oop.studyplanner.repository.StudyModuleRepository;
 import java.util.*;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
-  private final StudyModuleService studyModuleService;
+  private final StudyModuleRepository studyModuleRepository;
   private final ScheduleRepository scheduleRepository;
 
   public ScheduleServiceImpl(
-      StudyModuleService studyModuleService, ScheduleRepository scheduleRepository) {
-    this.studyModuleService = studyModuleService;
+      StudyModuleRepository studyModuleRepository, ScheduleRepository scheduleRepository) {
+    this.studyModuleRepository = studyModuleRepository;
     this.scheduleRepository = scheduleRepository;
   }
 
@@ -147,7 +148,7 @@ public class ScheduleServiceImpl implements ScheduleService {
   @Override
   public void calculateAndSaveSchedule(DegreeProgram program) {
     List<StudyModule> studyModules =
-        studyModuleService.findAllStudyModulesByDegreeProgramId(program.getDegreeProgramId());
+        studyModuleRepository.findAllStudyModulesByDegreeProgramId(program.getDegreeProgramId());
     Schedule schedule = calculateSchedule(studyModules);
     scheduleRepository.saveSchedule(program.getDegreeProgramId(), schedule);
   }

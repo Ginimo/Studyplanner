@@ -26,4 +26,7 @@ public interface StudyModuleRepository {
    * studyModuleKey}). No-op if it does not exist.
    */
   void deleteStudyModule(String degreeProgramId, String studyModuleKey);
+
+  /** Removes all study modules belonging to the given degree program. No-op if none exist. */
+  void deleteAllStudyModulesByDegreeProgramId(String degreeProgramId);
 }

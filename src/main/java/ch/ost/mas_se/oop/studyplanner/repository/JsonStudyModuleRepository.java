@@ -77,4 +77,11 @@ public class JsonStudyModuleRepository extends AbstractJsonRepository<List<Study
                 && module.getStudyModuleKey().equals(studyModuleKey));
     store(list);
   }
+
+  @Override
+  public void deleteAllStudyModulesByDegreeProgramId(String degreeProgramId) {
+    List<StudyModule> list = load();
+    list.removeIf(module -> module.getDegreeProgramId().equals(degreeProgramId));
+    store(list);
+  }
 }
