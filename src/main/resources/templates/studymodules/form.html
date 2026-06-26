@@ -102,12 +102,12 @@
                             <input type="checkbox"
                                    class="form-check-input"
                                    name="prerequisiteKeys"
-                                   th:id="${'prereq-' + avail.studyModuleKey.value}"
+                                   th:id="${'prereq-' + avail.studyModuleKey}"
                                    th:value="${avail.studyModuleKey}"
                                    th:checked="${studyModule.prerequisiteKeys != null
-                                                 and studyModule.prerequisiteKeys.contains(avail.studyModuleKey.value)}"/>
+                                                 and studyModule.prerequisiteKeys.contains(avail.studyModuleKey)}"/>
                             <label class="form-check-label"
-                                   th:for="${'prereq-' + avail.studyModuleKey.value}"
+                                   th:for="${'prereq-' + avail.studyModuleKey}"
                                    th:text="${avail.studyModuleKey + ' – ' + avail.name}">
                             </label>
                         </div>
