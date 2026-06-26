@@ -50,7 +50,7 @@ public class ScheduleServiceImpl implements ScheduleService {
       ready.clear();
       Semester semester = new Semester(semesterNumber);
       for (String studyModuleKey : layer) {
-        semester.addStudyModule(moduleMap.get(studyModuleKey));
+        semester.addStudyModuleKey(studyModuleKey);
         placedModuleCount++;
         for (String dependentKey : dependents.get(studyModuleKey)) {
           // one more prerequisite of dependentKey is now satisfied; if none remain, it is ready

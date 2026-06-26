@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Semester {
   private final int semesterNumber;
-  private final List<StudyModule> studyModules;
+  private final List<String> studyModuleKeys;
 
   /**
    * @param semesterNumber position of this semester in the study plan (1-based)
@@ -17,34 +17,30 @@ public class Semester {
           "semesterNumber must be at least 1, got: " + semesterNumber);
     }
     this.semesterNumber = semesterNumber;
-    this.studyModules = new ArrayList<>();
+    this.studyModuleKeys = new ArrayList<>();
   }
 
-  public Semester(int semesterNumber, List<StudyModule> studyModules) {
+  public Semester(int semesterNumber, List<String> studyModuleKeys) {
     if (semesterNumber < 1) {
       throw new IllegalArgumentException(
           "semesterNumber must be at least 1, got: " + semesterNumber);
     }
     this.semesterNumber = semesterNumber;
-    this.studyModules = studyModules != null ? new ArrayList<>(studyModules) : new ArrayList<>();
+    this.studyModuleKeys =
+        studyModuleKeys != null ? new ArrayList<>(studyModuleKeys) : new ArrayList<>();
   }
 
   public int getSemesterNumber() {
     return semesterNumber;
   }
 
-  /** Returns an unmodifiable view of the modules assigned to this semester, in insertion order. */
-  public List<StudyModule> getStudyModules() {
-    return Collections.unmodifiableList(studyModules);
+  /** Returns an unmodifiable view of module keys assigned to this semester, in placement order. */
+  public List<String> getStudyModuleKeys() {
+    return Collections.unmodifiableList(studyModuleKeys);
   }
 
-  /** Appends {@code module} to this semester's module list. */
-  public void addStudyModule(StudyModule module) {
-    this.studyModules.add(module);
-  }
-
-  /** Returns the sum of ECTS credits for all modules in this semester. */
-  public int getTotalEcts() {
-    return studyModules.stream().mapToInt(StudyModule::getEcts).sum();
+  /** Appends {@code key} to this semester's module key list. */
+  public void addStudyModuleKey(String key) {
+    this.studyModuleKeys.add(key);
   }
 }

@@ -3,6 +3,8 @@ package ch.ost.mas_se.oop.studyplanner.ui.views;
 import ch.ost.mas_se.oop.studyplanner.model.Semester;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public record SemesterView(
@@ -11,14 +13,17 @@ public record SemesterView(
     int totalEcts,
     String joinedStudyModuleKeys) {
 
-  public static SemesterView from(Semester semester) {
-    List<StudyModuleView> modules =
-        semester.getStudyModules().stream().map(StudyModuleView::from).collect(Collectors.toList());
-    String joinedStudyModuleKeys =
-        semester.getStudyModules().stream()
-            .map(StudyModule::getStudyModuleKey)
-            .collect(Collectors.joining(", "));
+  public static SemesterView from(Semester semester, Map<String, StudyModule> moduleMap) {
+    List<StudyModule> resolved =
+        semester.getStudyModuleKeys().stream()
+            .map(moduleMap::get)
+            .filter(Objects::nonNull)
+            .toList();
+
     return new SemesterView(
-        semester.getSemesterNumber(), modules, semester.getTotalEcts(), joinedStudyModuleKeys);
+        semester.getSemesterNumber(),
+        resolved.stream().map(StudyModuleView::from).collect(Collectors.toList()),
+        resolved.stream().mapToInt(StudyModule::getEcts).sum(),
+        String.join(", ", semester.getStudyModuleKeys()));
   }
 }
