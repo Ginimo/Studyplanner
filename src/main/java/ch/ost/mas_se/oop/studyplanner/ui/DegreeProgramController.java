@@ -125,7 +125,7 @@ public class DegreeProgramController extends AbstractController {
   }
 
   /** Deletes the degree program together with all of its study modules and schedule. */
-  @PostMapping("/{degreeProgramId}/deleteDegreeProgram")
+  @PostMapping("/{degreeProgramId}/delete")
   public String deleteDegreeProgram(
       @PathVariable final String degreeProgramId, final RedirectAttributes redirectAttributes) {
     DegreeProgram program = requireDegreeProgram(degreeProgramId);

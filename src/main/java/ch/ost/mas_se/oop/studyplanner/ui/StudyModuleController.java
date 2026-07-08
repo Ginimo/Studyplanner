@@ -162,7 +162,7 @@ public class StudyModuleController extends AbstractController {
    * Deletes the study module, removing its key from the prerequisite lists of any sibling modules,
    * then redirects to the degree program's detail view.
    */
-  @PostMapping("/{studyModuleKey}/deleteStudyModule")
+  @PostMapping("/{studyModuleKey}/delete")
   public String deleteStudyModule(
       @PathVariable final String degreeProgramId,
       @PathVariable final String studyModuleKey,

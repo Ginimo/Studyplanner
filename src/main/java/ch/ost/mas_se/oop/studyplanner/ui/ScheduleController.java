@@ -71,7 +71,7 @@ public class ScheduleController extends AbstractController {
    * Calculates the schedule, persists it, then redirects to {@link #showSchedule} which loads the
    * result from the repository.
    */
-  @PostMapping("/calculateSchedule")
+  @PostMapping("/calculate")
   public String calculateSchedule(
       @PathVariable final String degreeProgramId, final RedirectAttributes redirectAttributes) {
     DegreeProgram program = requireDegreeProgram(degreeProgramId);
