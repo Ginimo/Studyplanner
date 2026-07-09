@@ -92,7 +92,14 @@ class DegreeProgramControllerTest {
     when(studyModuleService.findAllStudyModulesByDegreeProgramId(PROGRAM_ID)).thenReturn(List.of());
     var model = new ConcurrentModel();
 
-    String view = testee.showDetails(PROGRAM_ID, model);
+    String view =
+        testee.showDetails(
+            PROGRAM_ID,
+            null, // nameFilter
+            null, // offeredAt
+            null, // sortBy
+            null, // sortDir
+            model);
 
     assertThat(view).isEqualTo("degreeprograms/details");
     assertThat(model.getAttribute("degreeProgram")).isNotNull();
@@ -103,7 +110,15 @@ class DegreeProgramControllerTest {
   void showDetails_withUnknownId_throwsNotFoundException() {
     when(degreeProgramService.findDegreeProgramById(any())).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> testee.showDetails("unknown-id", new ConcurrentModel()))
+    assertThatThrownBy(
+            () ->
+                testee.showDetails(
+                    "unknown-id",
+                    null, // nameFilter
+                    null, // offeredAt
+                    null, // sortBy
+                    null, // sortDir
+                    new ConcurrentModel()))
         .isInstanceOf(ResponseStatusException.class);
   }
 
