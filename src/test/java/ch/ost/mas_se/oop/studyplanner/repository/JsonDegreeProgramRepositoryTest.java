@@ -49,8 +49,8 @@ class JsonDegreeProgramRepositoryTest {
 
     List<DegreeProgram> all = testee.findAllDegreePrograms();
     assertThat(all).hasSize(1);
-    assertThat(all.get(0).getName()).isEqualTo("New Name");
-    assertThat(all.get(0).getMaxDurationInSemesters()).isEqualTo(8);
+    assertThat(all.getFirst().getName()).isEqualTo("New Name");
+    assertThat(all.getFirst().getMaxDurationInSemesters()).isEqualTo(8);
   }
 
   @Test

@@ -135,7 +135,7 @@ class StudyModuleServiceImplTest {
         .replaceAllStudyModulesForProgram(
             org.mockito.ArgumentMatchers.eq(PROGRAM_ID), moduleListCaptor.capture());
     assertThat(moduleListCaptor.getValue()).hasSize(1);
-    assertThat(moduleListCaptor.getValue().get(0).getStudyModuleKey()).isEqualTo(KEY_B);
+    assertThat(moduleListCaptor.getValue().getFirst().getStudyModuleKey()).isEqualTo(KEY_B);
     verify(scheduleService).deleteSchedule(PROGRAM_ID);
   }
 
@@ -294,8 +294,6 @@ class StudyModuleServiceImplTest {
     assertThat(ascending).containsExactly(early, late, missing);
     assertThat(descending).containsExactly(late, early, missing);
   }
-
-  // --- findModuleMapByDegreeProgramId ---
 
   @Test
   void findModuleMapByDegreeProgramId_returnsAllModulesIndexedByKey() {

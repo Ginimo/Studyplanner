@@ -24,8 +24,6 @@ class ArchitectureTest {
       DescribedPredicate.describe(
           "not abstract", javaClass -> !javaClass.getModifiers().contains(JavaModifier.ABSTRACT));
 
-  // ── Layer access rules ────────────────────────────────────────────────────
-
   @ArchTest
   static final ArchRule modelLayer_hasNoDependenciesOnOtherProjectLayers =
       noClasses()
@@ -75,8 +73,6 @@ class ArchitectureTest {
           .dependOnClassesThat()
           .resideInAPackage(BASE + ".repository..");
 
-  // ── Naming and annotation conventions ────────────────────────────────────
-
   @ArchTest
   static final ArchRule concreteControllers_areAnnotatedWithController =
       classes()
@@ -109,8 +105,6 @@ class ArchitectureTest {
           .haveSimpleNameEndingWith("Impl")
           .should()
           .beAnnotatedWith(Service.class);
-
-  // ── Cyclic dependency check ───────────────────────────────────────────────
 
   @ArchTest
   static final ArchRule packageSlices_areFreeOfCycles =
