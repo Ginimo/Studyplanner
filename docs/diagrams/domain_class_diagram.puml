@@ -177,6 +177,7 @@ ScheduleController -down-> StudyModuleService
 
 DegreeProgramServiceImpl -down-> DegreeProgramRepository
 StudyModuleServiceImpl -down-> StudyModuleRepository
+StudyModuleServiceImpl -down-> ScheduleService
 ScheduleServiceImpl -down-> StudyModuleRepository
 ScheduleServiceImpl -down-> ScheduleRepository
 
