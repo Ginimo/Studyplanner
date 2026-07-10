@@ -17,14 +17,23 @@
 
 == `moduleMap` — `LinkedHashMap<String, StudyModule>`
 
-During the BFS loop, each placed module needs to be looked up by its key string.
-A `Map` does this in $O(1)$.
-A `Set` would require scanning all elements to find a match — $O(V)$ per lookup —
-which would degrade the total algorithm from $O(V + E)$ to $O(V^2 + E)$.
+`moduleMap` is built before the BFS starts and serves two purposes:
 
-`LinkedHashMap` is used instead of plain `HashMap` so modules are processed in the order
-they were created, making the output deterministic: the same input always produces the
-same schedule.
+1. *Key set extraction:* `moduleMap.keySet()` is passed to `buildInDegree` and
+   `buildDependents` so they can distinguish in-program prerequisites (edges to include)
+   from dangling prerequisite keys that reference modules not present in the program
+   (edges to ignore). This prevents dangling keys from inflating in-degrees and blocking
+   modules that have no real unmet prerequisites.
+
+2. *Deterministic ordering:* `LinkedHashMap` preserves insertion order, so the initial
+   ready-queue seed (all keys with in-degree zero) is always produced in the same order
+   for the same input. This makes the generated schedule deterministic: identical module
+   sets always produce the same layering.
+
+Note: the BFS loop itself works only with module keys (`String`) — it does not look up
+`StudyModule` objects from `moduleMap` during the loop. Module details are resolved later
+by the controller when building the schedule view, via
+`StudyModuleService.findModuleMapByDegreeProgramId`.
 
 #figure(
   table(
@@ -122,30 +131,33 @@ element.
 
 = Repository Layer
 
-Both repositories use a `LinkedHashMap` as their backing store.
-This gives $O(1)$ for all four operations (save, find, findAll, delete) and preserves
-insertion order, so `findAll()` returns entries in creation order —
-producing a stable, predictable list in the UI.
+All three repositories (`JsonDegreeProgramRepository`, `JsonStudyModuleRepository`,
+`JsonScheduleRepository`) extend the abstract base class `AbstractJsonRepository<T>` and
+persist data to JSON files in the configured data directory (`studyplanner.data.dir`).
 
-`InMemoryStudyModuleRepository` needs to store modules from multiple degree programs in
-a single map.
-The alternative would be a nested map: `Map<String, Map<String, StudyModule>>` — an outer
-map keyed by degree program ID, each containing an inner map keyed by module key.
-Instead, a *flat map with a composite key* is used: the two IDs are joined into a single
-string (`"degreeProgramId#moduleKey"`) and used as the map key directly.
-For example, a module with key `"OOP1"` in program `"abc-123"` is stored under the key
-`"abc-123#OOP1"`.
-A flat map is simpler: there is only one map to create, one map to iterate, and no need
-to manage the lifecycle of inner maps.
+`JsonDegreeProgramRepository` and `JsonStudyModuleRepository` both deserialize their file
+into a `List<T>` on every read and serialize the complete list back on every write.
+`JsonScheduleRepository` uses a `Map<String, Schedule>` keyed by degree-program ID.
 
-The `#` separator is safe because degree-program IDs are UUIDs and module keys are short
-alphanumeric strings — neither can contain `#`, so two different (program, module) pairs
-can never produce the same composite key.
+*Flat list for study modules:* `JsonStudyModuleRepository` stores all study modules from
+all degree programs in a single flat `List<StudyModule>`.
+Each `StudyModule` object carries its own `degreeProgramId` field, so filtering by program
+is a linear scan.
+The alternative — one file per degree program or a nested map structure — would complicate
+file management (extra files to create and delete when programs are created or removed)
+without meaningfully improving performance at typical class sizes.
+
+*Composite business key:* A study module is uniquely identified by the pair
+(`degreeProgramId`, `studyModuleKey`).
+`findStudyModuleByKey` and `saveStudyModule` both match on this composite key.
+This avoids the need for a synthetic surrogate ID on study modules and keeps module keys
+human-readable (e.g., `"OO"`, `"DB1"`), while still supporting the case where the same
+short key appears in two different degree programs (see Assumption A03).
 
 #figure(
   align(center,
     grid(
-      columns: (auto, auto, auto, auto, auto, auto, auto),
+      columns: (auto, auto, auto, auto, auto),
       column-gutter: 5pt,
       align: center + horizon,
       rect(fill: luma(238), stroke: 0.5pt, inset: (x: 8pt, y: 7pt))[
@@ -153,34 +165,41 @@ can never produce the same composite key.
         #text(8pt, fill: gray)[degreeProgramId]
       ],
       [+],
-      rect(fill: luma(225), stroke: 0.5pt, inset: (x: 8pt, y: 7pt))[`"#"`],
-      [+],
       rect(fill: luma(238), stroke: 0.5pt, inset: (x: 8pt, y: 7pt))[
         `"OOP1"` \
-        #text(8pt, fill: gray)[moduleKey]
+        #text(8pt, fill: gray)[studyModuleKey]
       ],
       $arrow.r$,
-      rect(fill: luma(215), stroke: 0.5pt, inset: (x: 8pt, y: 7pt), radius: 2pt)[`"abc-123#OOP1"`],
+      rect(fill: luma(215), stroke: 0.5pt, inset: (x: 8pt, y: 7pt), radius: 2pt)[unique StudyModule],
     )
   ),
-  caption: [Composite key — degreeProgramId and moduleKey joined by `"#"` form a single flat-map key that uniquely identifies a (program, module) pair],
+  caption: [Composite business key — degreeProgramId and studyModuleKey together uniquely identify a study module within the flat JSON list],
 )
 
 
 = Model Layer
 
-== `Schedule` and `Semester` — `unmodifiableList` view
+== `Schedule` and `Semester` — defensive copy + `unmodifiableList` view
 
-Both classes build their lists incrementally: the BFS loop adds semesters to `Schedule`
-and modules to each `Semester` one by one.
-At the same time, their getters are public, so external code could potentially call
-`getSemesters().add(...)` and corrupt the state mid-calculation.
+Both `Schedule` and `Semester` are value objects whose lists are fully constructed before
+the objects are created.
 
-Wrapping the list in `Collections.unmodifiableList` before returning it blocks that:
-any attempt to add, remove, or clear via the returned reference throws an exception.
-The BFS itself keeps a direct reference to the underlying `ArrayList` and continues
-adding to it freely — only the view handed to callers is read-only.
-No copying happens, so this protection costs $O(1)$.
+- `Semester(int semesterNumber, List<String> studyModuleKeys)` — the BFS builds a
+  `semesterKeys` list for each layer and passes it to the constructor.
+  The constructor copies it immediately with `new ArrayList<>(studyModuleKeys)`, so the
+  caller's list and the internal list are independent from that point on.
+- `Schedule(LocalDateTime calculatedAt, List<Semester> semesters)` — likewise, the BFS
+  accumulates semesters in a local list and passes the finished list to the constructor,
+  which copies it with `new ArrayList<>(semesters)`.
+
+The defensive copy ensures that the internal state cannot be modified through the
+reference the caller still holds.
+
+The `getSemesters()` and `getStudyModuleKeys()` getters go one step further: they return
+`Collections.unmodifiableList` views of the internal lists.
+This prevents external code from mutating the object after construction.
+The unmodifiable wrapper is a zero-copy $O(1)$ operation — it creates a thin read-only
+view around the existing `ArrayList` without duplicating the data.
 
 #figure(
   align(center,
@@ -192,19 +211,20 @@ No copying happens, so this protection costs $O(1)$.
       #text(size: 8.5pt, fill: blue.darken(10%))[`Collections.unmodifiableList` — read-only view, O(1) overhead]
       #v(6pt)
       #rect(stroke: 0.5pt, inset: 9pt, fill: luma(248))[
-        `ArrayList`: \[Semester₁, Semester₂, …\] \
-        #text(8pt, fill: gray)[← BFS holds a direct reference here and writes freely]
+        internal `ArrayList` copy (made in constructor) \
+        #text(8pt, fill: gray)[← only the Schedule/Semester instance holds a reference to this]
       ]
     ]
   ),
-  caption: [The unmodifiable wrapper exposes a read-only view of the ArrayList; the BFS keeps a direct reference to the underlying list and continues to add to it],
+  caption: [The constructor makes a defensive copy; getters wrap it in an unmodifiable view so neither the original caller nor any later reader can mutate the internal state],
 )
 
 == `StudyModule` prerequisite keys — `List.copyOf`
 
-`StudyModule` is constructed by the controller, which builds the prerequisite list from
-form input and passes it in.
-If the constructor stored that reference directly, the controller could modify the list
+`StudyModule` is constructed inside the service layer (`StudyModuleServiceImpl`).
+The prerequisite keys originate from form input (collected by the controller) and are
+passed as a `List<String>` through the service call into the constructor.
+If the constructor stored that reference directly, the caller could modify the list
 afterwards (accidentally or otherwise) and silently change a module it already saved.
 
 `List.copyOf` makes a new, independent, immutable list at construction time, severing

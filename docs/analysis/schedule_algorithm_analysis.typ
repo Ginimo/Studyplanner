@@ -47,7 +47,7 @@ This quantity is also known as the *critical-path depth* of the vertex in the DA
 Kahn's algorithm computes a layered topological ordering in $O(|V| + |E|)$ time.
 It maintains three auxiliary data structures built from $G$:
 
-/ `moduleMap`: Maps each module key to its `StudyModule` object for $O(1)$ retrieval by key.
+/ `moduleMap`: Maps each module key to its `StudyModule` object, built from the input list with insertion order preserved (`LinkedHashMap`). Its primary roles are: (1) supplying `keySet()` to `buildInDegree` and `buildDependents` so those methods can distinguish in-program prerequisite edges from dangling references, and (2) ensuring the initial ready-queue seed is deterministic (insertion-ordered keys produce a consistent starting order). The BFS loop itself operates on keys only; module objects are not accessed during calculation.
 
 / `inDegree`: Maps each module key to its current *in-degree* — the number of its prerequisites
   that have not yet been placed. A module is ready to be scheduled exactly when its in-degree
@@ -71,17 +71,17 @@ It maintains three auxiliary data structures built from $G$:
     WHILE ready ≠ ∅                                            ─┐
       layer ← snapshot(ready)                                   │
       ready ← ∅                                                 │ each vertex
-      semester ← new Semester(semesterNumber++)                 │ dequeued
+      semesterKeys ← []                                         │ dequeued
       FOR EACH key ∈ layer                                      │ once  → O(V)
-        semester.add(moduleMap[key]);  placed++                 │
+        semesterKeys.add(key);  placed++                        │
         FOR EACH dep ∈ dependents[key]                          │ each edge
           inDegree[dep] ← inDegree[dep] − 1                     │ traversed
           IF inDegree[dep] = 0 THEN ready.add(dep)              │ once  → O(E)
-      schedule.addSemester(semester)                            │
+      semesters.add(new Semester(semesterNumber++, semesterKeys))│
     END WHILE                                                  ─┘
 
     IF placed < |V| THEN throw CyclicDependencyException
-    RETURN schedule
+    RETURN new Schedule(LocalDateTime.now(), semesters)
     ```
   ],
   caption: [Kahn's layered BFS — pseudocode with per-step cost annotations],

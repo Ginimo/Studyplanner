@@ -1,15 +1,8 @@
 #!/bin/sh
-if [ -x "./mvnw" ]; then
-  MVN="./mvnw"
-elif command -v mvn >/dev/null 2>&1; then
-  MVN="mvn"
-else
-  echo "Maven executable not found. Install Maven or add it to PATH, then re-commit."
-  exit 1
-fi
-
-"${MVN}" spotless:check -q || {
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+MVN="$SCRIPT_DIR/mvnw"
+"$MVN" spotless:check -q || {
   echo ""
-  echo "Formatting issues found. Run '${MVN} spotless:apply' then re-commit."
+  echo "Formatting issues found. Run '$MVN spotless:apply' then re-commit."
   exit 1
 }
