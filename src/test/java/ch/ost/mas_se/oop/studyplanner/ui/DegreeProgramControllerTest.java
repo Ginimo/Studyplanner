@@ -63,6 +63,7 @@ class DegreeProgramControllerTest {
     when(bindingResult.hasErrors()).thenReturn(false);
     DegreeProgramForm form = new DegreeProgramForm();
     form.setName("Software Engineering");
+    form.setMaxDurationInSemesters(6);
     var redirectAttributes = new RedirectAttributesModelMap();
 
     String view =
@@ -130,13 +131,13 @@ class DegreeProgramControllerTest {
     when(bindingResult.hasErrors()).thenReturn(false);
     var redirectAttributes = new RedirectAttributesModelMap();
 
+    DegreeProgramForm form = new DegreeProgramForm();
+    form.setName("Software Engineering");
+    form.setMaxDurationInSemesters(6);
+
     String view =
         testee.updateDegreeProgram(
-            PROGRAM_ID,
-            new DegreeProgramForm(),
-            bindingResult,
-            new ConcurrentModel(),
-            redirectAttributes);
+            PROGRAM_ID, form, bindingResult, new ConcurrentModel(), redirectAttributes);
 
     assertThat(view).isEqualTo("redirect:/degree-programs/" + PROGRAM_ID);
     assertThat(redirectAttributes.getFlashAttributes()).containsKey("successMessage");
