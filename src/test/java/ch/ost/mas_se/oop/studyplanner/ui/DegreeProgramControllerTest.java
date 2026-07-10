@@ -2,13 +2,17 @@ package ch.ost.mas_se.oop.studyplanner.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
+import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.forms.DegreeProgramForm;
+import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleListView;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -104,6 +108,62 @@ class DegreeProgramControllerTest {
     assertThat(view).isEqualTo("degreeprograms/details");
     assertThat(model.getAttribute("degreeProgram")).isNotNull();
     assertThat(model.getAttribute("studyModules")).isNotNull();
+  }
+
+  @Test
+  void showDetails_addsFilterAndSortParametersToModel() {
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
+    when(studyModuleService.findAllStudyModulesByDegreeProgramId(PROGRAM_ID)).thenReturn(List.of());
+    var model = new ConcurrentModel();
+
+    String view =
+        testee.showDetails(
+            PROGRAM_ID,
+            "Data", // nameFilter
+            LocalDate.of(2020, 1, 8), // offeredAt
+            "ECTS", // sortBy
+            "DESC", // sortDir
+            model);
+
+    assertAll(
+        () -> assertThat(view).isEqualTo("degreeprograms/details"),
+        () -> assertThat(model.getAttribute("nameFilter")).isEqualTo("Data"),
+        () -> assertThat(model.getAttribute("offeredAt")).isEqualTo(LocalDate.of(2020, 1, 8)),
+        () -> assertThat(model.getAttribute("sortBy")).isEqualTo("ECTS"),
+        () -> assertThat(model.getAttribute("sortDir")).isEqualTo("DESC"));
+  }
+
+  @Test
+  void showDetails_sortsStudyModulesByEctsDescending() {
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
+
+    StudyModule moduleWith5Ects =
+        new StudyModule("OOP1", PROGRAM_ID, "OOP 1", "", 5, List.of(), null, null);
+
+    StudyModule moduleWith10Ects =
+        new StudyModule("OOP2", PROGRAM_ID, "OOP 2", "", 10, List.of(), null, null);
+
+    StudyModule moduleWith3Ects =
+        new StudyModule("OOP3", PROGRAM_ID, "OOP 3", "", 3, List.of(), null, null);
+
+    when(studyModuleService.findAllStudyModulesByDegreeProgramId(PROGRAM_ID))
+        .thenReturn(List.of(moduleWith5Ects, moduleWith10Ects, moduleWith3Ects));
+
+    var model = new ConcurrentModel();
+
+    String view = testee.showDetails(PROGRAM_ID, null, null, "ECTS", "DESC", model);
+
+    assertThat(view).isEqualTo("degreeprograms/details");
+
+    @SuppressWarnings("unchecked")
+    List<StudyModuleListView> studyModules =
+        (List<StudyModuleListView>) model.getAttribute("studyModules");
+
+    assertThat(studyModules)
+        .extracting(StudyModuleListView::studyModuleKey)
+        .containsExactly("OOP2", "OOP1", "OOP3");
   }
 
   @Test
