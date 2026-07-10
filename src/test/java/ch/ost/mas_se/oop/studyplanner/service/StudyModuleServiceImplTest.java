@@ -219,6 +219,25 @@ class StudyModuleServiceImplTest {
   }
 
   @Test
+  void findFilteredStudyModules_offeredAtFilter_excludesModulesWithMissingDateRange() {
+    LocalDate from = LocalDate.of(2025, 1, 1);
+    LocalDate to = LocalDate.of(2025, 12, 31);
+    StudyModule completeRange =
+        new StudyModule(KEY_A, PROGRAM_ID, "Name-A", null, 4, List.of(), from, to);
+    StudyModule missingFrom =
+        new StudyModule(KEY_B, PROGRAM_ID, "Name-B", null, 4, List.of(), null, to);
+    StudyModule missingTo =
+        new StudyModule(KEY_C, PROGRAM_ID, "Name-C", null, 4, List.of(), from, null);
+    when(studyModuleRepository.findAllStudyModulesByDegreeProgramId(PROGRAM_ID))
+        .thenReturn(List.of(completeRange, missingFrom, missingTo));
+
+    List<StudyModule> result =
+        testee.findFilteredStudyModules(PROGRAM_ID, "", LocalDate.of(2025, 6, 15), "NAME", "ASC");
+
+    assertThat(result).containsExactly(completeRange);
+  }
+
+  @Test
   void findFilteredStudyModules_sortByEctsDesc_returnsModulesInDescendingOrder() {
     StudyModule low = new StudyModule(KEY_A, PROGRAM_ID, "Name-A", null, 2, List.of(), null, null);
     StudyModule mid = new StudyModule(KEY_B, PROGRAM_ID, "Name-B", null, 4, List.of(), null, null);
@@ -230,6 +249,50 @@ class StudyModuleServiceImplTest {
         testee.findFilteredStudyModules(PROGRAM_ID, "", null, "ECTS", "DESC");
 
     assertThat(result).containsExactly(high, mid, low);
+  }
+
+  @Test
+  void findFilteredStudyModules_sortByOfferedFrom_keepsMissingDatesLast() {
+    LocalDate earlyDate = LocalDate.of(2025, 1, 1);
+    LocalDate lateDate = LocalDate.of(2026, 1, 1);
+    StudyModule early =
+        new StudyModule(KEY_A, PROGRAM_ID, "Name-A", null, 4, List.of(), earlyDate, null);
+    StudyModule missing =
+        new StudyModule(KEY_B, PROGRAM_ID, "Name-B", null, 4, List.of(), null, null);
+    StudyModule late =
+        new StudyModule(KEY_C, PROGRAM_ID, "Name-C", null, 4, List.of(), lateDate, null);
+    when(studyModuleRepository.findAllStudyModulesByDegreeProgramId(PROGRAM_ID))
+        .thenReturn(List.of(missing, late, early));
+
+    List<StudyModule> ascending =
+        testee.findFilteredStudyModules(PROGRAM_ID, "", null, "OFFERED_FROM", "ASC");
+    List<StudyModule> descending =
+        testee.findFilteredStudyModules(PROGRAM_ID, "", null, "OFFERED_FROM", "DESC");
+
+    assertThat(ascending).containsExactly(early, late, missing);
+    assertThat(descending).containsExactly(late, early, missing);
+  }
+
+  @Test
+  void findFilteredStudyModules_sortByOfferedTo_keepsMissingDatesLast() {
+    LocalDate earlyDate = LocalDate.of(2025, 1, 1);
+    LocalDate lateDate = LocalDate.of(2026, 1, 1);
+    StudyModule early =
+        new StudyModule(KEY_A, PROGRAM_ID, "Name-A", null, 4, List.of(), null, earlyDate);
+    StudyModule missing =
+        new StudyModule(KEY_B, PROGRAM_ID, "Name-B", null, 4, List.of(), null, null);
+    StudyModule late =
+        new StudyModule(KEY_C, PROGRAM_ID, "Name-C", null, 4, List.of(), null, lateDate);
+    when(studyModuleRepository.findAllStudyModulesByDegreeProgramId(PROGRAM_ID))
+        .thenReturn(List.of(missing, late, early));
+
+    List<StudyModule> ascending =
+        testee.findFilteredStudyModules(PROGRAM_ID, "", null, "OFFERED_TO", "ASC");
+    List<StudyModule> descending =
+        testee.findFilteredStudyModules(PROGRAM_ID, "", null, "OFFERED_TO", "DESC");
+
+    assertThat(ascending).containsExactly(early, late, missing);
+    assertThat(descending).containsExactly(late, early, missing);
   }
 
   // --- findModuleMapByDegreeProgramId ---

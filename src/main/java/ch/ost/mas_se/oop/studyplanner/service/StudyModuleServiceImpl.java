@@ -85,28 +85,41 @@ public class StudyModuleServiceImpl implements StudyModuleService {
                 nameFilter == null
                     || nameFilter.isBlank()
                     || m.getName().toLowerCase().contains(nameFilter.toLowerCase()))
-        .filter(
-            m ->
-                offeredAt == null
-                    || (m.getOfferedFrom() == null || !offeredAt.isBefore(m.getOfferedFrom()))
-                        && (m.getOfferedTo() == null || !offeredAt.isAfter(m.getOfferedTo())))
+        .filter(m -> isOfferedAt(m, offeredAt))
         .sorted(buildComparator(sortBy, sortDir))
         .toList();
   }
 
+  private static boolean isOfferedAt(StudyModule module, LocalDate offeredAt) {
+    return offeredAt == null
+        || module.getOfferedFrom() != null
+            && module.getOfferedTo() != null
+            && !offeredAt.isBefore(module.getOfferedFrom())
+            && !offeredAt.isAfter(module.getOfferedTo());
+  }
+
   private static Comparator<StudyModule> buildComparator(String sortBy, String sortDir) {
+    if ("OFFERED_FROM".equals(sortBy)) {
+      return dateComparator(StudyModule::getOfferedFrom, sortDir);
+    }
+    if ("OFFERED_TO".equals(sortBy)) {
+      return dateComparator(StudyModule::getOfferedTo, sortDir);
+    }
+
     Comparator<StudyModule> comparator =
-        switch (sortBy) {
-          case "OFFERED_FROM" ->
-              Comparator.comparing(
-                  StudyModule::getOfferedFrom, Comparator.nullsLast(Comparator.naturalOrder()));
-          case "OFFERED_TO" ->
-              Comparator.comparing(
-                  StudyModule::getOfferedTo, Comparator.nullsLast(Comparator.naturalOrder()));
-          case "ECTS" -> Comparator.comparingInt(StudyModule::getEcts);
-          default -> Comparator.comparing(StudyModule::getName, String.CASE_INSENSITIVE_ORDER);
-        };
+        "ECTS".equals(sortBy)
+            ? Comparator.comparingInt(StudyModule::getEcts)
+            : Comparator.comparing(StudyModule::getName, String.CASE_INSENSITIVE_ORDER);
     return "DESC".equals(sortDir) ? comparator.reversed() : comparator;
+  }
+
+  private static Comparator<StudyModule> dateComparator(
+      Function<StudyModule, LocalDate> dateExtractor, String sortDir) {
+    Comparator<LocalDate> dateOrder = Comparator.naturalOrder();
+    if ("DESC".equals(sortDir)) {
+      dateOrder = dateOrder.reversed();
+    }
+    return Comparator.comparing(dateExtractor, Comparator.nullsLast(dateOrder));
   }
 
   @Override

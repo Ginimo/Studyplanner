@@ -1,5 +1,13 @@
 #!/bin/sh
-MVN="${HOME}/.m2/wrapper/dists/apache-maven-3.9.6-bin/bin/mvn"
+if [ -x "./mvnw" ]; then
+  MVN="./mvnw"
+elif command -v mvn >/dev/null 2>&1; then
+  MVN="mvn"
+else
+  echo "Maven executable not found. Install Maven or add it to PATH, then re-commit."
+  exit 1
+fi
+
 "${MVN}" spotless:check -q || {
   echo ""
   echo "Formatting issues found. Run '${MVN} spotless:apply' then re-commit."
