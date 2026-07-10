@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public class StudyModuleForm {
@@ -18,8 +20,9 @@ public class StudyModuleForm {
 
   private String description;
 
+  @NotNull(message = "ECTS must be at least 1")
   @Min(value = 1, message = "ECTS must be at least 1")
-  private int ects;
+  private Integer ects;
 
   private List<String> prerequisiteKeys = new ArrayList<>();
 
@@ -55,11 +58,11 @@ public class StudyModuleForm {
     this.description = description;
   }
 
-  public int getEcts() {
+  public Integer getEcts() {
     return ects;
   }
 
-  public void setEcts(final int ects) {
+  public void setEcts(final Integer ects) {
     this.ects = ects;
   }
 
