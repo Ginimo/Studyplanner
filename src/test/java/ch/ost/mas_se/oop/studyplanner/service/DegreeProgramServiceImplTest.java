@@ -2,6 +2,7 @@ package ch.ost.mas_se.oop.studyplanner.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -78,6 +79,30 @@ class DegreeProgramServiceImplTest {
     when(degreeProgramRepository.findAllDegreePrograms()).thenReturn(List.of(program));
 
     assertThat(testee.findAllDegreePrograms()).containsExactly(program);
+  }
+
+  @Test
+  void
+      updateDegreeProgram_duplicateNameOnAnotherProgram_throwsDuplicateDegreeProgramNameException() {
+    when(degreeProgramRepository.findAllDegreePrograms())
+        .thenReturn(
+            List.of(
+                new DegreeProgram(PROGRAM_ID, "Original Name", "", 6),
+                new DegreeProgram("other-id", "Taken Name", "", 4)));
+
+    assertThatThrownBy(() -> testee.updateDegreeProgram(PROGRAM_ID, "Taken Name", "", 6))
+        .isInstanceOf(DuplicateDegreeProgramNameException.class)
+        .hasMessageContaining("Taken Name");
+  }
+
+  @Test
+  void updateDegreeProgram_sameNameOnSameProgram_doesNotThrow() {
+    when(degreeProgramRepository.findAllDegreePrograms())
+        .thenReturn(List.of(new DegreeProgram(PROGRAM_ID, "Same Name", "", 6)));
+
+    testee.updateDegreeProgram(PROGRAM_ID, "Same Name", "new desc", 8);
+
+    verify(degreeProgramRepository).saveDegreeProgram(any());
   }
 
   @Test

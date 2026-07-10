@@ -167,6 +167,30 @@ class DegreeProgramControllerTest {
   }
 
   @Test
+  void updateDegreeProgram_withDuplicateName_returnsFormViewWithFieldError() {
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
+    when(bindingResult.hasErrors()).thenReturn(false);
+    doThrow(new DuplicateDegreeProgramNameException("Software Engineering"))
+        .when(degreeProgramService)
+        .updateDegreeProgram(eq(PROGRAM_ID), eq("Software Engineering"), any(), anyInt());
+    DegreeProgramForm form = new DegreeProgramForm();
+    form.setName("Software Engineering");
+    form.setMaxDurationInSemesters(6);
+
+    String view =
+        testee.updateDegreeProgram(
+            PROGRAM_ID,
+            form,
+            bindingResult,
+            new ConcurrentModel(),
+            new RedirectAttributesModelMap());
+
+    assertThat(view).isEqualTo("degreeprograms/form");
+    verify(bindingResult).rejectValue(eq("name"), any(), any());
+  }
+
+  @Test
   void updateDegreeProgram_withInvalidForm_returnsFormView() {
     when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
         .thenReturn(Optional.of(testProgram()));

@@ -139,8 +139,13 @@ public class DegreeProgramController extends AbstractController {
       return showEditFormView(degreeProgramId, model);
     }
 
-    degreeProgramService.updateDegreeProgram(
-        degreeProgramId, form.getName(), form.getDescription(), form.getMaxDurationInSemesters());
+    try {
+      degreeProgramService.updateDegreeProgram(
+          degreeProgramId, form.getName(), form.getDescription(), form.getMaxDurationInSemesters());
+    } catch (DuplicateDegreeProgramNameException e) {
+      result.rejectValue("name", "duplicate", "A degree program with this name already exists.");
+      return showEditFormView(degreeProgramId, model);
+    }
 
     redirectAttributes.addFlashAttribute("successMessage", "Degree program updated.");
     return "redirect:/degree-programs/" + degreeProgramId;

@@ -49,6 +49,13 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
   @Override
   public void updateDegreeProgram(
       String degreeProgramId, String name, String description, int maxDurationInSemesters) {
+    boolean nameConflict =
+        degreeProgramRepository.findAllDegreePrograms().stream()
+            .anyMatch(
+                p -> !p.getDegreeProgramId().equals(degreeProgramId) && p.getName().equals(name));
+    if (nameConflict) {
+      throw new DuplicateDegreeProgramNameException(name);
+    }
     degreeProgramRepository.saveDegreeProgram(
         new DegreeProgram(degreeProgramId, name, description, maxDurationInSemesters));
   }
