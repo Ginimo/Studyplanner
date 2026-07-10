@@ -5,10 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public record Schedule(
-  LocalDateTime calculatedAt,
-  List<Semester> semesters
-) {
+public record Schedule(LocalDateTime calculatedAt, List<Semester> semesters) {
 
   public Schedule {
     calculatedAt = Objects.requireNonNull(calculatedAt);

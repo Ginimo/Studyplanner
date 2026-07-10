@@ -75,8 +75,7 @@ class ScheduleServiceImplTest {
 
     assertThat(result.getTotalSemesters()).isEqualTo(3);
     assertThat(result.semesters().get(0).getStudyModuleKeys()).containsExactly("A");
-    assertThat(result.semesters().get(1).getStudyModuleKeys())
-        .containsExactlyInAnyOrder("B", "C");
+    assertThat(result.semesters().get(1).getStudyModuleKeys()).containsExactlyInAnyOrder("B", "C");
     assertThat(result.semesters().get(2).getStudyModuleKeys()).containsExactly("D");
   }
 
