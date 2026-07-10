@@ -8,7 +8,6 @@ public class DegreeProgram {
   private final String description;
   private final int maxDurationInSemesters;
 
-
   public DegreeProgram(
       String degreeProgramId, String name, String description, int maxDurationInSemesters) {
     this.degreeProgramId = Objects.requireNonNull(degreeProgramId);
