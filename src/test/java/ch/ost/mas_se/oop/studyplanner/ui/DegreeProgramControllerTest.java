@@ -3,8 +3,13 @@ package ch.ost.mas_se.oop.studyplanner.ui;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ch.ost.mas_se.oop.studyplanner.exception.DuplicateDegreeProgramNameException;
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
@@ -71,6 +76,24 @@ class DegreeProgramControllerTest {
 
     assertThat(view).isEqualTo("redirect:/degree-programs");
     assertThat(redirectAttributes.getFlashAttributes()).containsKey("successMessage");
+  }
+
+  @Test
+  void createDegreeProgram_withDuplicateName_returnsFormViewWithFieldError() {
+    when(bindingResult.hasErrors()).thenReturn(false);
+    doThrow(new DuplicateDegreeProgramNameException("Software Engineering"))
+        .when(degreeProgramService)
+        .createDegreeProgram(eq("Software Engineering"), any(), anyInt());
+    DegreeProgramForm form = new DegreeProgramForm();
+    form.setName("Software Engineering");
+    form.setMaxDurationInSemesters(6);
+
+    String view =
+        testee.createDegreeProgram(
+            form, bindingResult, new ConcurrentModel(), new RedirectAttributesModelMap());
+
+    assertThat(view).isEqualTo("degreeprograms/form");
+    verify(bindingResult).rejectValue(eq("name"), any(), any());
   }
 
   @Test

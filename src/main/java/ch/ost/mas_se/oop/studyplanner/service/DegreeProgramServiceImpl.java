@@ -1,5 +1,6 @@
 package ch.ost.mas_se.oop.studyplanner.service;
 
+import ch.ost.mas_se.oop.studyplanner.exception.DuplicateDegreeProgramNameException;
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.repository.DegreeProgramRepository;
 import java.util.List;
@@ -23,6 +24,12 @@ public class DegreeProgramServiceImpl implements DegreeProgramService {
   @Override
   public DegreeProgram createDegreeProgram(
       String name, String description, int maxDurationInSemesters) {
+    boolean nameExists =
+        degreeProgramRepository.findAllDegreePrograms().stream()
+            .anyMatch(p -> p.getName().equals(name));
+    if (nameExists) {
+      throw new DuplicateDegreeProgramNameException(name);
+    }
     DegreeProgram program =
         new DegreeProgram(UUID.randomUUID().toString(), name, description, maxDurationInSemesters);
     degreeProgramRepository.saveDegreeProgram(program);

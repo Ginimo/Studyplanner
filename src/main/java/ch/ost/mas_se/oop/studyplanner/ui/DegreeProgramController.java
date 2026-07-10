@@ -1,5 +1,6 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
+import ch.ost.mas_se.oop.studyplanner.exception.DuplicateDegreeProgramNameException;
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
@@ -62,8 +63,13 @@ public class DegreeProgramController extends AbstractController {
       return showCreateFormView(model);
     }
 
-    degreeProgramService.createDegreeProgram(
-        form.getName(), form.getDescription(), form.getMaxDurationInSemesters());
+    try {
+      degreeProgramService.createDegreeProgram(
+          form.getName(), form.getDescription(), form.getMaxDurationInSemesters());
+    } catch (DuplicateDegreeProgramNameException e) {
+      result.rejectValue("name", "duplicate", "A degree program with this name already exists.");
+      return showCreateFormView(model);
+    }
 
     redirectAttributes.addFlashAttribute(
         "successMessage", "Degree program \"" + form.getName() + "\" created.");

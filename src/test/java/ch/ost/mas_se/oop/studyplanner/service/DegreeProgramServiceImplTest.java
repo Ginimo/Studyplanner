@@ -1,9 +1,11 @@
 package ch.ost.mas_se.oop.studyplanner.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ch.ost.mas_se.oop.studyplanner.exception.DuplicateDegreeProgramNameException;
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.repository.DegreeProgramRepository;
 import java.util.List;
@@ -24,6 +26,16 @@ class DegreeProgramServiceImplTest {
   @Mock private StudyModuleService studyModuleService;
 
   @InjectMocks private DegreeProgramServiceImpl testee;
+
+  @Test
+  void createDegreeProgram_duplicateName_throwsDuplicateDegreeProgramNameException() {
+    when(degreeProgramRepository.findAllDegreePrograms())
+        .thenReturn(List.of(new DegreeProgram(PROGRAM_ID, "Software Engineering", "", 6)));
+
+    assertThatThrownBy(() -> testee.createDegreeProgram("Software Engineering", "desc", 6))
+        .isInstanceOf(DuplicateDegreeProgramNameException.class)
+        .hasMessageContaining("Software Engineering");
+  }
 
   @Test
   void createDegreeProgram_generatesIdAndSavesToRepository() {
