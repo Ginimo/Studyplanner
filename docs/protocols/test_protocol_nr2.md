@@ -3,6 +3,7 @@
 Dieser Dokument dokumentiert manuelle Testsfälle, die den Stand der Software vor dem Release protokollieren.
 
 Die manuellen Tests wurden am 10.07.2026 in einem gemeinsamen Review-Termin von Daniel, Marco, Martin und Kornel durchgeführt.
+Dies ist Testdurchlauf Nr 2. circa um 15:30 Uhr durchgeführt, da Testdurchlauf Nr. 1 an einer Stelle einen Fehler aufwies und dies noch nachträglich implementiert werden musste.
 
 ## Übersicht
 
