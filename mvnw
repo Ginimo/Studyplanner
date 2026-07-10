@@ -1,15 +1,9 @@
 #!/bin/sh
 # Apache Maven Wrapper script
 
-if [ -z "$JAVA_HOME" ]; then
-  if type -p java > /dev/null 2>&1; then
-    JAVA_CMD="java"
-  else
-    echo "Error: JAVA_HOME is not set and no 'java' command found in PATH." >&2
-    exit 1
-  fi
-else
-  JAVA_CMD="$JAVA_HOME/bin/java"
+if [ -z "$JAVA_HOME" ] && ! command -v java > /dev/null 2>&1; then
+  echo "Error: JAVA_HOME is not set and no 'java' command found in PATH." >&2
+  exit 1
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
