@@ -111,8 +111,6 @@ package "Repository" <<Repository>> {
         + deleteDegreeProgram(degreeProgramId)
     }
 
-    class JsonDegreeProgramRepository
-
     interface StudyModuleRepository {
         + saveStudyModule(module)
         + findStudyModuleByKey(degreeProgramId, studyModuleKey)
@@ -121,14 +119,23 @@ package "Repository" <<Repository>> {
         + replaceAllStudyModulesForProgram(degreeProgramId, modules)
     }
 
-    class JsonStudyModuleRepository
-
     interface ScheduleRepository {
         + saveSchedule(degreeProgramId, schedule)
         + findScheduleByDegreeProgramId(degreeProgramId)
         + deleteSchedule(degreeProgramId)
     }
 
+    abstract class AbstractJsonRepository<T> {
+        # mapper: ObjectMapper
+        # load(): T
+        # store(data: T): void
+        # {abstract} fileName(): String
+        # {abstract} typeRef(): TypeReference<T>
+        # {abstract} emptyValue(): T
+    }
+
+    class JsonDegreeProgramRepository
+    class JsonStudyModuleRepository
     class JsonScheduleRepository
 }
 
@@ -156,6 +163,10 @@ AbstractController <|-- ScheduleController
 DegreeProgramServiceImpl ..|> DegreeProgramService
 StudyModuleServiceImpl ..|> StudyModuleService
 ScheduleServiceImpl ..|> ScheduleService
+
+AbstractJsonRepository <|-- JsonDegreeProgramRepository
+AbstractJsonRepository <|-- JsonStudyModuleRepository
+AbstractJsonRepository <|-- JsonScheduleRepository
 
 JsonDegreeProgramRepository ..|> DegreeProgramRepository
 JsonStudyModuleRepository ..|> StudyModuleRepository
