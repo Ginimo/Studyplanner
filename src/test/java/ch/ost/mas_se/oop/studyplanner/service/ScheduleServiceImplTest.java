@@ -50,7 +50,7 @@ class ScheduleServiceImplTest {
     Schedule result = testee.calculateSchedule(List.of(module("A"), module("B"), module("C")));
 
     assertThat(result.getTotalSemesters()).isEqualTo(1);
-    assertThat(result.semesters().get(0).getStudyModuleKeys())
+    assertThat(result.semesters().get(0).studyModuleKeys())
         .containsExactlyInAnyOrder("A", "B", "C");
   }
 
@@ -61,9 +61,9 @@ class ScheduleServiceImplTest {
         testee.calculateSchedule(List.of(module("A"), module("B", "A"), module("C", "B")));
 
     assertThat(result.getTotalSemesters()).isEqualTo(3);
-    assertThat(result.semesters().get(0).getStudyModuleKeys()).containsExactly("A");
-    assertThat(result.semesters().get(1).getStudyModuleKeys()).containsExactly("B");
-    assertThat(result.semesters().get(2).getStudyModuleKeys()).containsExactly("C");
+    assertThat(result.semesters().get(0).studyModuleKeys()).containsExactly("A");
+    assertThat(result.semesters().get(1).studyModuleKeys()).containsExactly("B");
+    assertThat(result.semesters().get(2).studyModuleKeys()).containsExactly("C");
   }
 
   @Test
@@ -74,9 +74,9 @@ class ScheduleServiceImplTest {
             List.of(module("A"), module("B", "A"), module("C", "A"), module("D", "B", "C")));
 
     assertThat(result.getTotalSemesters()).isEqualTo(3);
-    assertThat(result.semesters().get(0).getStudyModuleKeys()).containsExactly("A");
-    assertThat(result.semesters().get(1).getStudyModuleKeys()).containsExactlyInAnyOrder("B", "C");
-    assertThat(result.semesters().get(2).getStudyModuleKeys()).containsExactly("D");
+    assertThat(result.semesters().get(0).studyModuleKeys()).containsExactly("A");
+    assertThat(result.semesters().get(1).studyModuleKeys()).containsExactlyInAnyOrder("B", "C");
+    assertThat(result.semesters().get(2).studyModuleKeys()).containsExactly("D");
   }
 
   @Test
@@ -94,7 +94,7 @@ class ScheduleServiceImplTest {
     Schedule result = testee.calculateSchedule(List.of(module("OO", "MISSING")));
 
     assertThat(result.getTotalSemesters()).isEqualTo(1);
-    assertThat(result.semesters().get(0).getStudyModuleKeys()).containsExactly("OO");
+    assertThat(result.semesters().get(0).studyModuleKeys()).containsExactly("OO");
   }
 
   @Test
@@ -110,11 +110,9 @@ class ScheduleServiceImplTest {
                 module("Thesis", "DB", "AD")));
 
     assertThat(result.getTotalSemesters()).isEqualTo(3);
-    assertThat(result.semesters().get(0).getStudyModuleKeys())
-        .containsExactlyInAnyOrder("OO", "Math");
-    assertThat(result.semesters().get(1).getStudyModuleKeys())
-        .containsExactlyInAnyOrder("DB", "AD");
-    assertThat(result.semesters().get(2).getStudyModuleKeys()).containsExactly("Thesis");
+    assertThat(result.semesters().get(0).studyModuleKeys()).containsExactlyInAnyOrder("OO", "Math");
+    assertThat(result.semesters().get(1).studyModuleKeys()).containsExactlyInAnyOrder("DB", "AD");
+    assertThat(result.semesters().get(2).studyModuleKeys()).containsExactly("Thesis");
   }
 
   // --- calculateAndSaveSchedule ---
