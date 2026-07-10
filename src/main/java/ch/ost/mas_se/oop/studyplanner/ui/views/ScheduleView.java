@@ -6,6 +6,6 @@ import java.time.LocalDateTime;
 public record ScheduleView(LocalDateTime calculatedAt, int totalSemesters) {
 
   public static ScheduleView from(Schedule schedule) {
-    return new ScheduleView(schedule.getCalculatedAt(), schedule.getTotalSemesters());
+    return new ScheduleView(schedule.calculatedAt(), schedule.getTotalSemesters());
   }
 }

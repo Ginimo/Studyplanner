@@ -55,7 +55,7 @@ public class ScheduleController extends AbstractController {
     model.addAttribute("schedule", ScheduleView.from(schedule));
     model.addAttribute(
         "semesterViews",
-        schedule.getSemesters().stream().map(s -> SemesterView.from(s, moduleMap)).toList());
+        schedule.semesters().stream().map(s -> SemesterView.from(s, moduleMap)).toList());
   }
 
   /**
