@@ -3,6 +3,7 @@ package ch.ost.mas_se.oop.studyplanner.ui.forms;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +19,9 @@ public class StudyModuleForm {
 
   private String description;
 
+  @NotNull(message = "ECTS must be at least 1")
   @Min(value = 1, message = "ECTS must be at least 1")
-  private int ects;
+  private Integer ects;
 
   private List<String> prerequisiteKeys = new ArrayList<>();
 
@@ -55,11 +57,11 @@ public class StudyModuleForm {
     this.description = description;
   }
 
-  public int getEcts() {
+  public Integer getEcts() {
     return ects;
   }
 
-  public void setEcts(final int ects) {
+  public void setEcts(final Integer ects) {
     this.ects = ects;
   }
 

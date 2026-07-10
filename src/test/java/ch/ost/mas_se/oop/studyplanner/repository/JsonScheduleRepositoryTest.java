@@ -50,7 +50,7 @@ class JsonScheduleRepositoryTest {
 
     Schedule found = testee.findScheduleByDegreeProgramId("prog-1").orElseThrow();
     assertThat(found.getTotalSemesters()).isEqualTo(1);
-    assertThat(found.semesters().get(0).getStudyModuleKeys()).containsExactly("OO", "Math");
+    assertThat(found.semesters().get(0).studyModuleKeys()).containsExactly("OO", "Math");
   }
 
   @Test
@@ -59,7 +59,7 @@ class JsonScheduleRepositoryTest {
     testee.saveSchedule("prog-1", scheduleWithKeys("NEW"));
 
     Schedule found = testee.findScheduleByDegreeProgramId("prog-1").orElseThrow();
-    assertThat(found.semesters().get(0).getStudyModuleKeys()).containsExactly("NEW");
+    assertThat(found.semesters().get(0).studyModuleKeys()).containsExactly("NEW");
   }
 
   @Test
@@ -73,7 +73,7 @@ class JsonScheduleRepositoryTest {
                 .orElseThrow()
                 .semesters()
                 .get(0)
-                .getStudyModuleKeys())
+                .studyModuleKeys())
         .containsExactly("A");
     assertThat(
             testee
@@ -81,7 +81,7 @@ class JsonScheduleRepositoryTest {
                 .orElseThrow()
                 .semesters()
                 .get(0)
-                .getStudyModuleKeys())
+                .studyModuleKeys())
         .containsExactly("B");
   }
 
