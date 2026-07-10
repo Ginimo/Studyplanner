@@ -28,6 +28,7 @@ public class SampleDataInitializer implements ApplicationRunner {
     }
 
     LocalDate offeredFrom = LocalDate.of(2026, 6, 1);
+    LocalDate offeredTo = LocalDate.of(2030, 12, 31);
 
     DegreeProgram bscInfo =
         degreeProgramService.createDegreeProgram(
@@ -44,7 +45,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         4,
         List.of(),
         offeredFrom,
-        null);
+        offeredTo);
     studyModuleService.createStudyModule(
         "Math",
         progId,
@@ -53,7 +54,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         4,
         List.of(),
         offeredFrom,
-        null);
+        offeredTo);
     studyModuleService.createStudyModule(
         "DB1",
         progId,
@@ -62,7 +63,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         4,
         List.of("OO"),
         offeredFrom,
-        null);
+        offeredTo);
     studyModuleService.createStudyModule(
         "AD1",
         progId,
@@ -71,7 +72,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         4,
         List.of("OO"),
         offeredFrom,
-        null);
+        offeredTo);
     studyModuleService.createStudyModule(
         "AD2",
         progId,
@@ -80,7 +81,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         4,
         List.of("OO", "AD1"),
         offeredFrom,
-        null);
+        offeredTo);
     studyModuleService.createStudyModule(
         "CPI",
         progId,
@@ -89,7 +90,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         4,
         List.of("OO", "Math"),
         offeredFrom,
-        null);
+        offeredTo);
     studyModuleService.createStudyModule(
         "DB2",
         progId,
@@ -98,7 +99,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         4,
         List.of("DB1"),
         offeredFrom,
-        null);
+        offeredTo);
     studyModuleService.createStudyModule(
         "SE1",
         progId,
@@ -107,7 +108,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         4,
         List.of("AD1", "CPI", "DB1"),
         offeredFrom,
-        null);
+        offeredTo);
     studyModuleService.createStudyModule(
         "UI1",
         progId,
@@ -116,7 +117,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         4,
         List.of("AD1"),
         offeredFrom,
-        null);
+        offeredTo);
     studyModuleService.createStudyModule(
         "SE2",
         progId,
@@ -125,7 +126,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         4,
         List.of("DB1", "SE1", "UI1"),
         offeredFrom,
-        null);
+        offeredTo);
     studyModuleService.createStudyModule(
         "UI2",
         progId,
@@ -134,7 +135,7 @@ public class SampleDataInitializer implements ApplicationRunner {
         4,
         List.of("UI1"),
         offeredFrom,
-        null);
+        offeredTo);
     studyModuleService.createStudyModule(
         "Thesis",
         progId,
@@ -143,6 +144,6 @@ public class SampleDataInitializer implements ApplicationRunner {
         12,
         List.of("DB2", "SE2", "UI2"),
         offeredFrom,
-        null);
+        offeredTo);
   }
 }
