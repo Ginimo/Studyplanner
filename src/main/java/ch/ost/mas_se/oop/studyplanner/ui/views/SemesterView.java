@@ -14,15 +14,12 @@ public record SemesterView(
 
   public static SemesterView from(Semester semester, Map<String, StudyModule> moduleMap) {
     List<StudyModule> resolved =
-        semester.getStudyModuleKeys().stream()
-            .map(moduleMap::get)
-            .filter(Objects::nonNull)
-            .toList();
+        semester.studyModuleKeys().stream().map(moduleMap::get).filter(Objects::nonNull).toList();
 
     return new SemesterView(
-        semester.getSemesterNumber(),
+        semester.semesterNumber(),
         resolved.stream().map(StudyModuleView::from).toList(),
         resolved.stream().mapToInt(StudyModule::getEcts).sum(),
-        String.join(", ", semester.getStudyModuleKeys()));
+        String.join(", ", semester.studyModuleKeys()));
   }
 }
