@@ -1,33 +1,49 @@
 @startuml
 skinparam style strictuml
-title Domain Sequence Diagram - Create Study Module
+title Sequence Diagram - Create Study Module
 
 actor Student
 participant "StudyModuleController" as SMC
 participant "StudyModuleService" as SMS
-participant "StudyModule" as SM
 participant "StudyModuleRepository" as SMR
+participant "ScheduleService" as SS
 
-Student -> SMC : createStudyModule(degreeProgramId, form)
+Student -> SMC : POST /degree-programs/{degreeProgramId}/study-modules/new
 activate SMC
 
-SMC -> SM : new StudyModule(form.details)
-activate SM
-SM --> SMC : module
-deactivate SM
+SMC -> SMC : validate StudyModuleForm
 
-SMC -> SMS : create(module)
-activate SMS
+alt form has validation errors
+    SMC --> Student : show form with errors
+else valid form
+    SMC -> SMS : createStudyModule(studyModuleKey, degreeProgramId, ...)
+    activate SMS
 
-SMS -> SMR : save(module)
-activate SMR
-SMR --> SMS : success
-deactivate SMR
+    SMS -> SMR : findStudyModuleByKey(degreeProgramId, studyModuleKey)
+    activate SMR
+    SMR --> SMS : Optional<StudyModule>
+    deactivate SMR
 
-SMS --> SMC : void
-deactivate SMS
+    alt key already exists
+        SMS --> SMC : throws DuplicateStudyModuleKeyException
+        SMC --> Student : show form with duplicate-key error
+    else key is unique
+        SMS -> SMR : saveStudyModule(new StudyModule(...))
+        activate SMR
+        SMR --> SMS : void
+        deactivate SMR
 
-SMC -> Student : redirect to degree program details
+        SMS -> SS : deleteSchedule(degreeProgramId)
+        activate SS
+        SS --> SMS : void
+        deactivate SS
+
+        SMS --> SMC : void
+        SMC --> Student : redirect to degree program details\nflash successMessage
+    end
+
+    deactivate SMS
+end
+
 deactivate SMC
-
 @enduml

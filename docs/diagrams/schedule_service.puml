@@ -1,5 +1,5 @@
 @startuml
-title Schedule Calculation — Kahn's Layered BFS  |  O(V + E)
+title Activity Diagram - Schedule Calculation
 
 skinparam activity {
     BackgroundColor #F9F9F9
@@ -10,100 +10,38 @@ skinparam activity {
     EndColor   #2E7D32
     ArrowColor #546E7A
 }
-skinparam swimlane {
-    BorderColor         #607D8B
-    TitleBackgroundColor #ECEFF1
-    TitleFontColor      #37474F
-}
 skinparam note {
     BackgroundColor #FFFDE7
     BorderColor     #F9A825
 }
 
-|#E8F5E9| Algorithm |
 start
+:load StudyModules for degreeProgramId;
+:build moduleMap;
+:build inDegree from prerequisiteKeys;
+:build dependents as reverse prerequisite lookup;
+:seed ready with modules where inDegree = 0;
+
 note right
-  <b>V</b> = number of StudyModules
-      (vertices in the dependency graph)
-  <b>E</b> = total prerequisite relationships
-      (edges in the dependency graph)
-  <b>Overall: O(V + E)</b>
+  Kahn's algorithm groups ready modules into layers.
+  One layer corresponds to one Semester.
+  Complexity: O(V + E).
 end note
-:build moduleMap
-build inDegree
-build dependents;
-note right
-  | <b>moduleMap</b>           | <b>inDegree</b>              | <b>dependents</b>                     |
-  | "Math"   → StudyModule(4)  | "Math"   → 0                 | "Math"   → ["CPI"]                    |
-  | "OO"     → StudyModule(4)  | "OO"     → 0                 | "OO"     → ["DB1","AD1","AD2","CPI"]  |
-  | "DB1"    → StudyModule(4)  | "DB1"    → 1  (OO)           | "DB1"    → ["DB2","SE1","SE2"]        |
-  | "AD1"    → StudyModule(4)  | "AD1"    → 1  (OO)           | "AD1"    → ["AD2","SE1","UI1"]        |
-  | "CPI"    → StudyModule(4)  | "CPI"    → 2  (OO, Math)     | "CPI"    → ["SE1"]                    |
-  | "DB2"    → StudyModule(4)  | "DB2"    → 1  (DB1)          | "DB2"    → ["Thesis"]                 |
-  | "SE1"    → StudyModule(4)  | "SE1"    → 3  (AD1,CPI,DB1)  | "SE1"    → ["SE2"]                    |
-  | "UI1"    → StudyModule(4)  | "UI1"    → 1  (AD1)          | "UI1"    → ["SE2","UI2"]              |
-  | "AD2"    → StudyModule(4)  | "AD2"    → 2  (OO, AD1)      | "AD2"    → []                         |
-  | "SE2"    → StudyModule(4)  | "SE2"    → 3  (DB1,SE1,UI1)  | "SE2"    → ["Thesis"]                 |
-  | "UI2"    → StudyModule(4)  | "UI2"    → 1  (UI1)          | "UI2"    → ["Thesis"]                 |
-  | "Thesis" → StudyModule(12) | "Thesis" → 3  (DB2,SE2,UI2)  | "Thesis" → []                         |
-end note
-:seed ready ← all keys with inDegree = 0
-ready = ["Math", "OO"]
-placed = 0;
 
-while (!ready.isEmpty()) is (true)
+while (ready is not empty?) is (yes)
+  :copy ready to current layer;
+  :clear ready for next semester;
+  :create Semester with current studyModuleKeys;
+  :decrement inDegree for dependent modules;
+  :add newly unblocked modules to ready;
+  :add Semester to Schedule;
+endwhile (no)
 
-  :layer = List.copyOf(ready)
-  ready.clear();
-  note right
-    Snapshot the current layer before processing
-    so that newly unblocked modules are queued
-    for the <b>next</b> semester, not the current one.
-  end note
-
-  :new Semester(semesterNumber)
-  for each key in layer:
-    semester.addStudyModule(moduleMap[key])
-    placed++
-    for each dep in dependents[key]:
-      inDegree[dep]--
-      if inDegree[dep] == 0 → ready.add(dep)
-  schedule.addSemester(semester);
-  note right
-    O(V + E) total across all iterations —
-    each module is dequeued exactly once (V),
-    each edge is traversed exactly once (E).
-  end note
-
-|#E3F2FD| inDegree (Map<String, Integer>) |
-:——— after iteration 1  (layer = [Math, OO]) ———
-"Math"   → 0   ✓ placed in Semester 1
-"OO"     → 0   ✓ placed in Semester 1
-"DB1"    → 0   ← unblocked! (OO done)
-"AD1"    → 0   ← unblocked! (OO done)
-"CPI"    → 0   ← unblocked! (OO + Math done)
-"DB2"    → 1   (DB1)
-"SE1"    → 3   (AD1, CPI, DB1)
-"UI1"    → 1   (AD1)
-"AD2"    → 1   (AD1)
-"SE2"    → 3   (DB1, SE1, UI1)
-"UI2"    → 1   (UI1)
-"Thesis" → 3   (DB2, SE2, UI2)
-ready = ["DB1", "AD1", "CPI"];
-
-|#E8F5E9| Algorithm |
-endwhile (false)
-
-if (placed < total?) then (yes)
-  :throw CyclicDependencyException
-  ──────────────────────────────
-  modules still with inDegree > 0
-  are in or blocked by a cycle
-  e.g. "M1"→inDegree=1, "M2"→inDegree=1
-       "M1" needs "M2", "M2" needs "M1"; <<#FFCDD2>>
+if (all modules placed?) then (yes)
+  :save Schedule for degreeProgramId;
   stop
 else (no)
-  :return schedule;
+  :throw CyclicDependencyException;
   stop
 endif
 

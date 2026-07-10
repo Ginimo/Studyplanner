@@ -1,84 +1,61 @@
 @startuml
+title UI Workflow - Degree Programs and Study Modules
 skinparam style strictuml
-title UI Workflow - Degree Program CRUD
 
-partition "Create Degree Program" {
-    (*) --> "GET /degree-programs/new"
-    "GET /degree-programs/new" --> "Show Create Form"
-    "Show Create Form" --> "Submit Form (POST)"
-    "Submit Form (POST)" --> "Validate Input"
-    if "Has Errors?" then
-        -->[Yes] "Show Create Form with Errors"
-        "Show Create Form with Errors" --> "Submit Form (POST)"
-    else
-        -->[No] "Save Degree Program"
-        "Save Degree Program" --> "Redirect to List"
-        "Redirect to List" --> (*)
-    endif
-}
-
-partition "Read Degree Program" {
+partition "Degree Program" {
     (*) --> "GET /degree-programs"
-    "GET /degree-programs" --> "Show List View"
-    "Show List View" --> (*)
-    
-    (*) --> "GET /degree-programs/{id}"
-    "GET /degree-programs/{id}" --> "Show Details View"
-    "Show Details View" --> (*)
-}
+    "GET /degree-programs" --> "List degree programs"
 
-partition "Update Degree Program" {
-    (*) --> "GET /degree-programs/{id}/edit"
-    "GET /degree-programs/{id}/edit" --> "Load Data"
-    "Load Data" --> "Show Edit Form"
-    "Show Edit Form" --> "Submit Update (POST)"
-    "Submit Update (POST)" --> "Validate Input"
-    if "Has Errors?" then
-        -->[Yes] "Show Edit Form with Errors"
-        "Show Edit Form with Errors" --> "Submit Update (POST)"
+    "List degree programs" --> "GET /degree-programs/new"
+    "GET /degree-programs/new" --> "Show DegreeProgramForm"
+    "Show DegreeProgramForm" --> "POST /degree-programs/new"
+    "POST /degree-programs/new" --> "Validate form"
+    if "valid?" then
+        -->[yes] "DegreeProgramService.createDegreeProgram"
+        "DegreeProgramService.createDegreeProgram" --> "Redirect to list"
     else
-        -->[No] "Save Changes"
-        "Save Changes" --> "Redirect to Details"
-        "Redirect to Details" --> (*)
-    endif
-}
-
-partition "Delete Degree Program" {
-    (*) --> "POST /degree-programs/{id}/delete"
-    "POST /degree-programs/{id}/delete" --> "Require Program"
-    "Require Program" --> "Delete all Study Modules\n(cleans up prerequisite references)"
-    "Delete all Study Modules\n(cleans up prerequisite references)" --> "Delete Program"
-    "Delete Program" --> "Redirect to List"
-}
-
-partition "Manage Study Modules" {
-    "Show Details View" --> "GET /degree-programs/{id}/study-modules/new"
-    "GET /degree-programs/{id}/study-modules/new" --> "Show Create Module Form"
-    "Show Create Module Form" --> "Submit Module (POST)"
-    "Submit Module (POST)" --> "Validate Module Input"
-    if "Module Has Errors?" then
-        -->[Yes] "Show Create Module Form with Errors"
-        "Show Create Module Form with Errors" --> "Submit Module (POST)"
-    else
-        -->[No] "Save Study Module"
-        "Save Study Module" --> "Redirect to Details"
+        -->[no] "Show form errors"
+        "Show form errors" --> "Show DegreeProgramForm"
     endif
 
-    "Show Details View" --> "GET /degree-programs/{id}/study-modules/{key}/edit"
-    "GET /degree-programs/{id}/study-modules/{key}/edit" --> "Show Edit Module Form"
-    "Show Edit Module Form" --> "Submit Module Update (POST)"
-    "Submit Module Update (POST)" --> "Validate Module Update Input"
-    if "Module Update Has Errors?" then
-        -->[Yes] "Show Edit Module Form with Errors"
-        "Show Edit Module Form with Errors" --> "Submit Module Update (POST)"
+    "List degree programs" --> "GET /degree-programs/{degreeProgramId}"
+    "GET /degree-programs/{degreeProgramId}" --> "Show details with filtered modules"
+}
+
+partition "Study Module" {
+    "Show details with filtered modules" --> "GET /degree-programs/{degreeProgramId}/study-modules/new"
+    "GET /degree-programs/{degreeProgramId}/study-modules/new" --> "Show StudyModuleForm"
+    "Show StudyModuleForm" --> "POST /degree-programs/{degreeProgramId}/study-modules/new"
+    "POST /degree-programs/{degreeProgramId}/study-modules/new" --> "Validate module form"
+    if "module valid and key unique?" then
+        -->[yes] "StudyModuleService.createStudyModule"
+        "StudyModuleService.createStudyModule" --> "Invalidate saved schedule"
+        "Invalidate saved schedule" --> "Redirect to degree program details"
     else
-        -->[No] "Save Module Changes"
-        "Save Module Changes" --> "Redirect to Details"
+        -->[no] "Show module form errors"
+        "Show module form errors" --> "Show StudyModuleForm"
     endif
 
-    "Show Details View" --> "POST /degree-programs/{id}/study-modules/{key}/delete"
-    "POST /degree-programs/{id}/study-modules/{key}/delete" --> "Delete Study Module"
-    "Delete Study Module" --> "Redirect to Details"
+    "Show details with filtered modules" --> "POST /degree-programs/{degreeProgramId}/study-modules/{studyModuleKey}/delete"
+    "POST /degree-programs/{degreeProgramId}/study-modules/{studyModuleKey}/delete" --> "StudyModuleService.deleteStudyModule"
+    "StudyModuleService.deleteStudyModule" --> "Remove prerequisite references"
+    "Remove prerequisite references" --> "Invalidate saved schedule"
+}
+
+partition "Schedule" {
+    "Show details with filtered modules" --> "GET /degree-programs/{degreeProgramId}/schedule"
+    "GET /degree-programs/{degreeProgramId}/schedule" --> "Load saved schedule if present"
+    "Load saved schedule if present" --> "Show schedule view"
+
+    "Show schedule view" --> "POST /degree-programs/{degreeProgramId}/schedule/calculate"
+    "POST /degree-programs/{degreeProgramId}/schedule/calculate" --> "ScheduleService.calculateAndSaveSchedule"
+    if "calculation successful?" then
+        -->[yes] "Save schedule and show success"
+    else
+        -->[no] "Show cycle error"
+    endif
+    "Save schedule and show success" --> (*)
+    "Show cycle error" --> (*)
 }
 
 @enduml

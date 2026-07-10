@@ -1,67 +1,52 @@
 @startuml
 skinparam style strictuml
-title Domain Sequence Diagram - Study Plan Calculation
+title Sequence Diagram - Calculate Study Plan
 
 actor Student
 participant "ScheduleController" as SC
 participant "DegreeProgramService" as DPS
 participant "ScheduleService" as SS
-participant "StudyModuleService" as SMS
-participant "Schedule" as S
-participant "Semester" as Sem
+participant "StudyModuleRepository" as SMR
+participant "ScheduleRepository" as SR
 
-Student -> SC : calculateSchedule(degreeProgramId)
+Student -> SC : POST /degree-programs/{degreeProgramId}/schedule/calculate
 activate SC
 
-SC -> DPS : findById(degreeProgramId)
+SC -> DPS : findDegreeProgramById(degreeProgramId)
 activate DPS
-DPS --> SC : degreeProgram
+DPS --> SC : Optional<DegreeProgram>
 deactivate DPS
 
-SC -> SS : calculate(degreeProgram)
+SC -> SS : calculateAndSaveSchedule(program)
 activate SS
 
-SS -> SMS : findAllByDegreeProgramId(degreeProgramId)
-activate SMS
-SMS --> SS : modules
-deactivate SMS
-
-SS -> S : new Schedule()
-activate S
-S --> SS : schedule
-deactivate S
+SS -> SMR : findAllStudyModulesByDegreeProgramId(degreeProgramId)
+activate SMR
+SMR --> SS : List<StudyModule>
+deactivate SMR
 
 note over SS
-  Topological sort — Kahn's layered BFS:
-  1. Build moduleMap (key → StudyModule) for O(1) lookup
-  2. Build inDegree (key → count of unmet in-program prerequisites)
-  3. Build dependents (key → list of modules that declare it as a prerequisite)
-  4. Seed ready queue with all keys whose inDegree == 0
-  5. Each iteration: snapshot the queue as a layer → create a new Semester →
-     place every module in the layer → decrement inDegree of each dependent →
-     enqueue dependents whose inDegree reaches 0 (for the next semester)
-  6. After BFS drains: if placed < total, throw CyclicDependencyException
+  Build dependency graph from prerequisiteKeys.
+  Process modules layer by layer with Kahn's algorithm.
+  Each layer becomes one Semester with studyModuleKeys.
 end note
 
 alt no cyclic dependency
-    loop for each topological layer (semester)
-        SS -> Sem : new Semester(semesterNumber)
-        activate Sem
-        Sem --> SS : semester
-        deactivate Sem
-        SS -> S : addSemester(semester)
-    end
-    SS --> SC : schedule
-else cyclic dependency detected
+    SS -> SR : saveSchedule(degreeProgramId, schedule)
+    activate SR
+    SR --> SS : void
+    deactivate SR
+    SS --> SC : void
+else cyclic dependency
     SS --> SC : throws CyclicDependencyException
 end
 
 deactivate SS
 
 alt schedule calculated successfully
-    SC --> Student : redirect to schedule view\n(flash: successMessage + schedule)
+    SC --> Student : redirect to schedule view\nflash successMessage
 else cyclic dependency
-    SC --> Student : redirect to schedule view\n(flash: errorMessage)
+    SC --> Student : redirect to schedule view\nflash errorMessage
 end
 
 deactivate SC
