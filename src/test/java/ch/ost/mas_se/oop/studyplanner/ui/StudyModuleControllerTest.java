@@ -69,6 +69,7 @@ class StudyModuleControllerTest {
     StudyModuleForm form = new StudyModuleForm();
     form.setStudyModuleKey(STUDY_MODULE_KEY);
     form.setName("OOP 1");
+    form.setEcts(3);
     var redirectAttributes = new RedirectAttributesModelMap();
 
     String view =
@@ -92,6 +93,7 @@ class StudyModuleControllerTest {
     StudyModuleForm form = new StudyModuleForm();
     form.setStudyModuleKey(STUDY_MODULE_KEY);
     form.setName("OOP 1");
+    form.setEcts(3);
 
     String view =
         testee.createStudyModule(
@@ -173,6 +175,7 @@ class StudyModuleControllerTest {
     when(bindingResult.hasErrors()).thenReturn(false);
     StudyModuleForm form = new StudyModuleForm();
     form.setName("OOP 1");
+    form.setEcts(3);
     var redirectAttributes = new RedirectAttributesModelMap();
 
     String view =
