@@ -1,6 +1,6 @@
 # Testfälle
 
-Dieser Dokument dokumentiert manuelle Testsfälle, die den Stand der Software vor dem Release protokollieren.
+Dieser Dokument dokumentiert manuelle Testsfälle, die den Stand der Software vor dem Release 10.07.2026 (23:59) protokollieren.
 
 Die manuellen Tests wurden am 10.07.2026 in einem gemeinsamen Review-Termin von Daniel, Marco, Martin und Kornel durchgeführt.
 Dies ist Testdurchlauf Nr 1. circa um 14 Uhr durchgeführt.
