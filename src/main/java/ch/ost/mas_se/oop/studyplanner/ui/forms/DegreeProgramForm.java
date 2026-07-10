@@ -2,6 +2,7 @@ package ch.ost.mas_se.oop.studyplanner.ui.forms;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class DegreeProgramForm {
 
@@ -10,8 +11,9 @@ public class DegreeProgramForm {
 
   private String description;
 
+  @NotNull(message = "Max duration must be at least 1 semester")
   @Min(value = 1, message = "Max duration must be at least 1 semester")
-  private int maxDurationInSemesters;
+  private Integer maxDurationInSemesters;
 
   public String getName() {
     return name;
@@ -29,11 +31,11 @@ public class DegreeProgramForm {
     this.description = description;
   }
 
-  public int getMaxDurationInSemesters() {
+  public Integer getMaxDurationInSemesters() {
     return maxDurationInSemesters;
   }
 
-  public void setMaxDurationInSemesters(final int maxDurationInSemesters) {
+  public void setMaxDurationInSemesters(final Integer maxDurationInSemesters) {
     this.maxDurationInSemesters = maxDurationInSemesters;
   }
 }
