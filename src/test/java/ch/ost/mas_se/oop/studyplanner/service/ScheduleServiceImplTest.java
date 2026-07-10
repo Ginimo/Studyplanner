@@ -35,8 +35,6 @@ class ScheduleServiceImplTest {
     return new StudyModule(key, PROGRAM_ID, "Name-" + key, null, 4, List.of(prereqs), null, null);
   }
 
-  // --- calculateSchedule (package-private algorithm, accessible from same package) ---
-
   @Test
   void calculateSchedule_noModules_returnsScheduleWithNoSemesters() {
     Schedule result = testee.calculateSchedule(List.of());
@@ -50,7 +48,7 @@ class ScheduleServiceImplTest {
     Schedule result = testee.calculateSchedule(List.of(module("A"), module("B"), module("C")));
 
     assertThat(result.getTotalSemesters()).isEqualTo(1);
-    assertThat(result.semesters().get(0).studyModuleKeys())
+    assertThat(result.semesters().getFirst().studyModuleKeys())
         .containsExactlyInAnyOrder("A", "B", "C");
   }
 
@@ -94,7 +92,7 @@ class ScheduleServiceImplTest {
     Schedule result = testee.calculateSchedule(List.of(module("OO", "MISSING")));
 
     assertThat(result.getTotalSemesters()).isEqualTo(1);
-    assertThat(result.semesters().get(0).studyModuleKeys()).containsExactly("OO");
+    assertThat(result.semesters().getFirst().studyModuleKeys()).containsExactly("OO");
   }
 
   @Test
@@ -115,8 +113,6 @@ class ScheduleServiceImplTest {
     assertThat(result.semesters().get(2).studyModuleKeys()).containsExactly("Thesis");
   }
 
-  // --- calculateAndSaveSchedule ---
-
   @Test
   void calculateAndSaveSchedule_fetchesModulesForProgram_calculatesAndPersistsResult() {
     DegreeProgram program = new DegreeProgram(PROGRAM_ID, "SE", "", 6);
@@ -130,8 +126,6 @@ class ScheduleServiceImplTest {
         .saveSchedule(org.mockito.ArgumentMatchers.eq(PROGRAM_ID), captor.capture());
     assertThat(captor.getValue().getTotalSemesters()).isEqualTo(2);
   }
-
-  // --- findScheduleByDegreeProgramId ---
 
   @Test
   void findScheduleByDegreeProgramId_delegatesToRepository() {
@@ -148,8 +142,6 @@ class ScheduleServiceImplTest {
 
     assertThat(testee.findScheduleByDegreeProgramId(PROGRAM_ID)).isEmpty();
   }
-
-  // --- deleteSchedule ---
 
   @Test
   void deleteSchedule_delegatesToRepository() {

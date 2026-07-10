@@ -54,8 +54,8 @@ class JsonStudyModuleRepositoryTest {
 
     List<StudyModule> all = testee.findAllStudyModulesByDegreeProgramId(PROG_A);
     assertThat(all).hasSize(1);
-    assertThat(all.get(0).getName()).isEqualTo("New");
-    assertThat(all.get(0).getEcts()).isEqualTo(6);
+    assertThat(all.getFirst().getName()).isEqualTo("New");
+    assertThat(all.getFirst().getEcts()).isEqualTo(6);
   }
 
   @Test
