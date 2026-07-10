@@ -1,8 +1,11 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import ch.ost.mas_se.oop.studyplanner.exception.CyclicDependencyException;
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.model.Schedule;
 import ch.ost.mas_se.oop.studyplanner.model.Semester;
@@ -12,6 +15,7 @@ import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.views.ScheduleView;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +62,7 @@ class ScheduleControllerTest {
         .thenReturn(Optional.of(testProgram()));
     when(scheduleService.findScheduleByDegreeProgramId(PROGRAM_ID))
         .thenReturn(Optional.of(schedule));
-    when(studyModuleService.findAllStudyModulesByDegreeProgramId(PROGRAM_ID)).thenReturn(List.of());
+    when(studyModuleService.findModuleMapByDegreeProgramId(PROGRAM_ID)).thenReturn(Map.of());
     var model = new ConcurrentModel();
 
     String view = testee.showSchedule(PROGRAM_ID, model);
@@ -78,5 +82,21 @@ class ScheduleControllerTest {
 
     assertThat(view).isEqualTo("redirect:/degree-programs/" + PROGRAM_ID + "/schedule");
     assertThat(redirectAttributes.getFlashAttributes()).containsKey("successMessage");
+  }
+
+  @Test
+  void calculateSchedule_onCyclicDependencyException_redirectsWithErrorMessage() {
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
+    doThrow(new CyclicDependencyException(List.of("A", "B")))
+        .when(scheduleService)
+        .calculateAndSaveSchedule(any());
+    var redirectAttributes = new RedirectAttributesModelMap();
+
+    String view = testee.calculateSchedule(PROGRAM_ID, redirectAttributes);
+
+    assertThat(view).isEqualTo("redirect:/degree-programs/" + PROGRAM_ID + "/schedule");
+    assertThat(redirectAttributes.getFlashAttributes()).containsKey("errorMessage");
+    assertThat(redirectAttributes.getFlashAttributes()).doesNotContainKey("successMessage");
   }
 }

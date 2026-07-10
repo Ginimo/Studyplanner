@@ -5,7 +5,6 @@ import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public record SemesterView(
     int semesterNumber,
@@ -22,7 +21,7 @@ public record SemesterView(
 
     return new SemesterView(
         semester.getSemesterNumber(),
-        resolved.stream().map(StudyModuleView::from).collect(Collectors.toList()),
+        resolved.stream().map(StudyModuleView::from).toList(),
         resolved.stream().mapToInt(StudyModule::getEcts).sum(),
         String.join(", ", semester.getStudyModuleKeys()));
   }

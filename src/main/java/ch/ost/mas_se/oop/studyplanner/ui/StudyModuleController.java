@@ -1,5 +1,6 @@
 package ch.ost.mas_se.oop.studyplanner.ui;
 
+import ch.ost.mas_se.oop.studyplanner.exception.DuplicateStudyModuleKeyException;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
@@ -8,7 +9,6 @@ import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleView;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -54,25 +54,23 @@ public class StudyModuleController extends AbstractController {
       return showCreateFormView(degreeProgramId, form, model);
     }
 
-    if (studyModuleService
-        .findStudyModuleByKey(degreeProgramId, form.getStudyModuleKey())
-        .isPresent()) {
+    try {
+      studyModuleService.createStudyModule(
+          form.getStudyModuleKey(),
+          degreeProgramId,
+          form.getName(),
+          form.getDescription(),
+          form.getEcts(),
+          form.getPrerequisiteKeys(),
+          form.getOfferedFrom(),
+          form.getOfferedTo());
+    } catch (DuplicateStudyModuleKeyException e) {
       result.rejectValue(
           "studyModuleKey",
           "duplicate",
           "A study module with this key already exists in this degree program.");
       return showCreateFormView(degreeProgramId, form, model);
     }
-
-    studyModuleService.createStudyModule(
-        form.getStudyModuleKey(),
-        degreeProgramId,
-        form.getName(),
-        form.getDescription(),
-        form.getEcts(),
-        form.getPrerequisiteKeys(),
-        form.getOfferedFrom(),
-        form.getOfferedTo());
 
     redirectAttributes.addFlashAttribute(
         "successMessage", "Study module \"" + form.getName() + "\" created.");
@@ -95,7 +93,7 @@ public class StudyModuleController extends AbstractController {
             .findStudyModulesByKeys(degreeProgramId, module.getPrerequisiteKeys())
             .stream()
             .map(StudyModuleView::from)
-            .collect(Collectors.toList());
+            .toList();
 
     model.addAttribute(
         "degreeProgram", DegreeProgramView.from(requireDegreeProgram(degreeProgramId)));
@@ -138,6 +136,8 @@ public class StudyModuleController extends AbstractController {
       final BindingResult result,
       final Model model,
       final RedirectAttributes redirectAttributes) {
+
+    requireStudyModule(degreeProgramId, studyModuleKey);
 
     if (result.hasErrors()) {
       return showEditFormView(degreeProgramId, studyModuleKey, form, model);
@@ -220,7 +220,7 @@ public class StudyModuleController extends AbstractController {
         studyModuleService.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
             .filter(studyModule -> !studyModule.getStudyModuleKey().equals(excludeStudyModuleKey))
             .map(StudyModuleView::from)
-            .collect(Collectors.toList());
+            .toList();
     model.addAttribute("availableStudyModules", available);
   }
 

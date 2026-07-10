@@ -1,6 +1,7 @@
 package ch.ost.mas_se.oop.studyplanner.ui.views;
 
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
+import java.time.LocalDate;
 import java.util.List;
 
 public record StudyModuleView(
@@ -8,7 +9,9 @@ public record StudyModuleView(
     String name,
     String description,
     int ects,
-    List<String> prerequisiteKeys) {
+    List<String> prerequisiteKeys,
+    LocalDate offeredFrom,
+    LocalDate offeredTo) {
 
   public StudyModuleView {
     prerequisiteKeys = List.copyOf(prerequisiteKeys);
@@ -20,6 +23,8 @@ public record StudyModuleView(
         module.getName(),
         module.getDescription(),
         module.getEcts(),
-        module.getPrerequisiteKeys());
+        module.getPrerequisiteKeys(),
+        module.getOfferedFrom(),
+        module.getOfferedTo());
   }
 }

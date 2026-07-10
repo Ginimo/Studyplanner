@@ -8,11 +8,21 @@ import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.repository.ScheduleRepository;
 import ch.ost.mas_se.oop.studyplanner.repository.StudyModuleRepository;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
+  // Direct repo injection: StudyModuleServiceImpl already depends on ScheduleService, so injecting
+  // StudyModuleService here would create a circular Spring dependency.
   private final StudyModuleRepository studyModuleRepository;
   private final ScheduleRepository scheduleRepository;
 
@@ -20,6 +30,24 @@ public class ScheduleServiceImpl implements ScheduleService {
       StudyModuleRepository studyModuleRepository, ScheduleRepository scheduleRepository) {
     this.studyModuleRepository = studyModuleRepository;
     this.scheduleRepository = scheduleRepository;
+  }
+
+  @Override
+  public void calculateAndSaveSchedule(DegreeProgram program) {
+    List<StudyModule> studyModules =
+        studyModuleRepository.findAllStudyModulesByDegreeProgramId(program.getDegreeProgramId());
+    Schedule schedule = calculateSchedule(studyModules);
+    scheduleRepository.saveSchedule(program.getDegreeProgramId(), schedule);
+  }
+
+  @Override
+  public Optional<Schedule> findScheduleByDegreeProgramId(String degreeProgramId) {
+    return scheduleRepository.findScheduleByDegreeProgramId(degreeProgramId);
+  }
+
+  @Override
+  public void deleteSchedule(String degreeProgramId) {
+    scheduleRepository.deleteSchedule(degreeProgramId);
   }
 
   /**
@@ -31,8 +59,7 @@ public class ScheduleServiceImpl implements ScheduleService {
    *
    * @throws CyclicDependencyException if the prerequisite graph contains a cycle
    */
-  @Override
-  public Schedule calculateSchedule(List<StudyModule> allModules) {
+  Schedule calculateSchedule(List<StudyModule> allModules) {
 
     // build 3 auxiliary data structures
     Map<String, StudyModule> moduleMap = buildModuleMap(allModules);
@@ -144,23 +171,5 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
     Collections.sort(cycleKeys);
     return cycleKeys;
-  }
-
-  @Override
-  public void calculateAndSaveSchedule(DegreeProgram program) {
-    List<StudyModule> studyModules =
-        studyModuleRepository.findAllStudyModulesByDegreeProgramId(program.getDegreeProgramId());
-    Schedule schedule = calculateSchedule(studyModules);
-    scheduleRepository.saveSchedule(program.getDegreeProgramId(), schedule);
-  }
-
-  @Override
-  public Optional<Schedule> findScheduleByDegreeProgramId(String degreeProgramId) {
-    return scheduleRepository.findScheduleByDegreeProgramId(degreeProgramId);
-  }
-
-  @Override
-  public void deleteSchedule(String degreeProgramId) {
-    scheduleRepository.deleteSchedule(degreeProgramId);
   }
 }

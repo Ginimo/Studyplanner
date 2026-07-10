@@ -7,7 +7,9 @@ import ch.ost.mas_se.oop.studyplanner.ui.forms.DegreeProgramForm;
 import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import ch.ost.mas_se.oop.studyplanner.ui.views.StudyModuleListView;
 import jakarta.validation.Valid;
-import java.util.stream.Collectors;
+import java.time.LocalDate;
+import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -34,7 +36,7 @@ public class DegreeProgramController extends AbstractController {
         "degreePrograms",
         degreeProgramService.findAllDegreePrograms().stream()
             .map(DegreeProgramView::from)
-            .collect(Collectors.toList()));
+            .toList());
     return "degreeprograms/list";
   }
 
@@ -73,17 +75,29 @@ public class DegreeProgramController extends AbstractController {
    * according to the query parameters.
    */
   @GetMapping("/{degreeProgramId}")
-  public String showDetails(@PathVariable final String degreeProgramId, final Model model) {
+  public String showDetails(
+      @PathVariable final String degreeProgramId,
+      final Model model,
+      @RequestParam(defaultValue = "") final String nameFilter,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+          final LocalDate offeredAt,
+      @RequestParam(defaultValue = "NAME") final String sortBy,
+      @RequestParam(defaultValue = "ASC") final String sortDir) {
     DegreeProgram program = requireDegreeProgram(degreeProgramId);
-
     model.addAttribute("degreeProgram", DegreeProgramView.from(program));
 
-    model.addAttribute(
-        "studyModules",
-        studyModuleService.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
+    List<StudyModuleListView> modules =
+        studyModuleService
+            .findFilteredStudyModules(degreeProgramId, nameFilter, offeredAt, sortBy, sortDir)
+            .stream()
             .map(StudyModuleListView::from)
-            .collect(Collectors.toList()));
+            .toList();
 
+    model.addAttribute("studyModules", modules);
+    model.addAttribute("nameFilter", nameFilter);
+    model.addAttribute("offeredAt", offeredAt);
+    model.addAttribute("sortBy", sortBy);
+    model.addAttribute("sortDir", sortDir);
     return "degreeprograms/details";
   }
 
@@ -112,6 +126,8 @@ public class DegreeProgramController extends AbstractController {
       final BindingResult result,
       final Model model,
       final RedirectAttributes redirectAttributes) {
+
+    requireDegreeProgram(degreeProgramId);
 
     if (result.hasErrors()) {
       return showEditFormView(degreeProgramId, model);

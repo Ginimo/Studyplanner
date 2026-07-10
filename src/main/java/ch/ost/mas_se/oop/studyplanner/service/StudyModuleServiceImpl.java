@@ -1,14 +1,16 @@
 package ch.ost.mas_se.oop.studyplanner.service;
 
+import ch.ost.mas_se.oop.studyplanner.exception.DuplicateStudyModuleKeyException;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
-import ch.ost.mas_se.oop.studyplanner.repository.ScheduleRepository;
 import ch.ost.mas_se.oop.studyplanner.repository.StudyModuleRepository;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -17,12 +19,12 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class StudyModuleServiceImpl implements StudyModuleService {
   private final StudyModuleRepository studyModuleRepository;
-  private final ScheduleRepository scheduleRepository;
+  private final ScheduleService scheduleService;
 
   public StudyModuleServiceImpl(
-      StudyModuleRepository studyModuleRepository, ScheduleRepository scheduleRepository) {
+      StudyModuleRepository studyModuleRepository, ScheduleService scheduleService) {
     this.studyModuleRepository = studyModuleRepository;
-    this.scheduleRepository = scheduleRepository;
+    this.scheduleService = scheduleService;
   }
 
   @Override
@@ -35,6 +37,9 @@ public class StudyModuleServiceImpl implements StudyModuleService {
       List<String> prerequisiteKeys,
       LocalDate offeredFrom,
       LocalDate offeredTo) {
+    if (studyModuleRepository.findStudyModuleByKey(degreeProgramId, studyModuleKey).isPresent()) {
+      throw new DuplicateStudyModuleKeyException(studyModuleKey, degreeProgramId);
+    }
     studyModuleRepository.saveStudyModule(
         new StudyModule(
             studyModuleKey,
@@ -45,7 +50,7 @@ public class StudyModuleServiceImpl implements StudyModuleService {
             prerequisiteKeys,
             offeredFrom,
             offeredTo));
-    scheduleRepository.deleteSchedule(degreeProgramId);
+    scheduleService.deleteSchedule(degreeProgramId);
   }
 
   @Override
@@ -62,14 +67,46 @@ public class StudyModuleServiceImpl implements StudyModuleService {
   public List<StudyModule> findStudyModulesByKeys(
       String degreeProgramId, List<String> studyModuleKeys) {
     Set<String> studyModuleKeySet = new HashSet<>(studyModuleKeys);
-    List<StudyModule> result = new ArrayList<>();
-    for (StudyModule module :
-        studyModuleRepository.findAllStudyModulesByDegreeProgramId(degreeProgramId)) {
-      if (studyModuleKeySet.contains(module.getStudyModuleKey())) {
-        result.add(module);
-      }
-    }
-    return result;
+    return studyModuleRepository.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
+        .filter(m -> studyModuleKeySet.contains(m.getStudyModuleKey()))
+        .toList();
+  }
+
+  @Override
+  public List<StudyModule> findFilteredStudyModules(
+      String degreeProgramId,
+      String nameFilter,
+      LocalDate offeredAt,
+      String sortBy,
+      String sortDir) {
+    return studyModuleRepository.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
+        .filter(
+            m ->
+                nameFilter == null
+                    || nameFilter.isBlank()
+                    || m.getName().toLowerCase().contains(nameFilter.toLowerCase()))
+        .filter(
+            m ->
+                offeredAt == null
+                    || (m.getOfferedFrom() == null || !offeredAt.isBefore(m.getOfferedFrom()))
+                        && (m.getOfferedTo() == null || !offeredAt.isAfter(m.getOfferedTo())))
+        .sorted(buildComparator(sortBy, sortDir))
+        .toList();
+  }
+
+  private static Comparator<StudyModule> buildComparator(String sortBy, String sortDir) {
+    Comparator<StudyModule> comparator =
+        switch (sortBy) {
+          case "OFFERED_FROM" ->
+              Comparator.comparing(
+                  StudyModule::getOfferedFrom, Comparator.nullsLast(Comparator.naturalOrder()));
+          case "OFFERED_TO" ->
+              Comparator.comparing(
+                  StudyModule::getOfferedTo, Comparator.nullsLast(Comparator.naturalOrder()));
+          case "ECTS" -> Comparator.comparingInt(StudyModule::getEcts);
+          default -> Comparator.comparing(StudyModule::getName, String.CASE_INSENSITIVE_ORDER);
+        };
+    return "DESC".equals(sortDir) ? comparator.reversed() : comparator;
   }
 
   @Override
@@ -92,7 +129,19 @@ public class StudyModuleServiceImpl implements StudyModuleService {
             prerequisiteKeys,
             offeredFrom,
             offeredTo));
-    scheduleRepository.deleteSchedule(degreeProgramId);
+    scheduleService.deleteSchedule(degreeProgramId);
+  }
+
+  @Override
+  public void deleteAllStudyModulesByDegreeProgramId(String degreeProgramId) {
+    studyModuleRepository.deleteAllStudyModulesByDegreeProgramId(degreeProgramId);
+    scheduleService.deleteSchedule(degreeProgramId);
+  }
+
+  @Override
+  public Map<String, StudyModule> findModuleMapByDegreeProgramId(String degreeProgramId) {
+    return studyModuleRepository.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
+        .collect(Collectors.toMap(StudyModule::getStudyModuleKey, Function.identity()));
   }
 
   @Override
@@ -105,8 +154,8 @@ public class StudyModuleServiceImpl implements StudyModuleService {
                     module.getPrerequisiteKeys().contains(studyModuleKey)
                         ? module.withoutPrerequisite(studyModuleKey)
                         : module)
-            .collect(Collectors.toList());
+            .toList();
     studyModuleRepository.replaceAllStudyModulesForProgram(degreeProgramId, updated);
-    scheduleRepository.deleteSchedule(degreeProgramId);
+    scheduleService.deleteSchedule(degreeProgramId);
   }
 }

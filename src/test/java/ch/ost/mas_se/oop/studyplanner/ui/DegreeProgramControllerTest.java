@@ -89,10 +89,11 @@ class DegreeProgramControllerTest {
   void showDetails_returnsDetailsViewWithProgramAndStudyModules() {
     when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
         .thenReturn(Optional.of(testProgram()));
-    when(studyModuleService.findAllStudyModulesByDegreeProgramId(PROGRAM_ID)).thenReturn(List.of());
+    when(studyModuleService.findFilteredStudyModules(any(), any(), any(), any(), any()))
+        .thenReturn(List.of());
     var model = new ConcurrentModel();
 
-    String view = testee.showDetails(PROGRAM_ID, model);
+    String view = testee.showDetails(PROGRAM_ID, model, "", null, "NAME", "ASC");
 
     assertThat(view).isEqualTo("degreeprograms/details");
     assertThat(model.getAttribute("degreeProgram")).isNotNull();
@@ -103,7 +104,8 @@ class DegreeProgramControllerTest {
   void showDetails_withUnknownId_throwsNotFoundException() {
     when(degreeProgramService.findDegreeProgramById(any())).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> testee.showDetails("unknown-id", new ConcurrentModel()))
+    assertThatThrownBy(
+            () -> testee.showDetails("unknown-id", new ConcurrentModel(), "", null, "NAME", "ASC"))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -123,6 +125,8 @@ class DegreeProgramControllerTest {
 
   @Test
   void updateDegreeProgram_withValidForm_redirectsToDetails() {
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
     when(bindingResult.hasErrors()).thenReturn(false);
     var redirectAttributes = new RedirectAttributesModelMap();
 
@@ -140,6 +144,8 @@ class DegreeProgramControllerTest {
 
   @Test
   void updateDegreeProgram_withInvalidForm_returnsFormView() {
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
     when(bindingResult.hasErrors()).thenReturn(true);
     var model = new ConcurrentModel();
 

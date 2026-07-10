@@ -3,8 +3,13 @@ package ch.ost.mas_se.oop.studyplanner.ui;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ch.ost.mas_se.oop.studyplanner.exception.DuplicateStudyModuleKeyException;
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
@@ -61,8 +66,6 @@ class StudyModuleControllerTest {
   @Test
   void createStudyModule_withValidForm_redirectsToProgram() {
     when(bindingResult.hasErrors()).thenReturn(false);
-    when(studyModuleService.findStudyModuleByKey(PROGRAM_ID, STUDY_MODULE_KEY))
-        .thenReturn(Optional.empty());
     StudyModuleForm form = new StudyModuleForm();
     form.setStudyModuleKey(STUDY_MODULE_KEY);
     form.setName("OOP 1");
@@ -74,6 +77,32 @@ class StudyModuleControllerTest {
 
     assertThat(view).isEqualTo("redirect:/degree-programs/" + PROGRAM_ID);
     assertThat(redirectAttributes.getFlashAttributes()).containsKey("successMessage");
+  }
+
+  @Test
+  void createStudyModule_withDuplicateKey_returnsFormViewWithFieldError() {
+    when(bindingResult.hasErrors()).thenReturn(false);
+    when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
+        .thenReturn(Optional.of(testProgram()));
+    when(studyModuleService.findAllStudyModulesByDegreeProgramId(PROGRAM_ID)).thenReturn(List.of());
+    doThrow(new DuplicateStudyModuleKeyException(STUDY_MODULE_KEY, PROGRAM_ID))
+        .when(studyModuleService)
+        .createStudyModule(
+            eq(STUDY_MODULE_KEY), eq(PROGRAM_ID), any(), any(), anyInt(), any(), any(), any());
+    StudyModuleForm form = new StudyModuleForm();
+    form.setStudyModuleKey(STUDY_MODULE_KEY);
+    form.setName("OOP 1");
+
+    String view =
+        testee.createStudyModule(
+            PROGRAM_ID,
+            form,
+            bindingResult,
+            new ConcurrentModel(),
+            new RedirectAttributesModelMap());
+
+    assertThat(view).isEqualTo("studymodules/form");
+    verify(bindingResult).rejectValue(eq("studyModuleKey"), any(), any());
   }
 
   @Test
@@ -139,6 +168,8 @@ class StudyModuleControllerTest {
 
   @Test
   void updateStudyModule_withValidForm_redirectsToProgram() {
+    when(studyModuleService.findStudyModuleByKey(PROGRAM_ID, STUDY_MODULE_KEY))
+        .thenReturn(Optional.of(testStudyModule()));
     when(bindingResult.hasErrors()).thenReturn(false);
     StudyModuleForm form = new StudyModuleForm();
     form.setName("OOP 1");
@@ -159,6 +190,8 @@ class StudyModuleControllerTest {
 
   @Test
   void updateStudyModule_withInvalidForm_returnsFormView() {
+    when(studyModuleService.findStudyModuleByKey(PROGRAM_ID, STUDY_MODULE_KEY))
+        .thenReturn(Optional.of(testStudyModule()));
     when(bindingResult.hasErrors()).thenReturn(true);
     when(degreeProgramService.findDegreeProgramById(PROGRAM_ID))
         .thenReturn(Optional.of(testProgram()));

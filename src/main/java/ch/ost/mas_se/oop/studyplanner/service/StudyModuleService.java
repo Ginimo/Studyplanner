@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface StudyModuleService {
@@ -56,4 +57,29 @@ public interface StudyModuleService {
    * dangling references.
    */
   void deleteStudyModule(String degreeProgramId, String studyModuleKey);
+
+  /**
+   * Deletes all study modules belonging to {@code degreeProgramId} and invalidates the associated
+   * schedule. Intended for use when an entire degree program is being removed.
+   */
+  void deleteAllStudyModulesByDegreeProgramId(String degreeProgramId);
+
+  /**
+   * Returns all study modules for {@code degreeProgramId} that match the optional filters, sorted
+   * by the given field and direction. A blank {@code nameFilter} or null {@code offeredAt} disables
+   * the respective filter. {@code sortBy} accepts {@code NAME}, {@code OFFERED_FROM}, {@code
+   * OFFERED_TO}, or {@code ECTS}; {@code sortDir} accepts {@code ASC} or {@code DESC}.
+   */
+  List<StudyModule> findFilteredStudyModules(
+      String degreeProgramId,
+      String nameFilter,
+      LocalDate offeredAt,
+      String sortBy,
+      String sortDir);
+
+  /**
+   * Returns all study modules for {@code degreeProgramId} indexed by their key, for O(1) lookup
+   * when resolving module keys to module details (e.g. assembling schedule views).
+   */
+  Map<String, StudyModule> findModuleMapByDegreeProgramId(String degreeProgramId);
 }

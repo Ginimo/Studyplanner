@@ -3,16 +3,12 @@ package ch.ost.mas_se.oop.studyplanner.ui;
 import ch.ost.mas_se.oop.studyplanner.exception.CyclicDependencyException;
 import ch.ost.mas_se.oop.studyplanner.model.DegreeProgram;
 import ch.ost.mas_se.oop.studyplanner.model.Schedule;
-import ch.ost.mas_se.oop.studyplanner.model.StudyModule;
 import ch.ost.mas_se.oop.studyplanner.service.DegreeProgramService;
 import ch.ost.mas_se.oop.studyplanner.service.ScheduleService;
 import ch.ost.mas_se.oop.studyplanner.service.StudyModuleService;
 import ch.ost.mas_se.oop.studyplanner.ui.views.DegreeProgramView;
 import ch.ost.mas_se.oop.studyplanner.ui.views.ScheduleView;
 import ch.ost.mas_se.oop.studyplanner.ui.views.SemesterView;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,16 +51,11 @@ public class ScheduleController extends AbstractController {
 
   private void addScheduleToModel(
       final Schedule schedule, final String degreeProgramId, final Model model) {
-    Map<String, StudyModule> moduleMap =
-        studyModuleService.findAllStudyModulesByDegreeProgramId(degreeProgramId).stream()
-            .collect(Collectors.toMap(StudyModule::getStudyModuleKey, Function.identity()));
-
+    var moduleMap = studyModuleService.findModuleMapByDegreeProgramId(degreeProgramId);
     model.addAttribute("schedule", ScheduleView.from(schedule));
     model.addAttribute(
         "semesterViews",
-        schedule.getSemesters().stream()
-            .map(s -> SemesterView.from(s, moduleMap))
-            .collect(Collectors.toList()));
+        schedule.getSemesters().stream().map(s -> SemesterView.from(s, moduleMap)).toList());
   }
 
   /**

@@ -79,7 +79,7 @@
             <label for="offeredAt" class="form-label mb-1 small fw-semibold">Offered at</label>
             <input type="date" id="offeredAt" name="offeredAt"
                    class="form-control form-control-sm"
-                   th:value="${#temporals.format(offeredAt, 'yyyy-MM-dd')}"/>
+                   th:value="${offeredAt != null ? #temporals.format(offeredAt, 'yyyy-MM-dd') : ''}"/>
         </div>
         <div class="col-auto">
             <button type="submit" class="btn btn-outline-primary btn-sm">
@@ -105,28 +105,28 @@
         <tr>
             <th>
                 <a class="text-decoration-none text-dark"
-                   th:href="@{/degree-programs/{degreeProgramId}(degreeProgramId=${degreeProgram.degreeProgramId},nameFilter=${nameFilter},offeredAt=${#temporals.format(offeredAt,'yyyy-MM-dd')},sortBy='NAME',sortDir=${sortBy == 'NAME' and sortDir == 'ASC' ? 'DESC' : 'ASC'})}"
+                   th:href="@{/degree-programs/{degreeProgramId}(degreeProgramId=${degreeProgram.degreeProgramId},nameFilter=${nameFilter},offeredAt=${offeredAt != null ? #temporals.format(offeredAt,'yyyy-MM-dd') : ''},sortBy='NAME',sortDir=${sortBy == 'NAME' and sortDir == 'ASC' ? 'DESC' : 'ASC'})}"
                 >Name
                     <i th:class="${sortBy == 'NAME'} ? (${sortDir == 'ASC'} ? 'bi bi-arrow-up' : 'bi bi-arrow-down') : 'bi bi-arrow-down-up text-muted'"></i>
                 </a>
             </th>
             <th>
                 <a class="text-decoration-none text-dark"
-                   th:href="@{/degree-programs/{degreeProgramId}(degreeProgramId=${degreeProgram.degreeProgramId},nameFilter=${nameFilter},offeredAt=${#temporals.format(offeredAt,'yyyy-MM-dd')},sortBy='OFFERED_FROM',sortDir=${sortBy == 'OFFERED_FROM' and sortDir == 'ASC' ? 'DESC' : 'ASC'})}"
+                   th:href="@{/degree-programs/{degreeProgramId}(degreeProgramId=${degreeProgram.degreeProgramId},nameFilter=${nameFilter},offeredAt=${offeredAt != null ? #temporals.format(offeredAt,'yyyy-MM-dd') : ''},sortBy='OFFERED_FROM',sortDir=${sortBy == 'OFFERED_FROM' and sortDir == 'ASC' ? 'DESC' : 'ASC'})}"
                 >Offered From
                     <i th:class="${sortBy == 'OFFERED_FROM'} ? (${sortDir == 'ASC'} ? 'bi bi-arrow-up' : 'bi bi-arrow-down') : 'bi bi-arrow-down-up text-muted'"></i>
                 </a>
             </th>
             <th>
                 <a class="text-decoration-none text-dark"
-                   th:href="@{/degree-programs/{degreeProgramId}(degreeProgramId=${degreeProgram.degreeProgramId},nameFilter=${nameFilter},offeredAt=${#temporals.format(offeredAt,'yyyy-MM-dd')},sortBy='OFFERED_TO',sortDir=${sortBy == 'OFFERED_TO' and sortDir == 'ASC' ? 'DESC' : 'ASC'})}"
+                   th:href="@{/degree-programs/{degreeProgramId}(degreeProgramId=${degreeProgram.degreeProgramId},nameFilter=${nameFilter},offeredAt=${offeredAt != null ? #temporals.format(offeredAt,'yyyy-MM-dd') : ''},sortBy='OFFERED_TO',sortDir=${sortBy == 'OFFERED_TO' and sortDir == 'ASC' ? 'DESC' : 'ASC'})}"
                 >Offered To
                     <i th:class="${sortBy == 'OFFERED_TO'} ? (${sortDir == 'ASC'} ? 'bi bi-arrow-up' : 'bi bi-arrow-down') : 'bi bi-arrow-down-up text-muted'"></i>
                 </a>
             </th>
             <th>
                 <a class="text-decoration-none text-dark"
-                   th:href="@{/degree-programs/{degreeProgramId}(degreeProgramId=${degreeProgram.degreeProgramId},nameFilter=${nameFilter},offeredAt=${#temporals.format(offeredAt,'yyyy-MM-dd')},sortBy='ECTS',sortDir=${sortBy == 'ECTS' and sortDir == 'ASC' ? 'DESC' : 'ASC'})}"
+                   th:href="@{/degree-programs/{degreeProgramId}(degreeProgramId=${degreeProgram.degreeProgramId},nameFilter=${nameFilter},offeredAt=${offeredAt != null ? #temporals.format(offeredAt,'yyyy-MM-dd') : ''},sortBy='ECTS',sortDir=${sortBy == 'ECTS' and sortDir == 'ASC' ? 'DESC' : 'ASC'})}"
                 >ECTS
                     <i th:class="${sortBy == 'ECTS'} ? (${sortDir == 'ASC'} ? 'bi bi-arrow-up' : 'bi bi-arrow-down') : 'bi bi-arrow-down-up text-muted'"></i>
                 </a>
