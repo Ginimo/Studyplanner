@@ -54,9 +54,12 @@ package "Service" <<Service>> {
         + createStudyModule(studyModuleKey, degreeProgramId, ...)
         + findStudyModuleByKey(degreeProgramId, studyModuleKey)
         + findAllStudyModulesByDegreeProgramId(degreeProgramId)
+        + findStudyModulesByKeys(degreeProgramId, studyModuleKeys)
         + findFilteredStudyModules(degreeProgramId, ...)
+        + findModuleMapByDegreeProgramId(degreeProgramId)
         + updateStudyModule(studyModuleKey, degreeProgramId, ...)
         + deleteStudyModule(degreeProgramId, studyModuleKey)
+        + deleteAllStudyModulesByDegreeProgramId(degreeProgramId)
     }
 
     class StudyModuleServiceImpl
@@ -132,6 +135,7 @@ package "Repository" <<Repository>> {
 package "Exception" <<Exception>> {
     class CyclicDependencyException
     class DuplicateStudyModuleKeyException
+    class DuplicateDegreeProgramNameException
 }
 
 ' Layering hints
@@ -176,8 +180,11 @@ StudyModuleServiceImpl -down-> StudyModuleRepository
 ScheduleServiceImpl -down-> StudyModuleRepository
 ScheduleServiceImpl -down-> ScheduleRepository
 
+DegreeProgramServiceImpl -down-> StudyModuleService
+
 ScheduleServiceImpl ..> Schedule
 ScheduleServiceImpl ..> CyclicDependencyException
 StudyModuleServiceImpl ..> DuplicateStudyModuleKeyException
+DegreeProgramServiceImpl ..> DuplicateDegreeProgramNameException
 
 @enduml

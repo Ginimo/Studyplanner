@@ -73,11 +73,15 @@ initial ready-queue seed deterministic.
   caption: [inDegree — count of unsatisfied in-program prerequisites; a module enters the ready queue when its count reaches 0],
 )
 
-== `dependents` — `HashMap<String, List<String>>`
+== `dependents` — `LinkedHashMap<String, List<String>>`
 
 Stores, for each module, the list of modules that depend on it.
 This is used to know which in-degrees to decrement when a module is placed.
-The order of decrements does not affect correctness, so a plain `HashMap` is sufficient.
+`LinkedHashMap` is used for the same reason as `moduleMap` and `inDegree`: the map is
+pre-populated with one empty list per key in `moduleMap.keySet()` insertion order, keeping
+the overall structure deterministic.
+The order of decrement operations during BFS does not affect correctness, but
+`LinkedHashMap` is used consistently across all three auxiliary maps.
 
 #figure(
   table(
@@ -179,44 +183,54 @@ short key appears in two different degree programs (see Assumption A03).
 
 = Model Layer
 
-== `Schedule` and `Semester` — defensive copy + `unmodifiableList` view
+== `Schedule` and `Semester` — Java records with `List.copyOf`
 
-Both `Schedule` and `Semester` are value objects whose lists are fully constructed before
-the objects are created.
+`Schedule` and `Semester` are Java records — inherently immutable value types.
+Their lists are fully constructed before the record is created, and the compact
+constructor seals them at construction time.
 
 - `Semester(int semesterNumber, List<String> studyModuleKeys)` — the BFS builds a
-  `semesterKeys` list for each layer and passes it to the constructor.
-  The constructor copies it immediately with `new ArrayList<>(studyModuleKeys)`, so the
-  caller's list and the internal list are independent from that point on.
+  `semesterKeys` list for each layer and passes it to the compact constructor.
+  The compact constructor immediately replaces the parameter with
+  `List.copyOf(studyModuleKeys)` (or `List.of()` when `null`), producing an independent,
+  unmodifiable snapshot. The caller retains a reference to the original mutable list but
+  cannot affect the record's internal state through it.
 - `Schedule(LocalDateTime calculatedAt, List<Semester> semesters)` — likewise, the BFS
-  accumulates semesters in a local list and passes the finished list to the constructor,
-  which copies it with `new ArrayList<>(semesters)`.
+  accumulates semesters in a local list and passes the finished list to the compact
+  constructor, which replaces it with `List.copyOf(semesters)`.
 
-The defensive copy ensures that the internal state cannot be modified through the
-reference the caller still holds.
-
-The `getSemesters()` and `getStudyModuleKeys()` getters go one step further: they return
-`Collections.unmodifiableList` views of the internal lists.
-This prevents external code from mutating the object after construction.
-The unmodifiable wrapper is a zero-copy $O(1)$ operation — it creates a thin read-only
-view around the existing `ArrayList` without duplicating the data.
+`List.copyOf` both copies the data and makes the result unmodifiable in a single step —
+unlike `Collections.unmodifiableList`, which creates only a read-only _view_ around an
+existing (potentially mutable) list without copying it.
+The record accessor methods `semesters()` and `studyModuleKeys()` return these immutable
+lists directly; no further wrapping is needed.
 
 #figure(
   align(center,
-    rect(
-      stroke: (paint: blue.lighten(40%), thickness: 0.8pt),
-      inset: 12pt,
-      radius: 3pt,
-    )[
-      #text(size: 8.5pt, fill: blue.darken(10%))[`Collections.unmodifiableList` — read-only view, O(1) overhead]
-      #v(6pt)
-      #rect(stroke: 0.5pt, inset: 9pt, fill: luma(248))[
-        internal `ArrayList` copy (made in constructor) \
-        #text(8pt, fill: gray)[← only the Schedule/Semester instance holds a reference to this]
-      ]
-    ]
+    grid(
+      columns: (1fr, auto, 1fr),
+      column-gutter: 16pt,
+      align: center + horizon,
+      stack(
+        rect(fill: luma(238), stroke: 0.5pt, inset: (x: 10pt, y: 8pt))[
+          caller's list \
+          #text(9pt)[\[`"OO"`, `"DB1"`\]]
+        ],
+        v(4pt),
+        text(8pt, fill: gray)[mutable — caller retains reference],
+      ),
+      $arrow.r^"List.copyOf"$,
+      stack(
+        rect(fill: luma(215), stroke: 0.5pt, inset: (x: 10pt, y: 8pt), radius: 2pt)[
+          record field \
+          #text(9pt)[\[`"OO"`, `"DB1"`\]]
+        ],
+        v(4pt),
+        text(8pt, fill: gray)[immutable copy — returned by accessor],
+      ),
+    )
   ),
-  caption: [The constructor makes a defensive copy; getters wrap it in an unmodifiable view so neither the original caller nor any later reader can mutate the internal state],
+  caption: [The compact constructor calls `List.copyOf` to sever the link to the caller's mutable list; the record accessor returns the immutable result directly],
 )
 
 == `StudyModule` prerequisite keys — `List.copyOf`
@@ -233,9 +247,11 @@ An `unmodifiableList` wrapper would not be enough here: it wraps the caller's li
 rather than copying it, so the caller would still hold a mutable reference to the
 underlying data.
 
-The key difference between the two cases: `Schedule`/`Semester` own their lists from
-the start and just need to hide them from callers, so a wrapper is enough.
-`StudyModule` receives a list it does not own, so it must copy it.
+All three types (`Schedule`, `Semester`, and `StudyModule`) use `List.copyOf` for the
+same reason: callers must not be able to affect an object's internal list after it is
+constructed. `StudyModule` is especially susceptible because its prerequisite list
+travels through several layers (form → controller → service → constructor) before
+arriving, and the caller at each hop still holds a reference to the original collection.
 
 #figure(
   align(center,
